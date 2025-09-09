@@ -28,13 +28,22 @@ public class AStar : MonoBehaviour
     float TILE = ARENA_DEFAULT_SIZE.TILE;
     float offset = TILE / 2f;
     int currDepth = 0;
-    this.currID = id;
+    currID = id;
 
     if (prevData.OpenList.Count <= 0)
     {
       AStarPoint aStarPoint = new AStarPoint(origin, target);
       prevData.OpenList.Add(aStarPoint);
-      prevData.MemoiPoint.Add(AStarFunctions.GetStringCoordName(origin), aStarPoint);
+
+      bool memoiExist = prevData.MemoiPoint.TryGetValue(AStarFunctions.GetStringCoordName(origin), out _);
+      if (memoiExist)
+      {
+        prevData.MemoiPoint[AStarFunctions.GetStringCoordName(origin)] = aStarPoint;
+      }
+      else
+      {
+        prevData.MemoiPoint.TryAdd(AStarFunctions.GetStringCoordName(origin), aStarPoint);
+      }
     }
 
     while (prevData.OpenList.Count > 0 && prevData.PathFound == null)
@@ -119,7 +128,7 @@ public class AStar : MonoBehaviour
         bool gScoreIsBest = false;
 
         AStarPoint? currNeighbor;
-        prevData.MemoiPoint.TryGetValue(
+        bool memoiExist = prevData.MemoiPoint.TryGetValue(
           AStarFunctions.GetStringCoordName(neighbor[i]),
           out currNeighbor
         );
@@ -128,10 +137,19 @@ public class AStar : MonoBehaviour
         {
           // new node
           currNeighbor = new AStarPoint(neighbor[i], target);
-          prevData.MemoiPoint.Add(
-            AStarFunctions.GetStringCoordName(neighbor[i]),
-            currNeighbor
-          );
+
+          if (memoiExist)
+          {
+            prevData.MemoiPoint[AStarFunctions.GetStringCoordName(neighbor[i])] = currNeighbor;
+          }
+          else
+          {
+            prevData.MemoiPoint.TryAdd(
+              AStarFunctions.GetStringCoordName(neighbor[i]),
+              currNeighbor
+            );
+          }
+
           prevData.OpenList.Add(currNeighbor);
           gScoreIsBest = true;
         }

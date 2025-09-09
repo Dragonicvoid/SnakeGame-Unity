@@ -15,7 +15,7 @@ public interface IArenaManager
     float radius
   );
   public GridConfig GetGridWithMostFood();
-  public void SetMapBody(Coordinate pos, string playerId);
+  public void SetMapBody(Vector2 pos, string playerId);
   public void RemovePlayerMapBody(SnakeConfig player);
   public void RemoveMapBody(Vector2 pos, string playerId);
 }

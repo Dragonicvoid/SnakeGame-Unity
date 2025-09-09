@@ -21,3 +21,10 @@ public enum BOT_ACTION
     CHASE_PLAYER,
     EAT,
 }
+
+public enum SNAKE_TYPE
+{
+    NORMAL,
+    FIRE,
+    WATER,
+}

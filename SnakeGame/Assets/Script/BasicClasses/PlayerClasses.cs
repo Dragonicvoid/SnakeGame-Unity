@@ -9,9 +9,9 @@ public class FoodGrabber
   public GameObject? Obj { get; set; }
 
   public FoodGrabber(
-Vector2 Position,
-float Radius,
-GameObject? Obj
+    Vector2 Position,
+    float Radius,
+    GameObject? Obj
   )
   {
     this.Position = Position;
@@ -42,14 +42,14 @@ public class SnakeDebugData
 {
   public string? EnemyID;
   public string? ActionName;
-  public List<Coordinate>? EnemyPath;
+  public List<Vector2>? EnemyPath;
   public AStarSearchData? PathfindingState;
   public List<IBaseAction>? PossibleActions;
 
   public SnakeDebugData(
   string? EnemyID,
   string? ActionName,
-  List<Coordinate>? EnemyPath,
+  List<Vector2>? EnemyPath,
   AStarSearchData? PathfindingState,
   List<IBaseAction>? PossibleActions
   )
@@ -282,11 +282,11 @@ public class MovementOpts
 public class SnakeTypeAndSkin
 {
   public SkinDetail Skin { get; set; }
-  public SnakeType Type { get; set; }
+  public SNAKE_TYPE Type { get; set; }
 
   public SnakeTypeAndSkin(
     SkinDetail Skin,
-    SnakeType Type
+    SNAKE_TYPE Type
   )
   {
     this.Skin = Skin;

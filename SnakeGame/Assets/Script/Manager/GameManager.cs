@@ -1,14 +1,12 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 public class GameManager : MonoBehaviour
 {
-  public ArenaManager arenaManager = null;
-  public GridManager gridManager = null;
+  public IArenaManager arenaManager = null;
+  public IGridManager gridManager = null;
   public PlayerManager playerManager = null;
   public FoodManager foodManager = null;
-  private UIManager uiManager = null;
+  private IUiManager uiManager = null;
   private ArenaInput inputField = null;
   private BotPlanner planner = null;
 
@@ -61,7 +59,7 @@ public class GameManager : MonoBehaviour
     PlayerManager.CreatePlayer(playerPos, playerDir);
 
     Vector2 enemyPos =
-      ArenaManager?.SpawnPos[rand > 0.5 ? 1 : 0] ?? new Vector2(0, 0);
+      ArenaManager?.spawnPos[rand > 0.5 ? 1 : 0] ?? new Vector2(0, 0);
     Vector2 enemyDir = new Vector2(1, 0);
     if (enemyPos.x > centerPos.x)
     {

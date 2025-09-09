@@ -3,7 +3,7 @@ using UnityEngine;
 
 public static class ArenaConverter
 {
-  public static Vector2 ConvertCoorToArenaPos(float x, float y)
+  public static Vector2 ConvertCoorToArenaPos(int x, int y)
   {
     Vector2 offset = new Vector2(
       ARENA_DEFAULT_SIZE.WIDTH / 2f,
@@ -25,7 +25,11 @@ public static class ArenaConverter
       ARENA_DEFAULT_SIZE.HEIGHT / 2f
 
     );
-    Coordinate coord = new Coordinate(Mathf.FloorToInt((x + offset.x) / ARENA_DEFAULT_SIZE.TILE), Mathf.FloorToInt((y + offset.y) / ARENA_DEFAULT_SIZE.TILE));
+    Coordinate coord = new Coordinate
+    {
+      X = Mathf.FloorToInt((x + offset.x) / ARENA_DEFAULT_SIZE.TILE),
+      Y = Mathf.FloorToInt((y + offset.y) / ARENA_DEFAULT_SIZE.TILE)
+    };
     return coord;
   }
 

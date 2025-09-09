@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using UnityEngine;
 
 public interface IGridManager
 {
@@ -8,7 +9,7 @@ public interface IGridManager
     public void AddFood(FoodConfig foodInstance);
     public void UpdateFood(FoodConfig food);
     public void RemoveFood(FoodConfig food);
-    public void RemoveBodyOnGrid(Coordinate coord, string playerID);
+    public void RemoveBodyOnGrid(Vector2 pos, string playerID);
 
-    public void AddBodyOnGrid(Coordinate coord, string playerID);
+    public void AddBodyOnGrid(Vector2 pos, string playerID);
 }
