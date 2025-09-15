@@ -1,13 +1,12 @@
-Shader "Hidden/AiDebuggerRender"
+Shader "Debug/AiRenderer"
 {
-    Properties
-    {
-        _MainTex ("Texture", 2D) = "white" {}
-    }
     SubShader
     {
-        // No culling or depth
-        Cull Off ZWrite Off ZTest Always
+        Tags { "Queue"="Transparent" "IgnoreProjector"="True" "RenderType"="Transparent" }
+        LOD 100
+
+        ZWrite Off
+        Blend SrcAlpha OneMinusSrcAlpha
 
         Pass
         {
@@ -20,32 +19,35 @@ Shader "Hidden/AiDebuggerRender"
             struct appdata
             {
                 float4 vertex : POSITION;
-                float2 uv : TEXCOORD0;
+                float4 color : COLOR;
+                half2 uv : TEXCOORD0;
             };
 
             struct v2f
             {
-                float2 uv : TEXCOORD0;
                 float4 vertex : SV_POSITION;
-                float size : TEXCOORD1;
-                float4 colors : COLORS;
+                float4 color : COLOR0;
+                half2 uv : TEXCOORD0;
             };
+
+            sampler2D _MainTex;
+            float4 _MainTex_ST;
 
             v2f vert (appdata v)
             {
                 v2f o;
                 o.vertex = UnityObjectToClipPos(v.vertex);
                 o.uv = v.uv;
+                o.color = v.color;
                 return o;
             }
 
-            sampler2D _MainTex;
-
             fixed4 frag (v2f i) : SV_Target
             {
-                fixed4 col = tex2D(_MainTex, i.uv);
-                // just invert the colors
-                col.rgb = 1 - col.rgb;
+                half dist = distance(half2(0.5,0.5), i.uv);
+                i.color.a = (1.0 - step(0.45, dist)) * step(0.4, dist);
+                fixed4 col = i.color;
+
                 return col;
             }
             ENDCG

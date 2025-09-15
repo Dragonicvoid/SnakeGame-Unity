@@ -5,11 +5,11 @@ using UnityEngine;
 public class ArenaManager : MonoBehaviour, IArenaManager
 {
   [SerializeField]
-  IGridManager gridManager;
+  IGridManager? gridManager;
   [SerializeField]
-  IObstacleManager obsManager;
+  IObstacleManager? obsManager;
   [SerializeField]
-  AiDebugger aiDebugger;
+  AiRenderer? aiDebugger;
 
   private List<List<TileMapData>> mapData = new List<List<TileMapData>>();
 
@@ -36,9 +36,9 @@ public class ArenaManager : MonoBehaviour, IArenaManager
       Mathf.FloorToInt(map.Col / 2f)
     );
     mapData = new List<List<TileMapData>>();
-    gridManager.Setup();
-    obsManager.ClearObstacle();
-    obsManager.InitializeObstacleMap();
+    gridManager?.Setup();
+    obsManager?.ClearObstacle();
+    obsManager?.InitializeObstacleMap();
 
     for (int y = map.Col - 1; y >= 0; y--)
     {
@@ -256,7 +256,8 @@ public class ArenaManager : MonoBehaviour, IArenaManager
   {
     GridConfig? result = null;
 
-    foreach (GridConfig? grid in gridManager.GridList)
+    List<GridConfig> gridList = gridManager?.GridList ?? new List<GridConfig>();
+    foreach (GridConfig? grid in gridList)
     {
       if (result == null || grid.Foods.Count > result.Foods.Count)
       {

@@ -7,7 +7,7 @@ public interface IPlayerManager
 {
   public List<SnakeConfig> PlayerList { get; set; }
 
-  public void CreatePlayer(Vector2 pos, Vector2 moveDir, bool? isBot = false);
+  public void CreatePlayer(Vector2 pos, Vector2 moveDir, bool isBot = false);
   public void RemoveAllPlayers();
 
   public List<float> FindNearestPlayerTowardPoint(

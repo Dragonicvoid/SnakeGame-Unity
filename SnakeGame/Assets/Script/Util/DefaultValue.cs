@@ -2,19 +2,21 @@ using System.Collections.Generic;
 
 public static class ARENA_DEFAULT_SIZE
 {
+  public const float SNAKE = 20f;
   public const float TILE = 20f;
   public const float WIDTH = 700f;
   public const float HEIGHT = 700f;
   public const float GRID_WIDTH = 200f;
   public const float GRID_HEIGHT = 200f;
+  public const float FOOD_GRABBER = 100f;
 }
 
 public static class MAP
 {
-  public static List<LevelMapData> ConfigMaps = new List<LevelMapData>(new LevelMapData[] {new LevelMapData{
-    Row = 35,
-    Col = 35,
-    Maps = new List<int>(new int[] {
+  public static List<LevelMapData> ConfigMaps = new List<LevelMapData>(new LevelMapData[] {new LevelMapData(
+    35,
+    35,
+    new List<int>(new int[] {
       8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8,
       8, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 8,
       8, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 8,
@@ -51,10 +53,10 @@ public static class MAP
       8, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 8,
       8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8,
     })
-  }, new LevelMapData{
-    Col = 35,
-    Row = 35,
-    Maps = new List<int>(new int[] {
+  ), new LevelMapData(
+    35,
+    35,
+    new List<int>(new int[] {
       8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8,
       8, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 8,
       8, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 8,
@@ -90,5 +92,5 @@ public static class MAP
       8, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 8,
       8, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 8,
       8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8,
-    }) } });
+    }) ) });
 }

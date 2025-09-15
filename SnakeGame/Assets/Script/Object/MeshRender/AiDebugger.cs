@@ -1,15 +1,25 @@
 #nullable enable 
 using System.Collections.Generic;
 using Unity.Collections;
+using Unity.Mathematics;
 using UnityEngine;
 using UnityEngine.Rendering;
-using UnityEngine.UI;
-using UnityEngine.UIElements;
 
-public class AiDebugger : MonoBehaviour
+[System.Runtime.InteropServices.StructLayout(System.Runtime.InteropServices.LayoutKind.Sequential)]
+struct AiRendererVertex
 {
-  [SerializeField]
-  Graphic view;
+  public Vector3 Pos;
+  public Color Color;
+  public half2 UV;
+}
+
+struct GraphicPos
+{
+  public Vector3 Pos;
+  public Color Color;
+}
+public class AiRenderer : MonoBehaviour
+{
   [SerializeField]
   float updateTime = 1;
   [SerializeField]
@@ -18,51 +28,138 @@ public class AiDebugger : MonoBehaviour
   Color openListColor = Color.white;
   [SerializeField]
   Color closeListColor = Color.black;
-  [SerializeField]
-  Color occupyColor = Color.red;
-  [SerializeField]
-  Color freeColor = Color.green;
-  [SerializeField]
-  Label actionLabel;
 
-  SnakeConfig? player;
-  List<SnakeConfig> playerList = new List<SnakeConfig>();
+  List<GraphicPos> graphicPos = new List<GraphicPos>();
+
+  SnakeConfig? snake;
+
   List<List<TileMapData>> map = new List<List<TileMapData>>();
 
-  [System.Runtime.InteropServices.StructLayout(System.Runtime.InteropServices.LayoutKind.Sequential)]
-  struct ExampleVertex
+  Mesh? mesh;
+
+  void Awake()
   {
-    public Vector3 pos;
-    public Vector2 uv0;
-    public Color32 color;
-    public float size;
+    SetupScheduler();
   }
 
-  void setupMeshRender()
+  void updateMeshRender()
   {
-    var mesh = new Mesh();
-    // specify vertex count and layout
-    var layout = new[]
+    MeshRenderer renderer = GetComponent<MeshRenderer>();
+
+    if (!renderer)
     {
-      new VertexAttributeDescriptor(VertexAttribute.Position, VertexAttributeFormat.Float32, 3),
-      new VertexAttributeDescriptor(VertexAttribute.TexCoord0, VertexAttributeFormat.Float32, 2),
-      new VertexAttributeDescriptor(VertexAttribute.Color, VertexAttributeFormat.Float32, 4),
-      new VertexAttributeDescriptor(VertexAttribute.TexCoord1, VertexAttributeFormat.Float32, 1),
-    };
-    var vertexCount = 11;
+      renderer = gameObject.AddComponent<MeshRenderer>();
+      Shader shader = Shader.Find("Debug/AiRenderer");
+      renderer.sharedMaterial = new Material(shader);
+    }
+
+    if (!mesh)
+    {
+      mesh = new Mesh();
+    }
+    else
+    {
+      mesh.Clear();
+    }
+
+    int attrbTotal = 3;
+    NativeArray<VertexAttributeDescriptor> layout = new NativeArray<VertexAttributeDescriptor>(attrbTotal, Allocator.Temp, NativeArrayOptions.UninitializedMemory);
+    layout[0] = new VertexAttributeDescriptor(VertexAttribute.Position, VertexAttributeFormat.Float32, 3);
+    layout[1] = new VertexAttributeDescriptor(VertexAttribute.Color, VertexAttributeFormat.Float32, 4);
+    layout[2] = new VertexAttributeDescriptor(VertexAttribute.TexCoord0, VertexAttributeFormat.Float16, 2);
+
+    int vertexPerPos = 4;
+    int vertexCount = graphicPos.Count * vertexPerPos;
     mesh.SetVertexBufferParams(vertexCount, layout);
+    layout.Dispose();
 
-    var verts = new NativeArray<ExampleVertex>(vertexCount, Allocator.Temp);
+    NativeArray<AiRendererVertex> verts = new NativeArray<AiRendererVertex>(vertexCount, Allocator.Temp, NativeArrayOptions.UninitializedMemory);
 
-    verts[0] = new ExampleVertex
+    half h0 = new half(0f); half h1 = new half(1f);
+
+    for (int i = 0; i < graphicPos.Count; i++)
     {
-      pos = new Vector3(),
-      uv0 = new Vector2(),
-      color = new Color32(),
-      size = 2f,
-    };
+      int padding = i * vertexPerPos;
+      float TILE = 50;
+      float halfWidth = TILE / 2;
+      float halfHeight = TILE / 2;
+
+      GraphicPos graphic = graphicPos[i];
+
+      verts[padding] = new AiRendererVertex
+      {
+        Pos = new Vector3(graphic.Pos.x - halfWidth, graphic.Pos.y - halfHeight),
+        Color = graphic.Color,
+        UV = new half2(h0, h0),
+      };
+
+      verts[padding + 1] = new AiRendererVertex
+      {
+        Pos = new Vector3(graphic.Pos.x - halfWidth, graphic.Pos.y + halfHeight),
+        Color = graphic.Color,
+        UV = new half2(h0, h1),
+      };
+
+      verts[padding + 2] = new AiRendererVertex
+      {
+        Pos = new Vector3(graphic.Pos.x + halfWidth, graphic.Pos.y + halfHeight),
+        Color = graphic.Color,
+        UV = new half2(h1, h1),
+      };
+
+      verts[padding + 3] = new AiRendererVertex
+      {
+        Pos = new Vector3(graphic.Pos.x + halfWidth, graphic.Pos.y - halfHeight),
+        Color = graphic.Color,
+        UV = new half2(h1, h0),
+      };
+    }
 
     mesh.SetVertexBufferData(verts, 0, 0, vertexCount);
+    verts.Dispose();
+
+    int indexPerPos = 6;
+    int indexCount = graphicPos.Count * indexPerPos;
+    mesh.SetIndexBufferParams(indexCount, IndexFormat.UInt32);
+
+    NativeArray<int> indices = new NativeArray<int>(indexCount, Allocator.Temp, NativeArrayOptions.UninitializedMemory);
+
+    for (int i = 0; i < graphicPos.Count; i++)
+    {
+      int padding = i * indexPerPos;
+      int vertPad = i * vertexPerPos;
+
+      indices[padding] = vertPad;
+      indices[padding + 1] = vertPad + 1;
+      indices[padding + 2] = vertPad + 2;
+      indices[padding + 3] = vertPad;
+      indices[padding + 4] = vertPad + 2;
+      indices[padding + 5] = vertPad + 3;
+    }
+
+    mesh.SetIndexBufferData(indices, 0, 0, indexCount);
+    indices.Dispose();
+
+    mesh.bounds = new Bounds
+    {
+      center = transform.localPosition,
+      extents = new Vector3(700f / 2f, 700f / 2f)
+    };
+    mesh.subMeshCount = 1;
+    mesh.SetSubMesh(0, new SubMeshDescriptor
+    {
+      indexStart = 0,
+      indexCount = indexCount,
+      topology = MeshTopology.Triangles,
+      baseVertex = 0,
+    });
+
+    MeshFilter filter = GetComponent<MeshFilter>();
+    if (!filter)
+    {
+      filter = gameObject.AddComponent<MeshFilter>();
+    }
+    filter.mesh = mesh;
   }
 
   public void SetupScheduler()
@@ -72,115 +169,95 @@ public class AiDebugger : MonoBehaviour
 
   private void updateDraw()
   {
-    // view Clear;
+    clearDataPath();
     drawPath();
     drawMap();
-    updateLabel();
+    updateMeshRender();
   }
 
   void drawPath()
   {
-    if (view == null || player?.State.DebugData == null) return;
+    if (snake == null) return;
 
-    bool shouldDrawPath = Util.ShouldDrawPathfinding();
-
-    if (!shouldDrawPath) return;
-
-    List<Vector2> path = this.player.State.DebugData.EnemyPath ?? new List<Vector2>();
-    foreach (Vector2 p in path)
+    List<Vector2> paths = snake.State.DebugData?.EnemyPath ?? new List<Vector2>();
+    foreach (Vector2 p in paths)
     {
       drawTile(p, null);
     }
 
-    List<AStarPoint> openList =
-      player.State.DebugData.PathfindingState?.OpenList ?? new List<AStarPoint>();
-
+    List<AStarPoint> openList = snake.State.DebugData?.PathfindingState?.OpenList ?? new List<AStarPoint>();
     foreach (AStarPoint o in openList)
     {
-      Vector2? point = o.Point;
-      if (point == null) continue;
-      drawTile(point.Value, openListColor);
+      drawTile(o.Point, openListColor);
     }
 
-    List<AStarPoint> closeList =
-      player.State.DebugData.PathfindingState?.CloseList ?? new List<AStarPoint>();
+    List<AStarPoint> closeList = snake.State.DebugData?.PathfindingState?.CloseList ?? new List<AStarPoint>();
     foreach (AStarPoint c in closeList)
     {
-      Vector2? point = c.Point;
-      if (point == null) return;
-      drawTile(point.Value, closeListColor);
+      drawTile(c.Point, closeListColor);
     }
   }
 
   private void drawMap()
   {
-    const ctx = view;
+    float TILE = 50;
 
-    const drawMap = shouldDrawMap();
+    float arenaWidth = 700;
+    float arenaHeight = 700;
 
-    if (!this.player || !drawMap) return;
+    float maxCoordX = Mathf.FloorToInt(arenaWidth / TILE);
+    float maxCoordY = Mathf.FloorToInt(arenaHeight / TILE);
 
-    const { TILE } = ARENA_DEFAULT_OBJECT_SIZE;
-    const head = this.player.state.body[0];
-
-    if (!head) return;
-
-    const headCoord = convertPosToCoord(head.position.x, head.position.y);
-
-    const arenaWidth = ARENA_DEFAULT_VALUE.WIDTH;
-    const arenaHeight = ARENA_DEFAULT_VALUE.HEIGHT;
-
-    for (let y = 0; y < Math.floor(arenaHeight / TILE); y++)
+    for (int y = 0; y < maxCoordY; y++)
     {
-      for (let x = 0; x < Math.floor(arenaWidth / TILE); x++)
+      for (int x = 0; x < maxCoordX; x++)
       {
-        if (!this.map[y] || !this.map[y][x]) return;
-
-        if (
-          this.map[y][x].playerIDList.length > 0 ||
-          this.map[y][x].type === ARENA_OBJECT_TYPE.SPIKE
-        )
+        Vector2 pos = new Vector2(x * TILE - arenaWidth / 2, y * TILE - arenaHeight / 2);
+        graphicPos.Add(new GraphicPos
         {
-          ctx.strokeColor.set(this.occupyColor);
-        }
-        else
-        {
-          ctx.strokeColor.set(this.freeColor);
-        }
-        ctx.lineWidth = 4;
-        ctx.circle(
-          this.map[y][x].x + TILE / 2,
-          this.map[y][x].y + TILE / 2,
-          10,
-        );
-        ctx.stroke();
-        ctx.close();
+          Pos = new Vector3(pos.x, pos.y),
+          Color = getColorByType(),
+        });
       }
     }
   }
 
-  private void drawTile(Vector2 pos, Color? color)
+  private Color32 getColorByType()
   {
+    int random = Mathf.FloorToInt(UnityEngine.Random.Range(0, 5));
+    switch (random)
+    {
+      case 1:
+        return pathColor;
+      case 2:
+        return closeListColor;
+      case 3:
+        return openListColor;
+      case 4:
+        return pathColor;
+      default:
+        return pathColor;
+    }
+  }
+
+  private void drawTile(Vector2? pos, Color32? color)
+  {
+    if (pos == null) return;
+
     if (color == null)
     {
       color = pathColor;
     }
-    const ctx = this.view!;
-
-    ctx.strokeColor.set(color);
-    ctx.circle(pos.x, pos.y, 10);
-    ctx.stroke();
-    ctx.close();
+    graphicPos.Add(new GraphicPos
+    {
+      Pos = new Vector3(pos.Value.x, pos.Value.y),
+      Color = color ?? new Color32(),
+    });
   }
 
-  public void SetPlayerToDebug(SnakeConfig? player)
+  public void SetSnakeToDebug(SnakeConfig? snake)
   {
-    this.player = player;
-  }
-
-  public void SetPlayerList(List<SnakeConfig> playerList)
-  {
-    this.playerList = playerList;
+    this.snake = snake;
   }
 
   public void SetMapToDebug(List<List<TileMapData>> map)
@@ -188,36 +265,9 @@ public class AiDebugger : MonoBehaviour
     this.map = map;
   }
 
-  private void updateLabel()
+  private void clearDataPath()
   {
-    const actionData = new Map<string, number>();
-    this.playerList.forEach((player) =>
-    {
-      if (!player.action) return;
-
-      const actionName = player.action?.mapKey;
-      const data = actionData.get(player.action.mapKey);
-      if (data !== undefined)
-      {
-        actionData.set(actionName, data + 1);
-      }
-      else
-      {
-        actionData.set(actionName, 1);
-      }
-    });
-
-    let finalString = "";
-    actionData.forEach((total, actionName) =>
-    {
-      finalString += `${ actionName} : ${ total}\n`;
-    });
-
-    if (this.actionLabel) this.actionLabel.string = finalString;
-  }
-
-  void OnDestroy()
-  {
-    this.unscheduleAllCallbacks();
+    mesh?.Clear();
+    graphicPos.Clear();
   }
 }

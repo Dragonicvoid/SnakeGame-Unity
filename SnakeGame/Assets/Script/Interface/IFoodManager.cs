@@ -8,5 +8,5 @@ public interface IFoodManager
     public void StopSpawningFood();
     public void ProcessEatenFood(SnakeConfig player, FoodConfig food);
     public void RemoveAllFood();
-    public FoodConfig getFoodByObj(GameObject obj);
+    public FoodConfig GetFoodByObj(GameObject obj);
 }

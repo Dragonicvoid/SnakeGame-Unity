@@ -85,7 +85,7 @@ public class SnakeBody
 {
   public Vector2 Position { get; set; }
   public float Radius { get; set; }
-  public List<Coordinate> MovementQueue { get; set; }
+  public List<Vector2> MovementQueue { get; set; }
   // actual current direction in the game
   public Vector2 Velocity
   { get; set; }
@@ -94,7 +94,7 @@ public class SnakeBody
   public SnakeBody(
     Vector2 Position,
    float Radius,
-   List<Coordinate> MovementQueue,
+   List<Vector2> MovementQueue,
    Vector2 Velocity,
    GameObject? Obj
   )

@@ -7,6 +7,13 @@ using UnityEngine;
 
 public static class Util
 {
+  public static T Pop<T>(this List<T> list)
+  {
+    int index = list.Count - 1;
+    T r = list[index];
+    list.RemoveAt(index);
+    return r;
+  }
   public static List<T> Slice<T>(List<T> inputList, int startIndex, int endIndex)
   {
     int elementCount = endIndex - startIndex + 1;

@@ -4,15 +4,17 @@ using UnityEngine;
 using UnityEngine.Rendering;
 using Unity.Mathematics;
 
-struct VertexType
-{
-  public Vector3 pos;
-  public half2 uv;
-}
-
 [ExecuteInEditMode]
 public class CustomSprite : MonoBehaviour
 {
+  [System.Runtime.InteropServices.StructLayout(System.Runtime.InteropServices.LayoutKind.Sequential)]
+  struct VertexType
+  {
+    public Vector3 pos;
+    public Color color;
+    public half2 uv;
+  }
+
   [SerializeField]
   Texture? _texture;
   Texture? texture
@@ -48,9 +50,23 @@ public class CustomSprite : MonoBehaviour
     }
   }
 
+  [SerializeField]
+  Color _color = Color.white;
+  Color color
+  {
+    get { return _color; }
+    set
+    {
+      _color = value;
+      updateMesh();
+    }
+  }
+
   Material? _mat;
 
   Mesh? mesh;
+
+  MeshRenderer renderer;
 
   void OnEnable()
   {
@@ -59,16 +75,10 @@ public class CustomSprite : MonoBehaviour
     updateMesh();
   }
 
-#if !UNITY_EDITOR
-  void Update()
-  {
-    transform.position.Set(transform.position.x + 1, transform.position.y, transform.position.z);
-  }
-#endif
 
   void setMaterial()
   {
-    MeshRenderer renderer = GetComponent<MeshRenderer>();
+    renderer = GetComponent<MeshRenderer>();
     if (!renderer)
     {
       renderer = gameObject.AddComponent<MeshRenderer>();
@@ -98,9 +108,10 @@ public class CustomSprite : MonoBehaviour
         name = gameObject.name
       };
     }
-    NativeArray<VertexAttributeDescriptor> attr = new NativeArray<VertexAttributeDescriptor>(2, Allocator.Temp, NativeArrayOptions.UninitializedMemory);
+    NativeArray<VertexAttributeDescriptor> attr = new NativeArray<VertexAttributeDescriptor>(3, Allocator.Temp, NativeArrayOptions.UninitializedMemory);
     attr[0] = new VertexAttributeDescriptor(VertexAttribute.Position, VertexAttributeFormat.Float32, 3);
-    attr[1] = new VertexAttributeDescriptor(VertexAttribute.TexCoord0, VertexAttributeFormat.Float16, 2);
+    attr[1] = new VertexAttributeDescriptor(VertexAttribute.Color, VertexAttributeFormat.Float32, 4);
+    attr[2] = new VertexAttributeDescriptor(VertexAttribute.TexCoord0, VertexAttributeFormat.Float16, 2);
 
     mesh.SetVertexBufferParams(4, attr);
     attr.Dispose();
@@ -111,10 +122,10 @@ public class CustomSprite : MonoBehaviour
 
     half h0 = new half(0f), h1 = new half(1f);
 
-    vertex[0] = new VertexType { pos = new Vector3(-currWidth, -currHeight), uv = new half2(h0, h0) };
-    vertex[1] = new VertexType { pos = new Vector3(currWidth, -currHeight), uv = new half2(h1, h0) };
-    vertex[2] = new VertexType { pos = new Vector3(-currWidth, currHeight), uv = new half2(h0, h1) };
-    vertex[3] = new VertexType { pos = new Vector3(currWidth, currHeight), uv = new half2(h1, h1) };
+    vertex[0] = new VertexType { pos = new Vector3(-currWidth, -currHeight), color = _color, uv = new half2(h0, h0) };
+    vertex[1] = new VertexType { pos = new Vector3(currWidth, -currHeight), color = _color, uv = new half2(h1, h0) };
+    vertex[2] = new VertexType { pos = new Vector3(-currWidth, currHeight), color = _color, uv = new half2(h0, h1) };
+    vertex[3] = new VertexType { pos = new Vector3(currWidth, currHeight), color = _color, uv = new half2(h1, h1) };
 
     mesh.SetVertexBufferData(vertex, 0, 0, 4);
     vertex.Dispose();
@@ -130,6 +141,11 @@ public class CustomSprite : MonoBehaviour
       indexCount = 6,
       topology = MeshTopology.Triangles,
       baseVertex = 0,
+      bounds = new Bounds
+      {
+        center = transform.localPosition,
+        extents = new Vector3(currWidth, currHeight)
+      }
     });
 
     MeshFilter filter = GetComponent<MeshFilter>();
@@ -159,7 +175,7 @@ public class CustomSprite : MonoBehaviour
   }
 
 #if !UNITY_EDITOR
-  void OnDestroy()
+void OnDestroy()
   {
     destroyMat();
   }

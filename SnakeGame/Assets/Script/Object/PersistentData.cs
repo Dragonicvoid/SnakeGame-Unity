@@ -26,6 +26,80 @@ public class PersistentData : MonoBehaviour
   List<AsyncOperation> scenesLoading = new List<AsyncOperation>();
 }
 
+public class GameEvent : MonoBehaviour
+{
+  public static GameEvent _instance;
+  public static GameEvent Instance
+  {
+    get
+    {
+
+      GameObject obj = GameObject.FindGameObjectWithTag("Event");
+
+      if (!obj)
+      {
+        obj = new GameObject("CustomEvent");
+        obj.tag = "Event";
+        DontDestroyOnLoad(obj);
+      }
+
+      _instance = obj.GetComponent<GameEvent>();
+
+      if (_instance)
+      {
+        _instance = obj.AddComponent<GameEvent>();
+      }
+      return _instance;
+    }
+  }
+
+  public event Action<SnakeConfig> onPlayerSizeIncrease;
+  public void PlayerSizeIncrease(SnakeConfig snake)
+  {
+    onPlayerSizeIncrease(snake);
+  }
+}
+
+public class UiEvent : MonoBehaviour
+{
+  public static UiEvent _instance;
+  public static UiEvent Instance
+  {
+    get
+    {
+
+      GameObject obj = GameObject.FindGameObjectWithTag("Event");
+
+      if (!obj)
+      {
+        obj = new GameObject("CustomEvent");
+        obj.tag = "Event";
+        DontDestroyOnLoad(obj);
+      }
+
+      _instance = obj.GetComponent<UiEvent>();
+
+      if (_instance)
+      {
+        _instance = obj.AddComponent<UiEvent>();
+      }
+      return _instance;
+    }
+  }
+
+  public event Action<int> onSkinSelected;
+  public void SkinSelected(int skinId)
+  {
+    onSkinSelected(skinId);
+  }
+
+  public event Action onPrevSkinDoneRender;
+  public void PrevSkinDoneRender()
+  {
+    onPrevSkinDoneRender();
+  }
+}
+
 public class GameplayMoveEvent : MonoBehaviour
 {
   public static GameplayMoveEvent _instance;
@@ -33,15 +107,20 @@ public class GameplayMoveEvent : MonoBehaviour
   {
     get
     {
-
       GameObject obj = GameObject.FindGameObjectWithTag("Event");
 
-      if (!obj || !_instance)
+      if (!obj)
       {
-        var newObj = new GameObject("CustomEvent");
-        newObj.tag = "Event";
-        DontDestroyOnLoad(newObj);
-        _instance = newObj.AddComponent<GameplayMoveEvent>();
+        obj = new GameObject("CustomEvent");
+        obj.tag = "Event";
+        DontDestroyOnLoad(obj);
+      }
+
+      _instance = obj.GetComponent<GameplayMoveEvent>();
+
+      if (_instance)
+      {
+        _instance = obj.AddComponent<GameplayMoveEvent>();
       }
       return _instance;
     }
