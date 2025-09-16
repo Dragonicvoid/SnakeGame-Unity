@@ -106,19 +106,19 @@ public class PlayerManager : MonoBehaviour, IPlayerManager
           : skinSelect?.GetPlayerSkinData();
 
         SnakeConfig player = new SnakeConfig(
-        isBot ? this.ENEMY_ID : this.PLAYER_ID,
+        isBot ? ENEMY_ID : PLAYER_ID,
       state,
       isBot,
       true,
       isBot ? enemyRender : playerRender,
-      new NormalAction(),
       isBot
-        ? new Dictionary<BOT_ACTION, BaseAction>{
+        ? new Dictionary<BOT_ACTION, IBaseAction>{
             {BOT_ACTION.NORMAL, new NormalAction() },
-            { BOT_ACTION.CHASE_PLAYER, new GoToPlayerAction() },
+            { BOT_ACTION.CHASE_PLAYER, new GoToPlayer() },
             { BOT_ACTION.EAT, new GoToFood()},
         }
-        : null
+        : null,
+      new NormalAction()
         );
 
         PlayerList.Add(player);

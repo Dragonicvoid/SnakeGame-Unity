@@ -9,4 +9,5 @@ public interface IFoodManager
     public void ProcessEatenFood(SnakeConfig player, FoodConfig food);
     public void RemoveAllFood();
     public FoodConfig GetFoodByObj(GameObject obj);
+    public FoodConfig GetFoodById(string id);
 }

@@ -39,6 +39,13 @@ public class SnakeRender : MonoBehaviour, ISnakeRenderable
             _mat = value;
         }
     }
+    [SerializeField]
+    float tileSize = 20;
+
+    public SNAKE_TYPE SnakeType { get; set; } = SNAKE_TYPE.NORMAL;
+    public SkinDetail? SkinData { get; set; }
+
+    public List<SnakeBody> SnakeBodies { set; get; }
 
     Mesh? mesh;
 
@@ -48,15 +55,11 @@ public class SnakeRender : MonoBehaviour, ISnakeRenderable
 
     int snakePass = (int)SnakeRenderPass.Body;
 
-    List<SnakeBody> snakeBodies;
-
-    [SerializeField]
-    float tileSize = 20;
-
     void Awake()
     {
+        SkinData = new SkinDetail();
         cmdBuffer = new CommandBuffer();
-        snakeBodies = new List<SnakeBody>
+        SnakeBodies = new List<SnakeBody>
         {
             new SnakeBody(new Vector2(0, 0), tileSize, new List<Vector2>(), Vector2.left, null),
             new SnakeBody(new Vector2(0, 25), tileSize, new List<Vector2>(), Vector2.left, null),
@@ -70,16 +73,16 @@ public class SnakeRender : MonoBehaviour, ISnakeRenderable
 
     public void SetSnakeBody(List<SnakeBody> bodies)
     {
-        snakeBodies = bodies;
+        SnakeBodies = bodies;
         Render();
     }
 
     void randomizeBody()
     {
         Vector2 lastPos = new Vector2(0, 0);
-        for (int i = 0; i < snakeBodies.Count; i++)
+        for (int i = 0; i < SnakeBodies.Count; i++)
         {
-            snakeBodies[i].Position = lastPos;
+            SnakeBodies[i].Position = lastPos;
             Vector2 newDir = new Vector2(Random.Range(-1f, 1f), Random.Range(-1f, 1f));
             newDir.Normalize();
             lastPos = new Vector2(lastPos.x + newDir.x * tileSize / 2, lastPos.y + newDir.y * tileSize / 2);
@@ -130,24 +133,24 @@ public class SnakeRender : MonoBehaviour, ISnakeRenderable
         attr[5] = new VertexAttributeDescriptor(VertexAttribute.TexCoord3, VertexAttributeFormat.Float32, 3);
 
         int vertexPerSnake = 4;
-        int vertexCount = vertexPerSnake * snakeBodies.Count;
+        int vertexCount = vertexPerSnake * SnakeBodies.Count;
         mesh.SetVertexBufferParams(vertexCount, attr);
         attr.Dispose();
 
         NativeArray<SnakeVertex> vertex = new NativeArray<SnakeVertex>(vertexCount, Allocator.Temp, NativeArrayOptions.UninitializedMemory);
 
-        for (int i = 0; i < snakeBodies.Count; i++)
+        for (int i = 0; i < SnakeBodies.Count; i++)
         {
-            float x = snakeBodies[i].Position.x;
-            float y = snakeBodies[i].Position.y;
+            float x = SnakeBodies[i].Position.x;
+            float y = SnakeBodies[i].Position.y;
             float r = tileSize;
 
             float? prevXNorm = null;
             float? prevYNorm = null;
             float prevR = tileSize;
-            if (i - 1 >= 0 && i - 1 < snakeBodies.Count)
+            if (i - 1 >= 0 && i - 1 < SnakeBodies.Count)
             {
-                Vector2 delta = new Vector2((snakeBodies[i - 1].Position.x - x) / tileSize, (snakeBodies[i - 1].Position.y - y) / tileSize);
+                Vector2 delta = new Vector2((SnakeBodies[i - 1].Position.x - x) / tileSize, (SnakeBodies[i - 1].Position.y - y) / tileSize);
                 prevXNorm = delta.x;
                 prevYNorm = delta.y;
             }
@@ -155,16 +158,16 @@ public class SnakeRender : MonoBehaviour, ISnakeRenderable
             float? nextXNorm = null;
             float? nextYNorm = null;
             float nextR = tileSize;
-            if (i + 1 >= 0 && i + 1 < snakeBodies.Count)
+            if (i + 1 >= 0 && i + 1 < SnakeBodies.Count)
             {
-                Vector2 delta = new Vector2((snakeBodies[i + 1].Position.x - x) / tileSize, (snakeBodies[i + 1].Position.y - y) / tileSize);
+                Vector2 delta = new Vector2((SnakeBodies[i + 1].Position.x - x) / tileSize, (SnakeBodies[i + 1].Position.y - y) / tileSize);
                 nextXNorm = delta.x;
                 nextYNorm = delta.y;
             }
 
             if (prevXNorm == null || prevYNorm == null)
             {
-                Vector2 norm = new Vector2(x - snakeBodies[i + 1].Position.x, y - snakeBodies[i + 1].Position.y);
+                Vector2 norm = new Vector2(x - SnakeBodies[i + 1].Position.x, y - SnakeBodies[i + 1].Position.y);
                 norm.Normalize();
 
                 prevXNorm = norm.x * 0.1f;
@@ -172,7 +175,7 @@ public class SnakeRender : MonoBehaviour, ISnakeRenderable
             }
             else if (nextXNorm == null || nextYNorm == null)
             {
-                Vector2 norm = new Vector2(x - snakeBodies[i - 1].Position.x, y - snakeBodies[i - 1].Position.y);
+                Vector2 norm = new Vector2(x - SnakeBodies[i - 1].Position.x, y - SnakeBodies[i - 1].Position.y);
                 norm.Normalize();
 
                 nextXNorm = norm.x * 0.1f;
@@ -185,7 +188,7 @@ public class SnakeRender : MonoBehaviour, ISnakeRenderable
             vertex[padding] = new SnakeVertex
             {
                 pos = new Vector3(x - snakeSize, y - snakeSize, r),
-                bodyCount = (uint)snakeBodies.Count - (uint)i,
+                bodyCount = (uint)SnakeBodies.Count - (uint)i,
                 uv = new Vector2(0f, 0f),
                 center = new Vector2(x, y),
                 nextPos = new Vector3(nextXNorm ?? 0, nextYNorm ?? 0, nextR),
@@ -194,7 +197,7 @@ public class SnakeRender : MonoBehaviour, ISnakeRenderable
             vertex[padding + 1] = new SnakeVertex
             {
                 pos = new Vector3(x - snakeSize, y + snakeSize, r),
-                bodyCount = (uint)snakeBodies.Count - (uint)i,
+                bodyCount = (uint)SnakeBodies.Count - (uint)i,
                 uv = new Vector2(0f, 1f),
                 center = new Vector2(x, y),
                 nextPos = new Vector3(nextXNorm ?? 0, nextYNorm ?? 0, nextR),
@@ -203,7 +206,7 @@ public class SnakeRender : MonoBehaviour, ISnakeRenderable
             vertex[padding + 2] = new SnakeVertex
             {
                 pos = new Vector3(x + snakeSize, y + snakeSize, r),
-                bodyCount = (uint)snakeBodies.Count - (uint)i,
+                bodyCount = (uint)SnakeBodies.Count - (uint)i,
                 uv = new Vector2(1f, 1f),
                 center = new Vector2(x, y),
                 nextPos = new Vector3(nextXNorm ?? 0, nextYNorm ?? 0, nextR),
@@ -212,7 +215,7 @@ public class SnakeRender : MonoBehaviour, ISnakeRenderable
             vertex[padding + 3] = new SnakeVertex
             {
                 pos = new Vector3(x + snakeSize, y - snakeSize, r),
-                bodyCount = (uint)snakeBodies.Count - (uint)i,
+                bodyCount = (uint)SnakeBodies.Count - (uint)i,
                 uv = new Vector2(1f, 0f),
                 center = new Vector2(x, y),
                 nextPos = new Vector3(nextXNorm ?? 0, nextYNorm ?? 0, nextR),
@@ -224,12 +227,12 @@ public class SnakeRender : MonoBehaviour, ISnakeRenderable
         vertex.Dispose();
 
         int indexPerSnake = 6;
-        int indexCount = indexPerSnake * snakeBodies.Count;
+        int indexCount = indexPerSnake * SnakeBodies.Count;
         mesh.SetIndexBufferParams(indexCount, IndexFormat.UInt32);
 
         NativeArray<int> indices = new NativeArray<int>(indexCount, Allocator.Temp, NativeArrayOptions.UninitializedMemory);
 
-        for (int i = 0; i < snakeBodies.Count; i++)
+        for (int i = 0; i < SnakeBodies.Count; i++)
         {
             int padding = i * indexPerSnake;
             int vertPad = i * vertexPerSnake;
@@ -298,6 +301,16 @@ public class SnakeRender : MonoBehaviour, ISnakeRenderable
         }
 
         Graphics.ExecuteCommandBuffer(cmdBuffer);
+    }
+
+    public void SetMatByType()
+    {
+
+    }
+
+    public void SetSnakeSkin()
+    {
+
     }
 
     private void updateMesh()

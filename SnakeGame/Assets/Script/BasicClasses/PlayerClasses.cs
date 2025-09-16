@@ -41,14 +41,14 @@ public class FoodTargetData
 public class SnakeDebugData
 {
   public string? EnemyID;
-  public string? ActionName;
+  public BOT_ACTION? ActionName;
   public List<Vector2>? EnemyPath;
   public AStarSearchData? PathfindingState;
   public List<IBaseAction>? PossibleActions;
 
   public SnakeDebugData(
   string? EnemyID,
-  string? ActionName,
+  BOT_ACTION? ActionName,
   List<Vector2>? EnemyPath,
   AStarSearchData? PathfindingState,
   List<IBaseAction>? PossibleActions

@@ -20,13 +20,13 @@ TagManager:
   - 
   - 
   - 
-  - 
-  - 
-  - 
-  - 
-  - 
-  - 
-  - 
+  - Physics_Food
+  - Physics_Player
+  - Physics_Food_Grabber
+  - Physics_Obstacle
+  - Physics_Enemy
+  - Physics_Player_Bodies
+  - Physics_Enemy_Bodies
   - 
   - 
   - 

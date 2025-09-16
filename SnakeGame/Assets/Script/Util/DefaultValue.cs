@@ -11,6 +11,32 @@ public static class ARENA_DEFAULT_SIZE
   public const float FOOD_GRABBER = 100f;
 }
 
+public static class ACTION_SCORE
+{
+  public const float NORMAL_ACTION = 0f;
+  public const float OBSTACLE_DETECTED = 9000f;
+  public const float FOUND_FOOD_NEARBY = 200f;
+  public const float SMALL_BODY = 100f;
+  public const float GO_TO_PLAYER_DEFAULT = -40f;
+  public const float BECOME_AGGRESIVE = 440f;
+  public const float AGGRESIVE_ON_COOLDOWN = -360f;
+}
+
+public static class BOT_CONFIG
+{
+  public const float AGGRRESIVE_TIME = 10f;
+  public const float AGGRESSIVE_CONE_RAD = 45f;
+  public const float AGGRESSIVE_CONE_DIST = 250f;
+  public const float AGGRESSIVE_COOLDOWN = 4f;
+  public const float TRIGGER_AREA_DST = 60f;
+  public const float TURN_RADIUS = 60f;
+}
+
+public static class TIME_CONFIG
+{
+  public const float FOOD_EXPIRED = 3;
+}
+
 public static class MAP
 {
   public static List<LevelMapData> ConfigMaps = new List<LevelMapData>(new LevelMapData[] {new LevelMapData(
