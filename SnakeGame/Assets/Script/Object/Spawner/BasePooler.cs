@@ -13,10 +13,11 @@ public class BasePooler : MonoBehaviour
     [SerializeField]
     int initial = 20;
 
-    List<GameObject> pool;
+    List<GameObject>? pool;
 
     void Awake()
     {
+        pool = new List<GameObject>();
         if (!parent)
         {
             parent = gameObject;
@@ -33,7 +34,7 @@ public class BasePooler : MonoBehaviour
 
     public GameObject? GetGameObj()
     {
-        if (pool.Count <= 0)
+        if (pool?.Count <= 0)
         {
             createNew();
         }
@@ -61,6 +62,6 @@ public class BasePooler : MonoBehaviour
 
         gameObj.SetActive(false);
         if (parent) gameObj.transform.SetParent(parent.transform);
-        pool.Add(gameObj);
+        pool?.Add(gameObj);
     }
 }

@@ -1,16 +1,17 @@
+#nullable enable
 using System;
 using System.Collections.Generic;
 using UnityEngine;
 
 public class GameManager : MonoBehaviour
 {
-  public IArenaManager arenaManager = null;
-  public IGridManager gridManager = null;
-  public PlayerManager playerManager = null;
-  public FoodManager foodManager = null;
-  private IUiManager uiManager = null;
-  private ArenaInput inputField = null;
-  private BotPlanner planner = null;
+  public IRef<IArenaManager>? ArenaManager = null;
+  public IRef<IGridManager>? GridManager = null;
+  public IRef<IPlayerManager>? PlayerManager = null;
+  public IRef<IFoodManager>? FoodManager = null;
+  public UiManager? UiManager = null;
+  public ArenaInput? ArenaInput = null;
+  public BotPlanner? Planner = null;
 
   private float botInterval = 0;
 
@@ -24,190 +25,178 @@ public class GameManager : MonoBehaviour
 
   public void StartGame()
   {
-    arenaManager.InitializedMap();
+    ArenaManager?.I.InitializedMap();
     gameStartTime = Time.fixedTime;
-    uiManager.ShowStartUI(false);
-    inputField.StartInputListener();
+    UiManager?.ShowStartUI(false);
+    ArenaInput?.StartInputListener();
 
     CreatePlayer();
-    SetCollisionEvent();
-    SetGameEvent();
+    setCollisionEvent();
+    setGameEvent();
 
     StartCoroutine(gameUpdate());
   }
 
   IEnumerator<object> gameUpdate()
   {
-    yield return new WaitForSeconds(0.016f);
-    float deltaTime = Math.Min(0.016f, Time.deltaTime);
-
-    foreach (SnakeConfig snake in playerManager.PlayerList)
+    while (true)
     {
-      HandleBotLogic(snake);
-      PlayerManager.UpdateCoordinate(deltaTime);
+      yield return new WaitForSeconds(0.016f);
+      float deltaTime = Math.Min(0.016f, Time.deltaTime);
+
+      foreach (SnakeConfig snake in PlayerManager.I.PlayerList)
+      {
+        handleBotLogic(snake);
+        PlayerManager.I.UpdateCoordinate(deltaTime);
+      }
     }
   }
 
   private void CreatePlayer()
   {
-    Vector2 centerPos = arenaManager?.CenterPos ?? new Vector2(0, 0);
+    Vector2 centerPos = ArenaManager?.I.CenterPos ?? new Vector2(0, 0);
 
     float rand = UnityEngine.Random.Range(0, 100) / 100;
     Vector2 playerPos =
-      arenaManager?.SpawnPos[rand > 0.5 ? 0 : 1] ?? new Vector2(0, 0);
+      ArenaManager?.I.SpawnPos[rand > 0.5 ? 0 : 1] ?? new Vector2(0, 0);
     Vector2 playerDir = new Vector2(1, 0);
     if (playerPos.x > centerPos.x)
     {
       playerDir.Set(-1, 0);
     }
-    playerManager.CreatePlayer(playerPos, playerDir);
+    PlayerManager?.I.CreatePlayer(playerPos, playerDir);
 
     Vector2 enemyPos =
-      arenaManager?.SpawnPos[rand > 0.5 ? 1 : 0] ?? new Vector2(0, 0);
+      ArenaManager?.I.SpawnPos[rand > 0.5 ? 1 : 0] ?? new Vector2(0, 0);
     Vector2 enemyDir = new Vector2(1, 0);
     if (enemyPos.x > centerPos.x)
     {
       enemyDir.Set(-1, 0);
     }
-    playerManager?.CreatePlayer(enemyPos, enemyDir, true);
+    PlayerManager?.I.CreatePlayer(enemyPos, enemyDir, true);
 
-    foodManager?.StartSpawningFood();
+    FoodManager?.I.StartSpawningFood();
   }
 
   void stopGame()
   {
-    foodManager?.StopSpawningFood();
-    inputField?.StopInputListener();
+    FoodManager?.I.StopSpawningFood();
+    ArenaInput?.StopInputListener();
     StopCoroutine(gameUpdate());
     stopCollisionEvent();
+    stopGameEvent();
   }
 
   public void GoToMainMenu()
   {
-    foodManager?.RemoveAllFood();
-    playerManager?.RemoveAllPlayers();
-    foodManager?.RemoveAllFood();
-    uiManager?.ShowStartUI();
-    uiManager?.ShowEndUI(null, false);
+    FoodManager?.I.RemoveAllFood();
+    PlayerManager?.I.RemoveAllPlayers();
+    FoodManager?.I.RemoveAllFood();
+    UiManager?.ShowStartUI();
+    UiManager?.ShowEndUI(null, false);
   }
 
   void setCollisionEvent()
   {
-    PhysicsSystem2D.instance.on(
-      Contact2DType.BEGIN_CONTACT,
-      this.headCollideCb,
-    );
-
-    PhysicsSystem2D.instance.on(
-      Contact2DType.BEGIN_CONTACT,
-      this.foodCollideCb,
-    );
+    CollisionEvent.Instance.onHeadCollide += onHeadCollide;
+    CollisionEvent.Instance.onFoodCollide += onFoodCollide;
   }
 
   void setGameEvent()
   {
-    PersistentDataManager.instance.eventTarget.once(
-      GAME_EVENT.GAME_OVER,
-      this.gameOverCb,
-    );
+    GameEvent.Instance.onGameOver += onGameOver;
   }
 
   void stopCollisionEvent()
   {
-    PhysicsSystem2D.instance.off(
-      Contact2DType.BEGIN_CONTACT,
-      this.headCollideCb,
-    );
-
-    PhysicsSystem2D.instance.off(
-      Contact2DType.BEGIN_CONTACT,
-      this.foodCollideCb,
-    );
+    CollisionEvent.Instance.onHeadCollide -= onHeadCollide;
+    CollisionEvent.Instance.onFoodCollide -= onFoodCollide;
   }
 
-  void onHeadCollide(selfCollider: Collider2D, otherCollider: Collider2D)
+  void stopGameEvent()
   {
-    const gameOverData: GameOverData = {
-    player: this.playerManager?.getMainPlayer(),
-      enemy: this.playerManager?.getEnemy(),
-      time: game.totalTime,
-      diff: this.diff,
-      isWon: false,
-    }
-    ;
+    GameEvent.Instance.onGameOver -= onGameOver;
+  }
+
+  void onHeadCollide(HeadCollideData data)
+  {
+    GameOverData gameOverData = new GameOverData(
+      Time.time,
+      diff,
+      false,
+      PlayerManager?.I.GetMainPlayer(),
+      PlayerManager?.I.GetEnemy()
+    );
+
+    int selfLayer = data.Self.layer;
+    int otherLayer = data.Other.layer;
 
     if (
-      (selfCollider.group === PHYSICS_GROUP.PLAYER &&
-        otherCollider.group === PHYSICS_GROUP.ENEMY) ||
-      (selfCollider.group === PHYSICS_GROUP.ENEMY &&
-        otherCollider.group === PHYSICS_GROUP.PLAYER)
+      (selfLayer == (int)LAYER.PHYSICS_PLAYER &&
+        otherLayer == (int)LAYER.PHYSICS_ENEMY) ||
+      (selfLayer == (int)LAYER.PHYSICS_ENEMY &&
+        otherLayer == (int)LAYER.PHYSICS_PLAYER)
     )
     {
-      PersistentDataManager.instance.eventTarget.emit(
-        GAME_EVENT.GAME_OVER,
-        gameOverData,
-      );
-    }
-
-    if (
-      (selfCollider.group === PHYSICS_GROUP.PLAYER &&
-        otherCollider.group === PHYSICS_GROUP.OBSTACLE) ||
-      (selfCollider.group === PHYSICS_GROUP.OBSTACLE &&
-        otherCollider.group === PHYSICS_GROUP.PLAYER) ||
-      (selfCollider.group === PHYSICS_GROUP.ENEMY_BODIES &&
-        otherCollider.group === PHYSICS_GROUP.PLAYER) ||
-      (selfCollider.group === PHYSICS_GROUP.PLAYER &&
-        otherCollider.group === PHYSICS_GROUP.ENEMY_BODIES)
-    )
-    {
-      PersistentDataManager.instance.eventTarget.emit(
-        GAME_EVENT.GAME_OVER,
-        gameOverData,
-      );
+      GameEvent.Instance.GameOver(gameOverData);
     }
 
     if (
-      (selfCollider.group === PHYSICS_GROUP.ENEMY &&
-        otherCollider.group === PHYSICS_GROUP.OBSTACLE) ||
-      (selfCollider.group === PHYSICS_GROUP.OBSTACLE &&
-        otherCollider.group === PHYSICS_GROUP.ENEMY) ||
-      (selfCollider.group === PHYSICS_GROUP.PLAYER_BODIES &&
-        otherCollider.group === PHYSICS_GROUP.ENEMY) ||
-      (selfCollider.group === PHYSICS_GROUP.ENEMY &&
-        otherCollider.group === PHYSICS_GROUP.PLAYER_BODIES)
+      (selfLayer == (int)LAYER.PHYSICS_PLAYER &&
+        otherLayer == (int)LAYER.PHYSICS_OBSTACLE) ||
+      (selfLayer == (int)LAYER.PHYSICS_OBSTACLE &&
+        otherLayer == (int)LAYER.PHYSICS_PLAYER) ||
+      (selfLayer == (int)LAYER.PHYSICS_ENEMY_BODIES &&
+        otherLayer == (int)LAYER.PHYSICS_PLAYER) ||
+      (selfLayer == (int)LAYER.PHYSICS_PLAYER &&
+        otherLayer == (int)LAYER.PHYSICS_ENEMY_BODIES)
     )
     {
-      gameOverData.isWon = true;
-      PersistentDataManager.instance.eventTarget.emit(
-        GAME_EVENT.GAME_OVER,
-        gameOverData,
-      );
+      gameOverData.IsWon = true;
+      GameEvent.Instance.GameOver(gameOverData);
+    }
+
+    if (
+      (selfLayer == (int)LAYER.PHYSICS_ENEMY &&
+        otherLayer == (int)LAYER.PHYSICS_OBSTACLE) ||
+      (selfLayer == (int)LAYER.PHYSICS_OBSTACLE &&
+        otherLayer == (int)LAYER.PHYSICS_ENEMY) ||
+      (selfLayer == (int)LAYER.PHYSICS_PLAYER_BODIES &&
+        otherLayer == (int)LAYER.PHYSICS_ENEMY) ||
+      (selfLayer == (int)LAYER.PHYSICS_ENEMY &&
+        otherLayer == (int)LAYER.PHYSICS_PLAYER_BODIES)
+    )
+    {
+      gameOverData.IsWon = true;
+      GameEvent.Instance.GameOver(gameOverData);
     }
   }
 
-  void onFoodCollide(selfCollider: Collider2D, otherCollider: Collider2D)
+  void onFoodCollide(FoodCollideData data)
   {
+    int selfLayer = data.Self.layer;
+    int otherLayer = data.Other.layer;
     if (
-      (selfCollider.group === PHYSICS_GROUP.FOOD_GRABBER &&
-        otherCollider.group === PHYSICS_GROUP.FOOD) ||
-      (selfCollider.group === PHYSICS_GROUP.FOOD &&
-        otherCollider.group === PHYSICS_GROUP.FOOD_GRABBER)
+      (selfLayer == (int)LAYER.PHYSICS_FOOD_GRABBER &&
+        otherLayer == (int)LAYER.PHYSICS_FOOD) ||
+      (selfLayer == (int)LAYER.PHYSICS_FOOD &&
+        otherLayer == (int)LAYER.PHYSICS_FOOD_GRABBER)
     )
     {
-      const selfNodeParent = selfCollider.node.parent;
-      const otherNodeParent = otherCollider.node.parent;
+      GameObject selfParent = data.Self.gameObject.transform.parent.gameObject;
+      GameObject otherParent = data.Other.gameObject.transform.parent.gameObject;
 
-      if (selfNodeParent && otherNodeParent)
+      if (selfParent && otherParent)
       {
-        const food =
-          this.foodManager?.getFoodByObj(selfNodeParent) ??
-          this.foodManager?.getFoodByObj(otherNodeParent);
-        const snake =
-          this.playerManager?.getPlayerByFoodGrabber(selfNodeParent) ??
-          this.playerManager?.getPlayerByFoodGrabber(otherNodeParent);
+        FoodConfig? food =
+          FoodManager?.I.GetFoodByObj(selfParent) ??
+          FoodManager?.I.GetFoodByObj(otherParent);
+        SnakeConfig? snake =
+          PlayerManager?.I.GetPlayerByFoodGrabber(selfParent) ??
+          PlayerManager?.I.GetPlayerByFoodGrabber(otherParent);
 
-        if (snake && food && !food.state.eaten)
-          this.foodManager?.processEatenFood(snake, food);
+        if (snake != null && food != null && !food.State.Eaten)
+          FoodManager?.I.ProcessEatenFood(snake, food);
       }
     }
   }
@@ -215,7 +204,7 @@ public class GameManager : MonoBehaviour
   void onGameOver(GameOverData data)
   {
     stopGame();
-    uiManager?.ShowEndUI(data);
+    UiManager?.ShowEndUI(data);
   }
 
   void handleBotLogic(SnakeConfig snake)
@@ -223,10 +212,10 @@ public class GameManager : MonoBehaviour
     if (!snake.IsBot) return;
 
     if (
-      playerManager == null ||
-      arenaManager == null ||
-      foodManager == null ||
-      planner == null
+      PlayerManager == null ||
+      ArenaManager == null ||
+      FoodManager == null ||
+      Planner == null
     )
       return;
 
@@ -239,23 +228,23 @@ public class GameManager : MonoBehaviour
     //if bot in the middle of turning sequene, disable the turn logic
     if (snake.State.InDirectionChange) return;
     //detect player and food
-    detectedPlayer = playerManager.FindNearestPlayerTowardPoint(
+    detectedPlayer = PlayerManager.I.FindNearestPlayerTowardPoint(
       snake,
       BOT_CONFIG.TRIGGER_AREA_DST
     );
 
     detectedWall =
-      arenaManager.FindNearestObstacleTowardPoint(
+      ArenaManager.I.FindNearestObstacleTowardPoint(
         snake,
         BOT_CONFIG.TRIGGER_AREA_DST
       ) ?? new List<float>();
 
     // need to updated to adjust botData
-    FoodTargetData targetFood = snake.State.TargetFood;
+    FoodTargetData? targetFood = snake.State.TargetFood;
     if (detectedPlayer.Count < 1 && targetFood == null)
     {
       detectedFood =
-        arenaManager.GetNearestDetectedFood(
+        ArenaManager.I.GetNearestDetectedFood(
           snake,
           BOT_CONFIG.TRIGGER_AREA_DST
         ) ?? null;
@@ -266,13 +255,12 @@ public class GameManager : MonoBehaviour
       targetFood = new FoodTargetData(
       detectedFood,
         Time.time
-      )
-      ;
+      );
     }
 
     if (targetFood != null)
     {
-      FoodConfig targetExist = foodManager.FoodList.Find(
+      FoodConfig targetExist = FoodManager.I.FoodList.Find(
         (item) => item.Id == targetFood.Food.Id
       );
       bool isEaten = targetFood.Food.State.Eaten;
@@ -284,13 +272,14 @@ public class GameManager : MonoBehaviour
       }
     }
 
-    SnakeBody currState = snake.State.Body[0];
+    if (snake.State.Body.Count <= 0) return;
 
-    GridConfig gridWithMostFood = arenaManager?.GetGridWithMostFood();
+    SnakeBody currState = snake.State.Body[0];
+    GridConfig? gridWithMostFood = ArenaManager?.I.GetGridWithMostFood();
 
     PlannerFactor factor = new PlannerFactor(
       snake,
-      playerManager.PlayerList,
+      PlayerManager.I.PlayerList,
     detectedPlayer,
       detectedWall,
       currState.Position,
@@ -300,16 +289,19 @@ public class GameManager : MonoBehaviour
     )
     ;
     List<IBaseAction> possibleActions = new List<IBaseAction>();
-    foreach (KeyValuePair<BOT_ACTION, IBaseAction> entry in snake.PossibleActions)
+    if (snake.PossibleActions != null)
     {
-      possibleActions.Add(entry.Value);
+      foreach (KeyValuePair<BOT_ACTION, IBaseAction> entry in snake.PossibleActions)
+      {
+        possibleActions.Add(entry.Value);
 
+      }
     }
 
-    IBaseAction currAction = planner.Plan(possibleActions, factor);
+    IBaseAction currAction = Planner.Plan(possibleActions, factor);
 
     bool differentAction = currAction != snake.Action;
-    if (currAction != null && snake.Action.AllowToChange())
+    if (currAction != null && snake.Action?.AllowToChange() == true)
     {
       if (differentAction)
       {
@@ -326,9 +318,9 @@ public class GameManager : MonoBehaviour
 
     snake.Action?.Run(snake, new SnakeActionData(
       new ManagerActionData(
-        playerManager,
-      arenaManager,
-        foodManager
+        PlayerManager.I,
+      ArenaManager?.I,
+        FoodManager.I
       ),
       detectedPlayer,
       detectedWall,
@@ -338,7 +330,7 @@ public class GameManager : MonoBehaviour
     snake.State.DebugData = new SnakeDebugData(
       snake.Id,
       snake.Action?.MapKey,
-      snake.Action.Path,
+      snake.Action?.Path,
       snake.Action?.PrevPathfindingData,
       possibleActions
       );

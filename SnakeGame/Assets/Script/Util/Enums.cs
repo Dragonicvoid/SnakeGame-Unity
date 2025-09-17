@@ -32,17 +32,17 @@ public enum SNAKE_TYPE
 public enum LAYER
 {
     DEFAULT = 0,
-    TRANSPARENT_FX = 1 << 0,
-    IGNORE_RAYCAST = 1 << 1,
+    TRANSPARENT_FX = 1,
+    IGNORE_RAYCAST = 2,
     // Skip
-    WATER = 1 << 3,
-    UI = 1 << 4,
+    WATER = 4,
+    UI = 5,
 
-    PHYSICS_FOOD = 1 << 13,
-    PHYSICS_PLAYER = 1 << 14,
-    PHYSICS_FOOD_GRABBER = 1 << 15,
-    PHYSICS_OBSTACLE = 1 << 16,
-    PHYSICS_ENEMY = 1 << 17,
-    PHYSICS_PLAYER_BODIES = 1 << 18,
-    PHYSICS_ENEMY_BODIES = 1 << 19,
+    PHYSICS_FOOD = 14,
+    PHYSICS_PLAYER = 15,
+    PHYSICS_FOOD_GRABBER = 16,
+    PHYSICS_OBSTACLE = 17,
+    PHYSICS_ENEMY = 18,
+    PHYSICS_PLAYER_BODIES = 19,
+    PHYSICS_ENEMY_BODIES = 20,
 }

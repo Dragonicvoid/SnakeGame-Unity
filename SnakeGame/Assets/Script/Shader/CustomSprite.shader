@@ -3,13 +3,13 @@ Shader "Transparent/CustomSprite"
     Properties
     {
         _MainTex ("Texture", 2D) = "white" {}
+        _Repeat("Repeating Tile", Int) = 1
     }
     SubShader
     {
-        Tags { "Queue"="Transparent" "IgnoreProjector"="True" "RenderType"="Transparent" }
+        Tags { "Queue"="Transparent" }
         LOD 100
 
-        ZWrite Off
         Blend SrcAlpha OneMinusSrcAlpha
 
         Pass
@@ -46,10 +46,14 @@ Shader "Transparent/CustomSprite"
                 return o;
             }
 
+            int _Repeat;
+
             fixed4 frag (v2f i) : SV_Target
             {
+                float2 uv0 = i.uv * (float)_Repeat;
+                float2 f = frac(uv0);
                 // sample the texture
-                float4 col = tex2D(_MainTex, i.uv);
+                float4 col = tex2D(_MainTex, f.xy);
                 col *= i.color;
 
                 fixed4 colFix = col;

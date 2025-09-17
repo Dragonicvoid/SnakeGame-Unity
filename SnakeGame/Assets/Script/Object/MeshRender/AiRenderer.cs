@@ -27,7 +27,9 @@ public class AiRenderer : MonoBehaviour
   [SerializeField]
   Color openListColor = Color.white;
   [SerializeField]
-  Color closeListColor = Color.black;
+  Color closeListColor = Color.red;
+  [SerializeField]
+  Color wallColor = Color.green;
 
   List<GraphicPos> graphicPos = new List<GraphicPos>();
 
@@ -80,7 +82,7 @@ public class AiRenderer : MonoBehaviour
     for (int i = 0; i < graphicPos.Count; i++)
     {
       int padding = i * vertexPerPos;
-      float TILE = 50;
+      float TILE = ARENA_DEFAULT_SIZE.TILE;
       float halfWidth = TILE / 2;
       float halfHeight = TILE / 2;
 
@@ -171,7 +173,7 @@ public class AiRenderer : MonoBehaviour
   {
     clearDataPath();
     drawPath();
-    drawMap();
+    // drawMap();
     updateMeshRender();
   }
 
@@ -200,10 +202,10 @@ public class AiRenderer : MonoBehaviour
 
   private void drawMap()
   {
-    float TILE = 50;
+    float TILE = ARENA_DEFAULT_SIZE.TILE;
 
-    float arenaWidth = 700;
-    float arenaHeight = 700;
+    float arenaWidth = ARENA_DEFAULT_SIZE.WIDTH;
+    float arenaHeight = ARENA_DEFAULT_SIZE.HEIGHT;
 
     float maxCoordX = Mathf.FloorToInt(arenaWidth / TILE);
     float maxCoordY = Mathf.FloorToInt(arenaHeight / TILE);
@@ -212,31 +214,26 @@ public class AiRenderer : MonoBehaviour
     {
       for (int x = 0; x < maxCoordX; x++)
       {
-        Vector2 pos = new Vector2(x * TILE - arenaWidth / 2, y * TILE - arenaHeight / 2);
+        Vector2 pos = new Vector2(x * TILE - arenaWidth / 2 + TILE / 2, y * TILE - arenaHeight / 2 + TILE / 2);
         graphicPos.Add(new GraphicPos
         {
           Pos = new Vector3(pos.x, pos.y),
-          Color = getColorByType(),
+          Color = getColorByType(map[y][x].Type),
         });
       }
     }
   }
 
-  private Color32 getColorByType()
+  private Color32 getColorByType(ARENA_OBJECT_TYPE type)
   {
-    int random = Mathf.FloorToInt(UnityEngine.Random.Range(0, 5));
-    switch (random)
+    switch (type)
     {
-      case 1:
-        return pathColor;
-      case 2:
-        return closeListColor;
-      case 3:
+      case ARENA_OBJECT_TYPE.NONE:
         return openListColor;
-      case 4:
-        return pathColor;
+      case ARENA_OBJECT_TYPE.WALL:
+        return wallColor;
       default:
-        return pathColor;
+        return openListColor;
     }
   }
 

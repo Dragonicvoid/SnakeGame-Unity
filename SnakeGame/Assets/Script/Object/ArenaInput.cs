@@ -1,7 +1,7 @@
 using UnityEngine;
 using UnityEngine.EventSystems;
 
-public class ArenaInput : MonoBehaviour, IDragHandler, IBeginDragHandler, IEndDragHandler
+public class ArenaInput : MonoBehaviour, IPointerDownHandler, IDragHandler, IPointerUpHandler
 {
   bool disableTouch = false;
   public void StartInputListener()
@@ -15,25 +15,25 @@ public class ArenaInput : MonoBehaviour, IDragHandler, IBeginDragHandler, IEndDr
     GameplayMoveEvent.Instance.GameUiEndTouch();
   }
 
-  public void OnBeginDrag(PointerEventData eventData)
-  {
-    if (disableTouch) return;
-
-    Vector2 uiLoc = eventData.position;
-
-    GameplayMoveEvent.Instance.GameUiStartTouch(uiLoc);
-  }
-
   public void OnDrag(PointerEventData eventData)
   {
     if (disableTouch) return;
 
-    Vector2 uiLoc = eventData.position;
+    Vector2 uiLoc = Camera.main.ScreenToWorldPoint(new Vector3(eventData.position.x, eventData.position.y, 0));
+
+    GameplayMoveEvent.Instance.GameUiMoveTouch(uiLoc);
+  }
+
+  public void OnPointerDown(PointerEventData eventData)
+  {
+    if (disableTouch) return;
+
+    Vector2 uiLoc = Camera.main.ScreenToWorldPoint(new Vector3(eventData.position.x, eventData.position.y, 0));
 
     GameplayMoveEvent.Instance.GameUiStartTouch(uiLoc);
   }
 
-  public void OnEndDrag(PointerEventData eventData)
+  public void OnPointerUp(PointerEventData eventData)
   {
     if (disableTouch) return;
 

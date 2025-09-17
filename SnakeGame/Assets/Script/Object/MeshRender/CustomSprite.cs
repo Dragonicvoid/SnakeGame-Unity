@@ -62,6 +62,15 @@ public class CustomSprite : MonoBehaviour
     }
   }
 
+  [SerializeField]
+  int repeat = 1;
+
+  [SerializeField]
+  Vector2 tiling = new Vector2(1f, 1f);
+
+  [SerializeField]
+  Vector2 offset = new Vector2(0f, 0f);
+
   Material? _mat;
 
   Mesh? mesh;
@@ -75,6 +84,12 @@ public class CustomSprite : MonoBehaviour
     updateMesh();
   }
 
+  void OnValidate()
+  {
+    setMaterial();
+    setTexture();
+    updateMesh();
+  }
 
   void setMaterial()
   {
@@ -84,13 +99,17 @@ public class CustomSprite : MonoBehaviour
       renderer = gameObject.AddComponent<MeshRenderer>();
     }
 
+    _mat = renderer.sharedMaterial;
+
     if (!_mat)
     {
-      Shader shader = Shader.Find("Unlit/Standard");
+      Shader shader = Shader.Find("Transparent/CustomSprite");
       _mat = new Material(shader);
+      renderer.sharedMaterial = _mat;
     }
-
-    renderer.sharedMaterial = _mat;
+    _mat.SetTextureOffset("_MainTex", offset);
+    _mat.SetTextureScale("_MainTex", tiling);
+    _mat.SetInt("_Repeat", repeat);
   }
 
   void setTexture()
@@ -135,6 +154,11 @@ public class CustomSprite : MonoBehaviour
     mesh.SetIndexBufferData(new short[6] { 0, 2, 1, 1, 2, 3 }, 0, 0, indexCount);
 
     mesh.subMeshCount = 1;
+    mesh.bounds = new Bounds
+    {
+      center = transform.localPosition,
+      extents = new Vector3(currWidth, currHeight)
+    };
     mesh.SetSubMesh(0, new SubMeshDescriptor
     {
       indexStart = 0,
@@ -148,12 +172,15 @@ public class CustomSprite : MonoBehaviour
       }
     });
 
-    MeshFilter filter = GetComponent<MeshFilter>();
-    if (!filter)
+    if (Application.isPlaying)
     {
-      filter = gameObject.AddComponent<MeshFilter>();
+      MeshFilter filter = GetComponent<MeshFilter>();
+      if (!filter)
+      {
+        filter = gameObject.AddComponent<MeshFilter>();
+      }
+      filter.mesh = mesh;
     }
-    filter.mesh = mesh;
   }
 
   private void updateMesh()

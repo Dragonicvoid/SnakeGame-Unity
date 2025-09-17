@@ -18,9 +18,9 @@ public class FoodManager : MonoBehaviour, IFoodManager
   [SerializeField]
   FoodSpawner? foodSpawner = null;
   [SerializeField]
-  IObstacleManager? obsManager = null;
+  IRef<IObstacleManager>? obsManager = null;
   [SerializeField]
-  IGridManager? gridManager = null;
+  IRef<IGridManager>? gridManager = null;
   [SerializeField]
   private int maxFoodInstance = 5;
   [SerializeField]
@@ -41,44 +41,56 @@ public class FoodManager : MonoBehaviour, IFoodManager
   {
 
     foodCounter = 0;
-    InvokeRepeating("spawnRandomFood", 0f, foodSpawnInterval);
+    StartCoroutine(spawnRandomFood());
   }
 
   public void StopSpawningFood()
   {
-    CancelInvoke("spawnRandomFood");
+    StopAllCoroutines();
   }
 
-  private void spawnRandomFood(int retries = 0)
+  IEnumerator<object> spawnRandomFood()
   {
-    if (!foodSpawner || retries >= maxRetries) return;
-
-    if (foodSpawner?.transform.childCount >= maxFoodInstance) return;
-
-    Vector2 pos = new Vector2(
-      Random.Range(0f, ARENA_DEFAULT_SIZE.WIDTH) - ARENA_DEFAULT_SIZE.WIDTH / 2,
-      Random.Range(0f, ARENA_DEFAULT_SIZE.HEIGHT) -
-        ARENA_DEFAULT_SIZE.HEIGHT / 2
-    );
-    Coordinate coord = ArenaConverter.ConvertPosToCoord(pos.x, pos.y);
-    bool isSafe = obsManager?.IsPosSafeForSpawn(coord) ?? false;
-
-    if (!isSafe)
+    int retries = 0;
+    while (true)
     {
-      spawnRandomFood(retries++);
-      return;
+      yield return new WaitForSeconds(foodSpawnInterval);
+      if (!foodSpawner || retries >= maxRetries)
+      {
+        retries = 0;
+        continue;
+      }
+
+      if (foodSpawner?.transform.childCount >= maxFoodInstance) continue;
+
+      Vector2 pos = new Vector2(
+        Random.Range(0f, ARENA_DEFAULT_SIZE.WIDTH) - ARENA_DEFAULT_SIZE.WIDTH / 2,
+        Random.Range(0f, ARENA_DEFAULT_SIZE.HEIGHT) -
+          ARENA_DEFAULT_SIZE.HEIGHT / 2
+      );
+      Coordinate coord = ArenaConverter.ConvertPosToCoord(pos.x, pos.y);
+      bool isSafe = obsManager?.I.IsPosSafeForSpawn(coord) ?? false;
+
+      if (!isSafe)
+      {
+        retries++;
+        continue;
+      }
+
+      GameObject? obj = foodSpawner?.Spawn(pos);
+
+      if (!obj)
+      {
+        continue;
+      }
+
+      FoodConfig food = new FoodConfig(foodCounter.ToString(), new FoodState(pos, false), 0, obj);
+
+      gridManager?.I.AddFood(food);
+      FoodList.Add(food);
+
+      foodCounter++;
     }
-
-    GameObject? obj = foodSpawner?.Spawn(pos);
-
-    if (!obj) return;
-
-    FoodConfig food = new FoodConfig(foodCounter.ToString(), new FoodState(pos, false), 0, obj);
-
-    gridManager?.AddFood(food);
-    FoodList.Add(food);
-
-    foodCounter++;
   }
 
   public void ProcessEatenFood(SnakeConfig player, FoodConfig food)
@@ -86,6 +98,7 @@ public class FoodManager : MonoBehaviour, IFoodManager
     if (player.State.Body.Count == 0) return;
 
     Vector2 targetVec = new Vector2(player.State.Body[0].Position.x, player.State.Body[0].Position.y);
+    Vector2 startVec = new Vector2(food.State.Position.x, food.State.Position.y);
     BaseTween<TweenData> tweenData = new BaseTween<TweenData>(
       0.1f,
       new TweenData(food, player),
@@ -93,19 +106,26 @@ public class FoodManager : MonoBehaviour, IFoodManager
       {
         data.Food.State.Eaten = true;
       },
-      (dist, data) => { },
+      (dist, data) =>
+      {
+        Vector2 delta = new Vector2(targetVec.x - startVec.x, targetVec.y - startVec.y);
+        delta *= dist;
+
+        Vector2 res = new Vector2(startVec.x + delta.x, startVec.y + delta.y);
+        food.Object.transform.localPosition = res;
+      },
       (dist, data) =>
       {
         removeFood(data.Food);
         GameEvent.Instance.PlayerSizeIncrease(data.Snake);
       });
-    IEnumerator<object> coroutine = Tween.Create<TweenData>(tweenData);
+    IEnumerator<object> coroutine = Tween.Create(tweenData);
     StartCoroutine(coroutine);
   }
 
   void removeFood(FoodConfig food)
   {
-    gridManager?.RemoveFood(food);
+    gridManager?.I.RemoveFood(food);
     foodSpawner?.RemoveFood(food.Object);
     FoodList = Util.Filter(FoodList, (item) =>
     {

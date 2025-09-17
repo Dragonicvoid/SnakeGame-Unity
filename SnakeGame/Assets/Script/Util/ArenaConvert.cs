@@ -25,11 +25,10 @@ public static class ArenaConverter
       ARENA_DEFAULT_SIZE.HEIGHT / 2f
 
     );
-    Coordinate coord = new Coordinate
-    {
-      X = Mathf.FloorToInt((x + offset.x) / ARENA_DEFAULT_SIZE.TILE),
-      Y = Mathf.FloorToInt((y + offset.y) / ARENA_DEFAULT_SIZE.TILE)
-    };
+    Coordinate coord = new Coordinate(
+      Mathf.FloorToInt((x + offset.x) / ARENA_DEFAULT_SIZE.TILE),
+      Mathf.FloorToInt((y + offset.y) / ARENA_DEFAULT_SIZE.TILE)
+    );
     return coord;
   }
 

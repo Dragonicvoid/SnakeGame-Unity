@@ -1,13 +1,15 @@
 #nullable enable
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 
+[Serializable]
 public class ArenaManager : MonoBehaviour, IArenaManager
 {
   [SerializeField]
-  IGridManager? gridManager;
+  IRef<IGridManager>? gridManager;
   [SerializeField]
-  IObstacleManager? obsManager;
+  IRef<IObstacleManager>? obsManager;
   [SerializeField]
   AiRenderer? aiDebugger;
 
@@ -31,18 +33,22 @@ public class ArenaManager : MonoBehaviour, IArenaManager
     int mapIdx = PersistentData.Instance.SelectedMap;
     LevelMapData map = MAP.ConfigMaps[mapIdx];
     spawnPos = new List<Vector2>();
-    this.centerPos = ArenaConverter.ConvertCoorToArenaPos(
+    centerPos = ArenaConverter.ConvertCoorToArenaPos(
       Mathf.FloorToInt(map.Row / 2f),
       Mathf.FloorToInt(map.Col / 2f)
     );
     mapData = new List<List<TileMapData>>();
-    gridManager?.Setup();
-    obsManager?.ClearObstacle();
-    obsManager?.InitializeObstacleMap();
+    gridManager?.I.Setup();
+    obsManager?.I.ClearObstacle();
+    obsManager?.I.InitializeObstacleMap();
+
+    for (int i = 0; i < map.Col; i++)
+    {
+      mapData.Add(new List<TileMapData>());
+    }
 
     for (int y = map.Col - 1; y >= 0; y--)
     {
-      mapData[y] = new List<TileMapData>();
       for (int x = 0; x < map.Row; x++)
       {
         float posX =
@@ -53,7 +59,7 @@ public class ArenaManager : MonoBehaviour, IArenaManager
           posX,
           posY
         );
-        mapData[y][x] = new TileMapData(posX, posY, ARENA_OBJECT_TYPE.NONE, new List<string>(), gridIdx);
+        mapData[y].Add(new TileMapData(posX, posY, ARENA_OBJECT_TYPE.NONE, new List<string>(), gridIdx));
         int idx = y * map.Row + x;
         handleTileByType((ARENA_OBJECT_TYPE)map.Maps[idx], new Coordinate(x, y));
       }
@@ -67,7 +73,7 @@ public class ArenaManager : MonoBehaviour, IArenaManager
     switch (type)
     {
       case ARENA_OBJECT_TYPE.SPIKE:
-        obsManager?.CreateSpike(coor);
+        obsManager?.I.CreateSpike(coor);
         break;
       case ARENA_OBJECT_TYPE.NONE:
         break;
@@ -84,7 +90,7 @@ public class ArenaManager : MonoBehaviour, IArenaManager
       default:
         break;
     }
-    this.UpdateTileType(coor, type);
+    UpdateTileType(coor, type);
   }
 
   public void UpdateTileType(Coordinate coord, ARENA_OBJECT_TYPE type)
@@ -246,7 +252,7 @@ public class ArenaManager : MonoBehaviour, IArenaManager
 
         if (gridIdx == -1) continue;
 
-        gridToCheck.Add(gridManager.GridList[gridIdx]);
+        gridToCheck.Add(gridManager.I.GridList[gridIdx]);
       }
     }
 
@@ -256,7 +262,7 @@ public class ArenaManager : MonoBehaviour, IArenaManager
   {
     GridConfig? result = null;
 
-    List<GridConfig> gridList = gridManager?.GridList ?? new List<GridConfig>();
+    List<GridConfig> gridList = gridManager?.I.GridList ?? new List<GridConfig>();
     foreach (GridConfig? grid in gridList)
     {
       if (result == null || grid.Foods.Count > result.Foods.Count)

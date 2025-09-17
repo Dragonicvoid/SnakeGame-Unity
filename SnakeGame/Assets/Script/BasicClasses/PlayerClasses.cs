@@ -119,6 +119,7 @@ public class SnakeState
   // actual current direction in the game
   public Vector2 MovementDir { get; set; }
   public Vector2 InputDirection { get; set; }
+  public List<SnakeRotationData> RotationQueue { get; set; }
   public float Speed { get; set; }
   public string CoordName { get; set; }
   public bool InDirectionChange { get; set; }
@@ -144,6 +145,7 @@ public class SnakeState
     this.Speed = Speed;
     this.CoordName = CoordName;
     this.InDirectionChange = InDirectionChange;
+    RotationQueue = new List<SnakeRotationData>();
 
     if (DebugData != null)
     {
@@ -220,6 +222,18 @@ public class SnakeActionData
     {
       this.DetectedFood = DetectedFood;
     }
+  }
+}
+
+public class SnakeRotationData
+{
+  public float TimeToRun { get; set; }
+  public Vector2 Dir { get; set; }
+
+  public SnakeRotationData(float timeToRun, Vector2 dir)
+  {
+    TimeToRun = timeToRun;
+    Dir = dir;
   }
 }
 

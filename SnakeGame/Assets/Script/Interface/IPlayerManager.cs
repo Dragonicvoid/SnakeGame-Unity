@@ -21,6 +21,7 @@ public interface IPlayerManager
     string playerId,
   MovementOpts option
 );
+  public void UpdateCoordinate(float delta = 0.016f);
   public SnakeConfig? GetMainPlayer();
   public SnakeConfig? GetEnemy();
   public SnakeConfig? GetPlayerById(string id);

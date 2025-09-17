@@ -17,7 +17,7 @@ public class UiManager : MonoBehaviour
 
   private float movMaxLength = 50;
 
-  void OnLoad()
+  void Awake()
   {
     setListener();
   }
@@ -54,7 +54,7 @@ public class UiManager : MonoBehaviour
 
   private void onTouchMove(Vector2 pos)
   {
-    this.setMovUIFrontDelta(pos);
+    setMovUIFrontDelta(pos);
   }
 
   private void onTouchEnd()
@@ -90,9 +90,9 @@ public class UiManager : MonoBehaviour
     Vector2 dir = new Vector2(pos.x - currPos.x, pos.y - currPos.y);
     if (dist > movMaxLength)
     {
-      Vector2 normVec = new Vector2(0, 0);
-      dir.Normalize();
-      dir *= movMaxLength;
+      Vector2 normVec = new Vector2(dir.x, dir.y);
+      normVec.Normalize();
+      normVec *= movMaxLength;
       movUIFront.transform.localPosition = new Vector3(normVec.x, normVec.y);
       movUI.transform.position = new Vector3(
         pos.x - normVec.x,

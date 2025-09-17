@@ -11,7 +11,7 @@ public class ObstacleManager : MonoBehaviour, IObstacleManager
   GameObject obstacleParent;
 
   [SerializeField]
-  GridManager gridManager;
+  IRef<IGridManager> gridManager;
 
   private List<List<TileMapData>> obstacleMap = new List<List<TileMapData>>();
   List<ObstacleData> spikes = new List<ObstacleData>();
@@ -29,15 +29,19 @@ public class ObstacleManager : MonoBehaviour, IObstacleManager
     int cols = Mathf.FloorToInt(ARENA_DEFAULT_SIZE.HEIGHT / TILE);
     obstacleMap = new List<List<TileMapData>>();
 
+    for (int i = 0; i < cols; i++)
+    {
+      obstacleMap.Add(new List<TileMapData>());
+    }
+
     for (int y = cols - 1; y >= 0; y--)
     {
-      obstacleMap[y] = new List<TileMapData>();
       for (int x = 0; x < rows; x++)
       {
         Vector2 pos = ArenaConverter.ConvertCoorToArenaPos(x, y);
         int gridPos = ArenaConverter.GetGridIdxByPos(pos.x, pos.y);
         TileMapData tileData = new TileMapData(pos.x, pos.y, ARENA_OBJECT_TYPE.NONE, new List<string>(), gridPos);
-        obstacleMap[y][x] = tileData;
+        obstacleMap[y].Add(tileData);
       }
     }
   }
@@ -55,14 +59,10 @@ public class ObstacleManager : MonoBehaviour, IObstacleManager
   public void CreateSpike(Coordinate coor)
   {
     if (obstacleParent == null) return;
-    RectTransform spikeUiTransform = spike.GetComponent<RectTransform>();
-    if (spikeUiTransform == null) return;
-    float width = spikeUiTransform.rect.width;
-    float height = spikeUiTransform.rect.height;
     setObstacleMapObject(coor.X, coor.Y, ARENA_OBJECT_TYPE.SPIKE);
     Vector2 pos = ArenaConverter.ConvertCoorToArenaPos(coor.X, coor.Y);
     int gridPos = ArenaConverter.GetGridIdxByPos(pos.x, pos.y);
-    gridManager.AddSpike(new SpikeConfig(gridPos != -1 ? gridPos : 0, pos));
+    gridManager.I.AddSpike(new SpikeConfig(gridPos != -1 ? gridPos : 0, pos));
 
     ObstacleData spikeData = new ObstacleData
     (
@@ -135,6 +135,12 @@ public class ObstacleManager : MonoBehaviour, IObstacleManager
     {
       for (int x = -1; x <= 1; x++)
       {
+        bool isOutsideY = coord.Y + y < 0 || coord.Y + y >= Mathf.FloorToInt(ARENA_DEFAULT_SIZE.HEIGHT / ARENA_DEFAULT_SIZE.TILE);
+        bool isOutsideX = coord.X + x < 0 || coord.X + x >= Mathf.FloorToInt(ARENA_DEFAULT_SIZE.WIDTH / ARENA_DEFAULT_SIZE.TILE);
+        if (isOutsideY || isOutsideX)
+        {
+          return false;
+        }
         safe |=
           (int)obstacleMap[coord.Y + y][coord.X + x].Type &
           (int)(ARENA_OBJECT_TYPE.SPIKE | ARENA_OBJECT_TYPE.WALL);

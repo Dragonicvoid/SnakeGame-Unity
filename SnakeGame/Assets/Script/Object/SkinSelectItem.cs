@@ -7,7 +7,7 @@ using UnityEngine.UI;
 public class SkinSelectItem : MonoBehaviour, IPointerExitHandler
 {
   [SerializeField]
-  Image? preview = null;
+  RawImage? preview = null;
 
   [SerializeField]
   Text? labelName = null;
@@ -75,18 +75,16 @@ public class SkinSelectItem : MonoBehaviour, IPointerExitHandler
     }
   }
 
-  void setSpriteFrame(Texture2D tex)
+  void setSpriteFrame(Texture tex)
   {
     if (!preview || SkinData == null) return;
 
-    if (preview.sprite)
+    if (preview.texture)
     {
-      Sprite temp = preview.sprite;
-      preview.sprite = null;
+      Texture temp = preview.texture;
       Destroy(temp);
     }
-    Rect rect = new Rect(0, 0, preview.rectTransform.rect.width, preview.rectTransform.rect.height);
-    preview.sprite = Sprite.Create(tex, rect, new Vector2(0, 0), 1);
+    preview.texture = tex;
   }
 
 

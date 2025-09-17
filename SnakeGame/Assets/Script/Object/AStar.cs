@@ -3,7 +3,7 @@ using System;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class AStar : MonoBehaviour
+public class AStar
 {
   private List<List<TileMapData>> map = new List<List<TileMapData>>();
 
