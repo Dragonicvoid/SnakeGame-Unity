@@ -32,6 +32,8 @@ public class FoodManager : MonoBehaviour, IFoodManager
 
   public List<FoodConfig> FoodList { set; get; }
 
+  Coroutine? spawnRandFoodCo = null;
+
   void Awake()
   {
     FoodList = new List<FoodConfig>();
@@ -41,12 +43,15 @@ public class FoodManager : MonoBehaviour, IFoodManager
   {
 
     foodCounter = 0;
-    StartCoroutine(spawnRandomFood());
+    spawnRandFoodCo = StartCoroutine(spawnRandomFood());
   }
 
   public void StopSpawningFood()
   {
-    StopAllCoroutines();
+    if (spawnRandFoodCo != null)
+    {
+      StopCoroutine(spawnRandFoodCo);
+    }
   }
 
   IEnumerator<object> spawnRandomFood()

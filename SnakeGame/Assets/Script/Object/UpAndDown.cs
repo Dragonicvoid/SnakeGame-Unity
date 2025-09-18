@@ -21,7 +21,7 @@ public class UpAndDown : MonoBehaviour
 
   Vector3? initPos = null;
 
-  IEnumerator<object>? anim = null;
+  Coroutine? anim = null;
 
   int mult = 1;
 
@@ -79,7 +79,7 @@ public class UpAndDown : MonoBehaviour
       }
     );
     IEnumerator<object> enumerator = Tween.Create(obj);
-    StartCoroutine(enumerator);
+    anim = StartCoroutine(enumerator);
   }
 
   void OnDestroy()

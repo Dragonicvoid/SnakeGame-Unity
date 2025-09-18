@@ -1,22 +1,21 @@
 using System;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 public class PersistentData : MonoBehaviour
 {
-  public static PersistentData _instance;
-  public static PersistentData Instance
+  public static PersistentData Instance;
+
+  void Awake()
   {
-    get
-    {
-      if (!_instance)
-      {
-        var obj = new GameObject("PersistentData");
-        DontDestroyOnLoad(obj);
-        _instance = obj.AddComponent<PersistentData>();
-      }
-      return _instance;
-    }
+    DontDestroyOnLoad(gameObject);
+    Instance = this;
+  }
+
+  void Start()
+  {
+    SceneManager.LoadScene(1, LoadSceneMode.Single);
   }
 
   public int SelectedMap = 0;

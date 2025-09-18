@@ -1,19 +1,21 @@
+#nullable enable
 using System;
 using UnityEngine;
+using UnityEngine.UI;
 using UnityEngine.UIElements;
 
 public class UiManager : MonoBehaviour
 {
   [SerializeField]
-  GameObject startUI;
+  GameObject? startUI = null;
   [SerializeField]
-  GameObject endUI;
+  GameObject? endUI = null;
   [SerializeField]
-  Label endLabel;
+  Text? endLabel = null;
   [SerializeField]
-  GameObject movUI;
+  GameObject? movUI = null;
   [SerializeField]
-  GameObject movUIFront;
+  GameObject? movUIFront = null;
 
   private float movMaxLength = 50;
 

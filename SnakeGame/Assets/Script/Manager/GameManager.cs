@@ -17,6 +17,8 @@ public class GameManager : MonoBehaviour
 
   private float gameStartTime = 0;
 
+  Coroutine? gameUpdateCorutine = null;
+
   private DIFFICULTY diff = DIFFICULTY.MEDIUM;
   void Start()
   {
@@ -34,7 +36,7 @@ public class GameManager : MonoBehaviour
     setCollisionEvent();
     setGameEvent();
 
-    StartCoroutine(gameUpdate());
+    gameUpdateCorutine = StartCoroutine(gameUpdate());
   }
 
   IEnumerator<object> gameUpdate()
@@ -82,7 +84,10 @@ public class GameManager : MonoBehaviour
   {
     FoodManager?.I.StopSpawningFood();
     ArenaInput?.StopInputListener();
-    StopCoroutine(gameUpdate());
+    if (gameUpdateCorutine != null)
+    {
+      StopCoroutine(gameUpdateCorutine);
+    }
     stopCollisionEvent();
     stopGameEvent();
   }
@@ -152,7 +157,6 @@ public class GameManager : MonoBehaviour
         otherLayer == (int)LAYER.PHYSICS_ENEMY_BODIES)
     )
     {
-      gameOverData.IsWon = true;
       GameEvent.Instance.GameOver(gameOverData);
     }
 

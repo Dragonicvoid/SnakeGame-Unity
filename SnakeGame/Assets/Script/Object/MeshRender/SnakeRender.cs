@@ -59,16 +59,6 @@ public class SnakeRender : MonoBehaviour, ISnakeRenderable
     {
         SkinData = new SkinDetail();
         cmdBuffer = new CommandBuffer();
-        // SnakeBodies = new List<SnakeBody>
-        // {
-        //     new SnakeBody(new Vector2(0, 0), tileSize, new List<Vector2>(), Vector2.left, null),
-        //     new SnakeBody(new Vector2(0, 25), tileSize, new List<Vector2>(), Vector2.left, null),
-        //     new SnakeBody(new Vector2(0, 50), tileSize, new List<Vector2>(), Vector2.left, null),
-        //     new SnakeBody(new Vector2(0, 75), tileSize, new List<Vector2>(), Vector2.left, null),
-        //     new SnakeBody(new Vector2(0, 100), tileSize, new List<Vector2>(), Vector2.left, null)
-        // };
-        // Render();
-        // InvokeRepeating("randomizeBody", 0f, 1f);
     }
 
     public void SetSnakeBody(List<SnakeBody> bodies)
