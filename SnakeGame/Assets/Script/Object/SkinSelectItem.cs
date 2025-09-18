@@ -131,8 +131,8 @@ public class SkinSelectItem : MonoBehaviour
     {
       this.tex = tex;
       rendTex = new RenderTexture(
-      tex.width,
-      tex.height,
+      (int)preview.rectTransform.rect.width,
+      (int)preview.rectTransform.rect.height,
       UnityEngine.Experimental.Rendering.GraphicsFormat.R8G8B8A8_UNorm,
       UnityEngine.Experimental.Rendering.GraphicsFormat.D32_SFloat_S8_UInt
     );
@@ -160,7 +160,6 @@ public class SkinSelectItem : MonoBehaviour
       {
         mat = new Material(shader);
         mat.SetTexture("_MainTex", tex);
-        Debug.Log("Setting up texture: " + tex.name);
       }
     }
   }
@@ -181,8 +180,8 @@ public class SkinSelectItem : MonoBehaviour
 
     mesh.SetVertexBufferParams(4, attr);
     attr.Dispose();
-    float currHeight = tex.height / 2f;
-    float currWidth = tex.width / 2f;
+    float currHeight = 100 / 2f;
+    float currWidth = 100 / 2f;
 
     NativeArray<VertexType> vertex = new NativeArray<VertexType>(4, Allocator.Temp, NativeArrayOptions.UninitializedMemory);
 
@@ -217,20 +216,16 @@ public class SkinSelectItem : MonoBehaviour
 
   void drawRenderTex()
   {
-    if (cmdBuffer == null || tex == null || mat == null) return;
+    if (cmdBuffer == null || rendTex == null || mat == null) return;
 
     cmdBuffer.Clear();
     var lookMatrix = Camera.main.worldToCameraMatrix;
-    var orthoMatrix = Matrix4x4.Ortho(-tex.width / 2, tex.width / 2, -tex.height / 2, tex.height / 2, 0.3f, 1000f);
+    var orthoMatrix = Matrix4x4.Ortho(-rendTex.width / 2, rendTex.width / 2, -rendTex.height / 2, rendTex.height / 2, 0.3f, 1000f);
     cmdBuffer.SetViewProjectionMatrices(lookMatrix, orthoMatrix);
 
-    int bodyID = Shader.PropertyToID("_Temp");
-
-    cmdBuffer.GetTemporaryRT(bodyID, tex.width, tex.height, 0, FilterMode.Point, RenderTextureFormat.ARGB32);
-    cmdBuffer.SetRenderTarget(bodyID);
-    cmdBuffer.ClearRenderTarget(true, true, Color.black, 1f);
+    cmdBuffer.SetRenderTarget(rendTex);
+    cmdBuffer.ClearRenderTarget(true, true, Color.clear, 1f);
     cmdBuffer.DrawMesh(mesh, Matrix4x4.identity, mat, 0, 0);
-    cmdBuffer.Blit(bodyID, rendTex);
 
     Graphics.ExecuteCommandBuffer(cmdBuffer);
   }

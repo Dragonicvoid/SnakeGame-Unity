@@ -7,7 +7,6 @@ using UnityEngine.Rendering;
 enum SnakeRenderPass
 {
     Body = 1 << 0,
-    TextureSampling = 1 << 1,
     Shinny = 1 << 2,
 }
 
@@ -42,10 +41,23 @@ public class SnakeRender : MonoBehaviour, ISnakeRenderable
     [SerializeField]
     float tileSize = 20;
 
-    public SNAKE_TYPE SnakeType { get; set; } = SNAKE_TYPE.NORMAL;
-    public SkinDetail? SkinData { get; set; }
+    [SerializeField]
+    private SnakeTexture? _snakeTexture = null;
+    public SnakeTexture? SnakeTexture
+    {
+        get
+        {
+            return _snakeTexture;
+        }
+        set
+        {
+            _snakeTexture = value;
+        }
+    }
 
-    public List<SnakeBody> SnakeBodies { set; get; }
+    public SNAKE_TYPE SnakeType { get; set; } = SNAKE_TYPE.NORMAL;
+
+    public List<SnakeBody>? SnakeBodies { set; get; } = null;
 
     Mesh? mesh;
 
@@ -57,8 +69,9 @@ public class SnakeRender : MonoBehaviour, ISnakeRenderable
 
     void Awake()
     {
-        SkinData = new SkinDetail();
         cmdBuffer = new CommandBuffer();
+
+        setMaterial();
     }
 
     public void SetSnakeBody(List<SnakeBody> bodies)
@@ -82,8 +95,7 @@ public class SnakeRender : MonoBehaviour, ISnakeRenderable
 
     public void Render()
     {
-        setMaterial();
-        setMeshData();
+        setBodyMeshData();
         setRenderPass();
     }
 
@@ -103,7 +115,7 @@ public class SnakeRender : MonoBehaviour, ISnakeRenderable
         }
     }
 
-    void setMeshData()
+    void setBodyMeshData()
     {
         if (!mesh)
         {
@@ -264,23 +276,9 @@ public class SnakeRender : MonoBehaviour, ISnakeRenderable
 
         if ((snakePass & (int)SnakeRenderPass.Body) != 0)
         {
-            int bodyID = Shader.PropertyToID("_BodyTexture");
-
-            cmdBuffer.GetTemporaryRT(bodyID, RendTex.width, RendTex.height, 0, FilterMode.Point, RenderTextureFormat.ARGB32);
             cmdBuffer.SetRenderTarget(RendTex);
             cmdBuffer.ClearRenderTarget(true, true, Color.clear, 1f);
             cmdBuffer.DrawMesh(mesh, Matrix4x4.identity, _mat, 0, 0);
-            cmdBuffer.Blit(RendTex, bodyID);
-        }
-
-        if ((snakePass & (int)SnakeRenderPass.TextureSampling) != 0)
-        {
-            int textureSamp = Shader.PropertyToID("_Temp1");
-
-            cmdBuffer.GetTemporaryRT(textureSamp, RendTex.width, RendTex.height, 0, FilterMode.Point, RenderTextureFormat.ARGB32);
-            cmdBuffer.SetRenderTarget(RendTex);
-            cmdBuffer.DrawMesh(mesh, Matrix4x4.identity, _mat, 0, 1);
-            cmdBuffer.Blit(textureSamp, RendTex);
         }
 
         Graphics.ExecuteCommandBuffer(cmdBuffer);
@@ -291,9 +289,14 @@ public class SnakeRender : MonoBehaviour, ISnakeRenderable
 
     }
 
-    public void SetSnakeSkin()
+    public void SetSnakeSkin(SkinDetail skin, bool isPrimary)
     {
+        _snakeTexture?.SetSkin(skin, isPrimary);
 
+        if (skin != null && Mat)
+        {
+            Mat.SetTexture(isPrimary ? "_MainTex" : "_SecondTex", _snakeTexture.PrimaryTex);
+        }
     }
 
     private void updateMesh()
@@ -303,7 +306,7 @@ public class SnakeRender : MonoBehaviour, ISnakeRenderable
             mesh.Clear();
         }
 
-        setMeshData();
+        setBodyMeshData();
     }
 
     private void destroyMat()

@@ -151,7 +151,7 @@ public class PlayerManager : MonoBehaviour, IPlayerManager
       if (!enemyRender) return;
 
       enemyRender.SnakeType = skinData?.Type ?? SNAKE_TYPE.NORMAL;
-      enemyRender.SkinData = skinData?.Skin ?? null;
+      enemyRender.SetSnakeSkin(skinData?.Skin, true);
 
       if (!enemyRender.RendTex && enemyDisplay)
       {
@@ -170,7 +170,7 @@ public class PlayerManager : MonoBehaviour, IPlayerManager
       if (!playerRender) return;
 
       playerRender.SnakeType = skinData?.Type ?? SNAKE_TYPE.NORMAL;
-      playerRender.SkinData = skinData?.Skin ?? null;
+      playerRender.SetSnakeSkin(skinData?.Skin, true);
       if (!playerRender.RendTex && playerDisplay)
       {
         playerRender.RendTex = new RenderTexture(
@@ -426,7 +426,7 @@ public class PlayerManager : MonoBehaviour, IPlayerManager
               float dist = Vector2.Distance(lastPos, bodyState.MovementQueue[b]);
               totalDist += dist;
 
-              if (totalDist > SNAKE * 0.75)
+              if (totalDist > SNAKE * 0.5)
               {
                 if (bodyState.Obj) bodyState.Obj.transform.localPosition = new Vector3(
                   bodyState.MovementQueue[b].x,

@@ -124,4 +124,10 @@ public class StartSnakePrev : MonoBehaviour
   );
     StartCoroutine(Tween.Create(newTween));
   }
+
+  public void SetSnakeSkin(SkinDetail skin, bool isPrimary)
+  {
+    SkinData = skin;
+    snakeRender?.SetSnakeSkin(skin, isPrimary);
+  }
 }

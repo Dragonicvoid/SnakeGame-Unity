@@ -107,13 +107,28 @@ public class CustomSprite : MonoBehaviour
       renderer = gameObject.AddComponent<MeshRenderer>();
     }
 
-    _mat = renderer.material;
+    if (Application.isPlaying)
+    {
+      _mat = renderer.material;
+    }
+    else
+    {
+      _mat = renderer.sharedMaterial;
+    }
 
     if (!_mat)
     {
       Shader shader = Shader.Find("Transparent/CustomSprite");
       _mat = new Material(shader);
-      renderer.material = _mat;
+
+      if (Application.isPlaying)
+      {
+        renderer.material = _mat;
+      }
+      else
+      {
+        renderer.sharedMaterial = _mat;
+      }
     }
     _mat.SetTextureOffset("_MainTex", offset);
     _mat.SetTextureScale("_MainTex", tiling);

@@ -54,9 +54,9 @@ public class SkinSelect : MonoBehaviour
 
     if (JsonTex != null && JsonTex.text != "")
     {
-      SkinList text = JsonUtility.FromJson<SkinList>(JsonTex.text);
+      SkinList = JsonUtility.FromJson<SkinList>(JsonTex.text);
 
-      foreach (SkinDetail skin in text.skins)
+      foreach (SkinDetail skin in SkinList.skins)
       {
         if (customScroll == null) break;
 
@@ -110,7 +110,7 @@ public class SkinSelect : MonoBehaviour
 
     if (selectedSkin?.SkinData == null || !snakePrev) return;
 
-    snakePrev.SkinData = selectedSkin.SkinData;
+    snakePrev.SetSnakeSkin(selectedSkin.SkinData, true);
   }
 
   InstantiateData? createPref()
@@ -146,7 +146,7 @@ public class SkinSelect : MonoBehaviour
 
     if (SkinList?.skins != null)
     {
-      List<SkinDetail> skinArray = Util.DeepCopy(SkinList?.skins) ?? new List<SkinDetail>();
+      List<SkinDetail> skinArray = new List<SkinDetail>(SkinList?.skins);
       List<SkinDetail> skins = Util.Filter(new List<SkinDetail>(skinArray), (skin) =>
       {
         return snakePrev?.SkinData?.id != null && skin.id != snakePrev?.SkinData?.id;
