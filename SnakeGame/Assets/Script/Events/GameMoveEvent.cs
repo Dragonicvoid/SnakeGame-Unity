@@ -13,24 +13,28 @@ public class GameplayMoveEvent : MonoBehaviour
     public event Action<Vector2> onGameUiStartTouch;
     public void GameUiStartTouch(Vector2 touchPos)
     {
-        onGameUiStartTouch(touchPos);
+        if (onGameUiStartTouch != null)
+            onGameUiStartTouch(touchPos);
     }
 
     public event Action<Vector2> onGameUiMoveTouch;
     public void GameUiMoveTouch(Vector2 touchPos)
     {
-        onGameUiMoveTouch(touchPos);
+        if (onGameUiMoveTouch != null)
+            onGameUiMoveTouch(touchPos);
     }
 
     public event Action onGameUiEndTouch;
     public void GameUiEndTouch()
     {
-        onGameUiEndTouch();
+        if (onGameUiEndTouch != null)
+            onGameUiEndTouch();
     }
 
     public event Action<Vector2> onSnakeMoveCalculated;
     public void SnakeMoveCalculated(Vector2 dir)
     {
-        onSnakeMoveCalculated(dir);
+        if (onSnakeMoveCalculated != null)
+            onSnakeMoveCalculated(dir);
     }
 }

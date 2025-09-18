@@ -1,9 +1,7 @@
 #nullable enable
 using System;
 using System.Collections.Generic;
-using Unity.VisualScripting;
 using UnityEngine;
-using UnityEngine.UIElements;
 
 public class SkinSelect : MonoBehaviour
 {
@@ -19,13 +17,15 @@ public class SkinSelect : MonoBehaviour
   [SerializeField]
   StartSnakePrev? snakePrev = null;
 
+  [SerializeField]
+  CustomScollRect? customScroll = null;
+
+  [SerializeField]
+  TextAsset? JsonTex = null;
+
   public SkinList? SkinList = null;
 
   public List<SkinSelectItem> ItemList;
-
-  GameObject? scrollViewContent = null;
-
-  string jsonFilePath = "JSON/texList";
 
   void Start()
   {
@@ -35,6 +35,7 @@ public class SkinSelect : MonoBehaviour
     {
       UiEvent.Instance.onPrevSkinDoneRender += onPrevSkinDoneRender;
     }
+    InitSkinSelect();
   }
 
   void onPrevSkinDoneRender()
@@ -49,36 +50,29 @@ public class SkinSelect : MonoBehaviour
 
   IEnumerator<object> getSkinJsonAndSetup()
   {
-    ResourceRequest request = Resources.LoadAsync<Texture2D>(jsonFilePath);
+    yield return null;
 
-    while (!request.isDone)
+    if (JsonTex != null && JsonTex.text != "")
     {
-      yield return null;
-    }
-    TextAsset? loadedJson = request.asset as TextAsset;
+      SkinList text = JsonUtility.FromJson<SkinList>(JsonTex.text);
 
-    if (loadedJson != null)
-    {
-      SkinList = JsonUtility.FromJson<SkinList>(loadedJson.ToString());
-
-      foreach (SkinDetail skin in SkinList.skins)
+      foreach (SkinDetail skin in text.skins)
       {
-        if (scrollViewContent == null) break;
+        if (customScroll == null) break;
 
         InstantiateData? item = createPref();
 
         if (item == null) break;
 
         item.Value.Item.SetSkinData(skin);
-        item.Value.GameObj.transform.SetParent(scrollViewContent.transform);
+        customScroll?.AddItem(item.Value.GameObj.GetComponent<RectTransform>());
       }
-
       setListener();
       selectDefault();
     }
     else
     {
-      Debug.LogError("Failed to load asset at path: " + jsonFilePath);
+      Debug.LogError("Failed to load Texture Json:");
     }
   }
 
@@ -152,7 +146,7 @@ public class SkinSelect : MonoBehaviour
 
     if (SkinList?.skins != null)
     {
-      SkinDetail[] skinArray = Util.DeepCopy(SkinList?.skins) ?? new SkinDetail[0];
+      List<SkinDetail> skinArray = Util.DeepCopy(SkinList?.skins) ?? new List<SkinDetail>();
       List<SkinDetail> skins = Util.Filter(new List<SkinDetail>(skinArray), (skin) =>
       {
         return snakePrev?.SkinData?.id != null && skin.id != snakePrev?.SkinData?.id;

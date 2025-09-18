@@ -37,9 +37,9 @@ public class UiManager : MonoBehaviour
 
     endUI.SetActive(val);
 
-    if (endLabel == null) return;
+    if (endLabel == null || !val) return;
 
-    endLabel.text = !data.IsWon ? "You Lose" : "You Won";
+    endLabel.text = data.IsWon == false ? "You Lose" : "You Won";
   }
 
   private void setListener()

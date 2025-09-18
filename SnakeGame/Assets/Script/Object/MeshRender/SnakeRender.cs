@@ -25,7 +25,7 @@ public class SnakeRender : MonoBehaviour, ISnakeRenderable
     }
 
     [SerializeField]
-    RenderTexture rendTex;
+    public RenderTexture RendTex;
     [SerializeField]
     Material? _mat;
     public Material? Mat
@@ -99,7 +99,7 @@ public class SnakeRender : MonoBehaviour, ISnakeRenderable
         {
             Shader shader = Shader.Find("Transparent/SnakeRender");
             _mat = new Material(shader);
-            meshRend.sharedMaterial = _mat;
+            meshRend.material = _mat;
         }
     }
 
@@ -251,13 +251,6 @@ public class SnakeRender : MonoBehaviour, ISnakeRenderable
             topology = MeshTopology.Triangles,
             baseVertex = 0,
         });
-
-        MeshFilter filter = GetComponent<MeshFilter>();
-        if (!filter)
-        {
-            filter = gameObject.AddComponent<MeshFilter>();
-        }
-        filter.mesh = mesh;
     }
 
     void setRenderPass()
@@ -266,28 +259,28 @@ public class SnakeRender : MonoBehaviour, ISnakeRenderable
 
         cmdBuffer.Clear();
         var lookMatrix = Camera.main.worldToCameraMatrix;
-        var orthoMatrix = Matrix4x4.Ortho(-350, 350, -350, 350, 0.3f, 1000f);
+        var orthoMatrix = Matrix4x4.Ortho(-RendTex.width / 2, RendTex.width / 2, -RendTex.height / 2, RendTex.height / 2, 0.3f, 1000f);
         cmdBuffer.SetViewProjectionMatrices(lookMatrix, orthoMatrix);
 
         if ((snakePass & (int)SnakeRenderPass.Body) != 0)
         {
             int bodyID = Shader.PropertyToID("_BodyTexture");
 
-            cmdBuffer.GetTemporaryRT(bodyID, (int)700f, (int)700f, 0, FilterMode.Point, RenderTextureFormat.ARGB32);
-            cmdBuffer.SetRenderTarget(rendTex);
+            cmdBuffer.GetTemporaryRT(bodyID, RendTex.width, RendTex.height, 0, FilterMode.Point, RenderTextureFormat.ARGB32);
+            cmdBuffer.SetRenderTarget(RendTex);
             cmdBuffer.ClearRenderTarget(true, true, Color.clear, 1f);
             cmdBuffer.DrawMesh(mesh, Matrix4x4.identity, _mat, 0, 0);
-            cmdBuffer.Blit(rendTex, bodyID);
+            cmdBuffer.Blit(RendTex, bodyID);
         }
 
         if ((snakePass & (int)SnakeRenderPass.TextureSampling) != 0)
         {
             int textureSamp = Shader.PropertyToID("_Temp1");
 
-            cmdBuffer.GetTemporaryRT(textureSamp, 700, 700, 0, FilterMode.Point, RenderTextureFormat.ARGB32);
-            cmdBuffer.SetRenderTarget(rendTex);
-            cmdBuffer.DrawMesh(mesh, transform.localToWorldMatrix, _mat, 0, 1);
-            cmdBuffer.Blit(textureSamp, rendTex);
+            cmdBuffer.GetTemporaryRT(textureSamp, RendTex.width, RendTex.height, 0, FilterMode.Point, RenderTextureFormat.ARGB32);
+            cmdBuffer.SetRenderTarget(RendTex);
+            cmdBuffer.DrawMesh(mesh, Matrix4x4.identity, _mat, 0, 1);
+            cmdBuffer.Blit(textureSamp, RendTex);
         }
 
         Graphics.ExecuteCommandBuffer(cmdBuffer);

@@ -13,12 +13,14 @@ public class UiEvent : MonoBehaviour
     public event Action<int> onSkinSelected;
     public void SkinSelected(int skinId)
     {
-        onSkinSelected(skinId);
+        if (onSkinSelected != null)
+            onSkinSelected(skinId);
     }
 
     public event Action onPrevSkinDoneRender;
     public void PrevSkinDoneRender()
     {
-        onPrevSkinDoneRender();
+        if (onPrevSkinDoneRender != null)
+            onPrevSkinDoneRender();
     }
 }

@@ -13,12 +13,14 @@ public class GameEvent : MonoBehaviour
     public event Action<SnakeConfig> onPlayerSizeIncrease;
     public void PlayerSizeIncrease(SnakeConfig snake)
     {
-        onPlayerSizeIncrease(snake);
+        if (onPlayerSizeIncrease != null)
+            onPlayerSizeIncrease(snake);
     }
 
     public event Action<GameOverData> onGameOver;
     public void GameOver(GameOverData data)
     {
-        onGameOver(data);
+        if (onGameOver != null)
+            onGameOver(data);
     }
 }

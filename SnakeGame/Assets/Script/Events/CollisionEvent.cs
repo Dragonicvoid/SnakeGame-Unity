@@ -13,12 +13,14 @@ public class CollisionEvent : MonoBehaviour
     public event Action<HeadCollideData> onHeadCollide;
     public void HeadCollide(HeadCollideData data)
     {
-        onHeadCollide(data);
+        if (onHeadCollide != null)
+            onHeadCollide(data);
     }
 
     public event Action<FoodCollideData> onFoodCollide;
     public void FoodCollide(FoodCollideData data)
     {
-        onFoodCollide(data);
+        if (onFoodCollide != null)
+            onFoodCollide(data);
     }
 }

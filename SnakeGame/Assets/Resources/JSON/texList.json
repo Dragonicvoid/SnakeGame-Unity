@@ -3,21 +3,20 @@
     {
       "id": 1001,
       "name": "Snake Skin",
-      "shader_name": "",
-      "texture_name": "image/textureSpf/snake_skin"
+      "shader_name": "Transparent/CustomSprite",
+      "texture_name": "Image/snake_skin"
     },
     {
       "id": 1002,
       "name": "Brick Skin",
-      "shader_name": "",
-      "texture_name": "image/textureSpf/test"
+      "shader_name": "Transparent/CustomSprite",
+      "texture_name": "Image/test"
     },
     {
       "id": 2001,
       "name": "Snake Skin Move",
-      "shader_name": "effect/textureFx/infiniteScroll",
-      "texture_name": "image/textureSpf/snake_skin",
-      "effect_code": "vec4 getTexture(vec2 uv) {\n\tfloat time = cc_time.x;\n\tvec2 realUv = vec2(uv.x, fract(uv.y + time));\n\treturn texture(mainTexture, realUv);\n}"
+      "shader_name": "Transparent/CustomSprite",
+      "texture_name": "Image/test"
     }
   ]
 }

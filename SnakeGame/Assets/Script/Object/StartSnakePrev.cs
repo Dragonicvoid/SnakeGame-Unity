@@ -1,6 +1,8 @@
 #nullable enable
 using System.Collections.Generic;
+using Unity.VisualScripting;
 using UnityEngine;
+using UnityEngine.UI;
 
 
 public class StartSnakePrev : MonoBehaviour
@@ -20,6 +22,9 @@ public class StartSnakePrev : MonoBehaviour
   [SerializeField]
   SnakeRender? snakeRender = null;
 
+  [SerializeField]
+  RenderTexture? renTex = null;
+
   float snakeSize = ARENA_DEFAULT_SIZE.SNAKE;
 
   List<IEnumerator<float>> tween;
@@ -36,19 +41,46 @@ public class StartSnakePrev : MonoBehaviour
 
   void Awake()
   {
-    snakeShape = new List<SnakeBody>();
-    for (int i = 6; i >= -6; i--)
+    RectTransform rect = GetComponent<RectTransform>();
+    renTex = new RenderTexture(
+      (int)rect.rect.width,
+      (int)rect.rect.height,
+      UnityEngine.Experimental.Rendering.GraphicsFormat.R8G8B8A8_UNorm,
+      UnityEngine.Experimental.Rendering.GraphicsFormat.D32_SFloat_S8_UInt
+    );
+    if (snakeRender != null && renTex != null)
     {
-      snakeShape.Add(new SnakeBody(
-              new Vector2(0, snakeSize * i),
-        snakeSize,
-        new List<Vector2>(),
-        new Vector2(),
-        null
-              ));
+      snakeShape = new List<SnakeBody>();
+      for (int i = 6; i >= -6; i--)
+      {
+        snakeShape.Add(new SnakeBody(
+          new Vector2(0, snakeSize * i),
+          snakeSize,
+          new List<Vector2>(),
+          new Vector2(),
+          null
+        ));
+      }
+      snakeRender.SetSnakeBody(snakeShape);
+      snakeRender.RendTex = renTex;
+      RawImage rawImage = GetComponent<RawImage>();
+      rawImage.texture = renTex;
     }
-    snakeRender?.SetSnakeBody(snakeShape);
+  }
+
+  void OnEnable()
+  {
     StartCoroutine(startSnakeDance());
+    StartCoroutine(renderSnake());
+  }
+
+  IEnumerator<object> renderSnake()
+  {
+    while (true)
+    {
+      yield return new WaitForSeconds(0.016f);
+      snakeRender?.Render();
+    }
   }
 
   IEnumerator<object> startSnakeDance()
@@ -89,7 +121,7 @@ public class StartSnakePrev : MonoBehaviour
       data.Mult *= -1;
       animDance(obj);
     }
-);
+  );
     StartCoroutine(Tween.Create(newTween));
   }
 }

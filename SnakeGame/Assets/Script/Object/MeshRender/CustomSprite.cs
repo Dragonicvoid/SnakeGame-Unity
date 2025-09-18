@@ -17,12 +17,13 @@ public class CustomSprite : MonoBehaviour
 
   [SerializeField]
   Texture? _texture;
-  Texture? texture
+  public Texture? Texture
   {
     get { return _texture; }
     set
     {
       _texture = value;
+      Render();
     }
   }
 
@@ -39,7 +40,7 @@ public class CustomSprite : MonoBehaviour
   }
 
   [SerializeField]
-  float _height;
+  float _height = 100f;
   public float Height
   {
     get { return _height; }
@@ -91,6 +92,13 @@ public class CustomSprite : MonoBehaviour
     updateMesh();
   }
 
+  public void Render()
+  {
+    setMaterial();
+    setTexture();
+    updateMesh();
+  }
+
   void setMaterial()
   {
     renderer = GetComponent<MeshRenderer>();
@@ -99,13 +107,13 @@ public class CustomSprite : MonoBehaviour
       renderer = gameObject.AddComponent<MeshRenderer>();
     }
 
-    _mat = renderer.sharedMaterial;
+    _mat = renderer.material;
 
     if (!_mat)
     {
       Shader shader = Shader.Find("Transparent/CustomSprite");
       _mat = new Material(shader);
-      renderer.sharedMaterial = _mat;
+      renderer.material = _mat;
     }
     _mat.SetTextureOffset("_MainTex", offset);
     _mat.SetTextureScale("_MainTex", tiling);

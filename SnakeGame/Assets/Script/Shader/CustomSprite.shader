@@ -56,7 +56,7 @@ Shader "Transparent/CustomSprite"
                 float4 col = tex2D(_MainTex, f.xy);
                 col *= i.color;
 
-                fixed4 colFix = col;
+                fixed4 colFix = float4(col.xyz, col.a * 1.0);
                 return colFix;
             }
             ENDCG

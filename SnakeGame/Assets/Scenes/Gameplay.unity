@@ -391,7 +391,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 234956718}
+  - {fileID: 1498895827}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -425,46 +425,13 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 06855300b1869f04cb84cbd04e651965, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _texture: {fileID: 2800000, guid: 6879673d256fdc740b270c050894994a, type: 3}
+  _texture: {fileID: 0}
   _width: 700
   _height: 700
   _color: {r: 1, g: 1, b: 1, a: 1}
   repeat: 8
   tiling: {x: 1, y: 1}
   offset: {x: 0, y: 0}
---- !u!21 &234956718
-Material:
-  serializedVersion: 8
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_Name: Transparent/CustomSprite
-  m_Shader: {fileID: 4800000, guid: 916c85e3053ef354b86530de1fa0970f, type: 3}
-  m_Parent: {fileID: 0}
-  m_ModifiedSerializedProperties: 0
-  m_ValidKeywords: []
-  m_InvalidKeywords: []
-  m_LightmapFlags: 4
-  m_EnableInstancingVariants: 0
-  m_DoubleSidedGI: 0
-  m_CustomRenderQueue: -1
-  stringTagMap: {}
-  disabledShaderPasses: []
-  m_LockedProperties: 
-  m_SavedProperties:
-    serializedVersion: 3
-    m_TexEnvs:
-    - _MainTex:
-        m_Texture: {fileID: 2800000, guid: 6879673d256fdc740b270c050894994a, type: 3}
-        m_Scale: {x: 1, y: 1}
-        m_Offset: {x: 0, y: 0}
-    m_Ints: []
-    m_Floats:
-    - _Repeat: 8
-    m_Colors: []
-  m_BuildTextureStacks: []
-  m_AllowLocking: 1
 --- !u!1 &275928464
 GameObject:
   m_ObjectHideFlags: 0
@@ -514,39 +481,6 @@ MonoBehaviour:
   openListColor: {r: 1, g: 1, b: 1, a: 1}
   closeListColor: {r: 0, g: 0, b: 0, a: 1}
   wallColor: {r: 0, g: 1, b: 0, a: 1}
---- !u!21 &394151564
-Material:
-  serializedVersion: 8
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_Name: Transparent/CustomSprite
-  m_Shader: {fileID: 4800000, guid: 916c85e3053ef354b86530de1fa0970f, type: 3}
-  m_Parent: {fileID: 0}
-  m_ModifiedSerializedProperties: 0
-  m_ValidKeywords: []
-  m_InvalidKeywords: []
-  m_LightmapFlags: 4
-  m_EnableInstancingVariants: 0
-  m_DoubleSidedGI: 0
-  m_CustomRenderQueue: -1
-  stringTagMap: {}
-  disabledShaderPasses: []
-  m_LockedProperties: 
-  m_SavedProperties:
-    serializedVersion: 3
-    m_TexEnvs:
-    - _MainTex:
-        m_Texture: {fileID: 8400000, guid: c9f4b6fee9db78a46bf77f7bbb986f7d, type: 2}
-        m_Scale: {x: 1, y: 1}
-        m_Offset: {x: 0, y: 0}
-    m_Ints: []
-    m_Floats:
-    - _Repeat: 1
-    m_Colors: []
-  m_BuildTextureStacks: []
-  m_AllowLocking: 1
 --- !u!1 &406524936
 GameObject:
   m_ObjectHideFlags: 0
@@ -602,6 +536,45 @@ MonoBehaviour:
   UiManager: {fileID: 1461183450}
   ArenaInput: {fileID: 669471643}
   Planner: {fileID: 667817212}
+--- !u!21 &424829541
+Material:
+  serializedVersion: 8
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_Name: Transparent/CustomSprite (Instance)
+  m_Shader: {fileID: 4800000, guid: 916c85e3053ef354b86530de1fa0970f, type: 3}
+  m_Parent: {fileID: 0}
+  m_ModifiedSerializedProperties: 0
+  m_ValidKeywords: []
+  m_InvalidKeywords: []
+  m_LightmapFlags: 4
+  m_EnableInstancingVariants: 0
+  m_DoubleSidedGI: 0
+  m_CustomRenderQueue: -1
+  stringTagMap: {}
+  disabledShaderPasses: []
+  m_LockedProperties: 
+  m_SavedProperties:
+    serializedVersion: 3
+    m_TexEnvs:
+    - _MainTex:
+        m_Texture: {fileID: 2800000, guid: aba182c0ad1788848b8fcf88cb032950, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    m_Ints: []
+    m_Floats:
+    - _ColorMask: 15
+    - _Repeat: 1
+    - _Stencil: 0
+    - _StencilComp: 8
+    - _StencilOp: 0
+    - _StencilReadMask: 255
+    - _StencilWriteMask: 255
+    m_Colors: []
+  m_BuildTextureStacks: []
+  m_AllowLocking: 1
 --- !u!1 &437358768
 GameObject:
   m_ObjectHideFlags: 0
@@ -940,7 +913,7 @@ RectTransform:
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 1, y: 1}
   m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 0, y: 337.27}
+  m_SizeDelta: {x: 0, y: 75}
   m_Pivot: {x: 0, y: 1}
 --- !u!1 &570991245
 GameObject:
@@ -1251,9 +1224,9 @@ GameObject:
   - component: {fileID: 632136236}
   - component: {fileID: 632136239}
   - component: {fileID: 632136238}
-  - component: {fileID: 632136237}
+  - component: {fileID: 632136240}
   m_Layer: 5
-  m_Name: SkinSelect
+  m_Name: CustomScrollView
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -1266,34 +1239,19 @@ RectTransform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 632136235}
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 1612696662}
-  m_Father: {fileID: 816126224}
+  m_Father: {fileID: 1991224649}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 172.5062, y: -35.475}
+  m_AnchoredPosition: {x: 0, y: -35.475}
   m_SizeDelta: {x: 255.0125, y: 337.27}
   m_Pivot: {x: 0.5, y: 0.5}
---- !u!114 &632136237
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 632136235}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 46b06e2a8037bbb439d1036ca8632ad4, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  skinPref: {fileID: 2481476783623199698, guid: bd5d88220be32e646b2e87999e0b6cfd, type: 3}
-  snakePrev: {fileID: 840862366}
-  ItemList: []
 --- !u!114 &632136238
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1307,9 +1265,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_Content: {fileID: 562089222}
-  m_Horizontal: 1
+  m_Horizontal: 0
   m_Vertical: 1
-  m_MovementType: 1
+  m_MovementType: 2
   m_Elasticity: 0.1
   m_Inertia: 1
   m_DecelerationRate: 0.135
@@ -1332,6 +1290,20 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 632136235}
   m_CullTransparentMesh: 1
+--- !u!114 &632136240
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 632136235}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 937958ac2a2495a48897de87cd39376b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  yMargin: 8
+  padding: 12
 --- !u!1 &655784120
 GameObject:
   m_ObjectHideFlags: 0
@@ -1798,7 +1770,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7c3b89d9731aa1a448540755972a0748, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  rendTex: {fileID: 8400000, guid: 260f9e1a5330ce241bc01b3dd4555f48, type: 2}
+  RendTex: {fileID: 0}
   _mat: {fileID: 0}
   tileSize: 20
 --- !u!1 &739035382
@@ -2047,39 +2019,6 @@ Mesh:
     offset: 0
     size: 0
     path: 
---- !u!21 &807840173
-Material:
-  serializedVersion: 8
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_Name: Transparent/CustomSprite
-  m_Shader: {fileID: 4800000, guid: 916c85e3053ef354b86530de1fa0970f, type: 3}
-  m_Parent: {fileID: 0}
-  m_ModifiedSerializedProperties: 0
-  m_ValidKeywords: []
-  m_InvalidKeywords: []
-  m_LightmapFlags: 4
-  m_EnableInstancingVariants: 0
-  m_DoubleSidedGI: 0
-  m_CustomRenderQueue: -1
-  stringTagMap: {}
-  disabledShaderPasses: []
-  m_LockedProperties: 
-  m_SavedProperties:
-    serializedVersion: 3
-    m_TexEnvs:
-    - _MainTex:
-        m_Texture: {fileID: 8400000, guid: 260f9e1a5330ce241bc01b3dd4555f48, type: 2}
-        m_Scale: {x: 1, y: 1}
-        m_Offset: {x: 0, y: 0}
-    m_Ints: []
-    m_Floats:
-    - _Repeat: 1
-    m_Colors: []
-  m_BuildTextureStacks: []
-  m_AllowLocking: 1
 --- !u!1 &816126223
 GameObject:
   m_ObjectHideFlags: 0
@@ -2113,7 +2052,7 @@ RectTransform:
   - {fileID: 840862364}
   - {fileID: 2062205720}
   - {fileID: 1137099568}
-  - {fileID: 632136236}
+  - {fileID: 1991224649}
   m_Father: {fileID: 667867102}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
@@ -2206,13 +2145,14 @@ RectTransform:
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
-  m_Children: []
+  m_Children:
+  - {fileID: 1656117876}
   m_Father: {fileID: 816126224}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: -194, y: 5.0005}
-  m_SizeDelta: {x: 199.7977, y: 256.32}
+  m_AnchoredPosition: {x: -194, y: 0}
+  m_SizeDelta: {x: 200, y: 260}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &840862365
 MonoBehaviour:
@@ -2253,8 +2193,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b3116297d3aa8a74e85c5ccd8d31b30c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  snakeRender: {fileID: 0}
+  snakeRender: {fileID: 1656117875}
+  renTex: {fileID: 0}
   SkinData:
+    id: 0
     name: 
     shader_name: 
     texture_name: 
@@ -2332,7 +2274,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 807840173}
+  - {fileID: 1044855698}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -2366,7 +2308,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 06855300b1869f04cb84cbd04e651965, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _texture: {fileID: 8400000, guid: 260f9e1a5330ce241bc01b3dd4555f48, type: 2}
+  _texture: {fileID: 0}
   _width: 700
   _height: 700
   _color: {r: 1, g: 1, b: 1, a: 1}
@@ -2438,7 +2380,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 1951106045}
+  - {fileID: 1402750422}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -2472,10 +2414,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 06855300b1869f04cb84cbd04e651965, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _texture: {fileID: 2800000, guid: 0822012f3fd433b4f8aa14fda66f6522, type: 3}
-  _width: 50
-  _height: 50
-  _color: {r: 1, g: 1, b: 1, a: 0.5019608}
+  _texture: {fileID: 0}
+  _width: 100
+  _height: 0
+  _color: {r: 1, g: 1, b: 1, a: 1}
   repeat: 1
   tiling: {x: 1, y: 1}
   offset: {x: 0, y: 0}
@@ -2549,6 +2491,45 @@ Transform:
   - {fileID: 480948079}
   m_Father: {fileID: 584878304}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!21 &1044855698
+Material:
+  serializedVersion: 8
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_Name: Transparent/CustomSprite (Instance)
+  m_Shader: {fileID: 4800000, guid: 916c85e3053ef354b86530de1fa0970f, type: 3}
+  m_Parent: {fileID: 0}
+  m_ModifiedSerializedProperties: 0
+  m_ValidKeywords: []
+  m_InvalidKeywords: []
+  m_LightmapFlags: 4
+  m_EnableInstancingVariants: 0
+  m_DoubleSidedGI: 0
+  m_CustomRenderQueue: -1
+  stringTagMap: {}
+  disabledShaderPasses: []
+  m_LockedProperties: 
+  m_SavedProperties:
+    serializedVersion: 3
+    m_TexEnvs:
+    - _MainTex:
+        m_Texture: {fileID: 8400000, guid: 260f9e1a5330ce241bc01b3dd4555f48, type: 2}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    m_Ints: []
+    m_Floats:
+    - _ColorMask: 15
+    - _Repeat: 1
+    - _Stencil: 0
+    - _StencilComp: 8
+    - _StencilOp: 0
+    - _StencilReadMask: 255
+    - _StencilWriteMask: 255
+    m_Colors: []
+  m_BuildTextureStacks: []
+  m_AllowLocking: 1
 --- !u!43 &1108520144
 Mesh:
   m_ObjectHideFlags: 0
@@ -2793,39 +2774,6 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1137099567}
   m_CullTransparentMesh: 1
---- !u!21 &1204306012
-Material:
-  serializedVersion: 8
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_Name: Transparent/CustomSprite
-  m_Shader: {fileID: 4800000, guid: 916c85e3053ef354b86530de1fa0970f, type: 3}
-  m_Parent: {fileID: 0}
-  m_ModifiedSerializedProperties: 0
-  m_ValidKeywords: []
-  m_InvalidKeywords: []
-  m_LightmapFlags: 4
-  m_EnableInstancingVariants: 0
-  m_DoubleSidedGI: 0
-  m_CustomRenderQueue: -1
-  stringTagMap: {}
-  disabledShaderPasses: []
-  m_LockedProperties: 
-  m_SavedProperties:
-    serializedVersion: 3
-    m_TexEnvs:
-    - _MainTex:
-        m_Texture: {fileID: 2800000, guid: aba182c0ad1788848b8fcf88cb032950, type: 3}
-        m_Scale: {x: 1, y: 1}
-        m_Offset: {x: 0, y: 0}
-    m_Ints: []
-    m_Floats:
-    - _Repeat: 1
-    m_Colors: []
-  m_BuildTextureStacks: []
-  m_AllowLocking: 1
 --- !u!1 &1244131104
 GameObject:
   m_ObjectHideFlags: 0
@@ -3314,6 +3262,45 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1357864716}
   m_CullTransparentMesh: 1
+--- !u!21 &1402750422
+Material:
+  serializedVersion: 8
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_Name: Transparent/CustomSprite (Instance)
+  m_Shader: {fileID: 4800000, guid: 916c85e3053ef354b86530de1fa0970f, type: 3}
+  m_Parent: {fileID: 0}
+  m_ModifiedSerializedProperties: 0
+  m_ValidKeywords: []
+  m_InvalidKeywords: []
+  m_LightmapFlags: 4
+  m_EnableInstancingVariants: 0
+  m_DoubleSidedGI: 0
+  m_CustomRenderQueue: -1
+  stringTagMap: {}
+  disabledShaderPasses: []
+  m_LockedProperties: 
+  m_SavedProperties:
+    serializedVersion: 3
+    m_TexEnvs:
+    - _MainTex:
+        m_Texture: {fileID: 2800000, guid: 0822012f3fd433b4f8aa14fda66f6522, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    m_Ints: []
+    m_Floats:
+    - _ColorMask: 15
+    - _Repeat: 1
+    - _Stencil: 0
+    - _StencilComp: 8
+    - _StencilOp: 0
+    - _StencilReadMask: 255
+    - _StencilWriteMask: 255
+    m_Colors: []
+  m_BuildTextureStacks: []
+  m_AllowLocking: 1
 --- !u!1 &1446997422
 GameObject:
   m_ObjectHideFlags: 0
@@ -3379,7 +3366,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 1204306012}
+  - {fileID: 424829541}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -3413,9 +3400,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 06855300b1869f04cb84cbd04e651965, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _texture: {fileID: 2800000, guid: aba182c0ad1788848b8fcf88cb032950, type: 3}
-  _width: 40
-  _height: 40
+  _texture: {fileID: 0}
+  _width: 100
+  _height: 0
   _color: {r: 1, g: 1, b: 1, a: 1}
   repeat: 1
   tiling: {x: 1, y: 1}
@@ -3469,6 +3456,45 @@ MonoBehaviour:
   endLabel: {fileID: 1357864718}
   movUI: {fileID: 480948078}
   movUIFront: {fileID: 1446997422}
+--- !u!21 &1498895827
+Material:
+  serializedVersion: 8
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_Name: Transparent/CustomSprite (Instance)
+  m_Shader: {fileID: 4800000, guid: 916c85e3053ef354b86530de1fa0970f, type: 3}
+  m_Parent: {fileID: 0}
+  m_ModifiedSerializedProperties: 0
+  m_ValidKeywords: []
+  m_InvalidKeywords: []
+  m_LightmapFlags: 4
+  m_EnableInstancingVariants: 0
+  m_DoubleSidedGI: 0
+  m_CustomRenderQueue: -1
+  stringTagMap: {}
+  disabledShaderPasses: []
+  m_LockedProperties: 
+  m_SavedProperties:
+    serializedVersion: 3
+    m_TexEnvs:
+    - _MainTex:
+        m_Texture: {fileID: 2800000, guid: 6879673d256fdc740b270c050894994a, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    m_Ints: []
+    m_Floats:
+    - _ColorMask: 15
+    - _Repeat: 8
+    - _Stencil: 0
+    - _StencilComp: 8
+    - _StencilOp: 0
+    - _StencilReadMask: 255
+    - _StencilWriteMask: 255
+    m_Colors: []
+  m_BuildTextureStacks: []
+  m_AllowLocking: 1
 --- !u!1 &1545584774
 GameObject:
   m_ObjectHideFlags: 0
@@ -3650,7 +3676,7 @@ MonoBehaviour:
   enemyRender: {fileID: 736104851}
   playerDisplay: {fileID: 1996626752}
   enemyDisplay: {fileID: 898140846}
-  skinSelect: {fileID: 632136237}
+  skinSelect: {fileID: 0}
   collParent: {fileID: 1642782209}
   sBodyPref: {fileID: 5947583522335873371, guid: eb7eec4ebb9c873438efeede786bc5fe, type: 3}
   sFoodGrabPref: {fileID: 2496594985580051409, guid: d1edb0889ebcf1d40ae170953c1a302f, type: 3}
@@ -3792,6 +3818,45 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1612696661}
   m_CullTransparentMesh: 1
+--- !u!21 &1628489041
+Material:
+  serializedVersion: 8
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_Name: Transparent/CustomSprite (Instance)
+  m_Shader: {fileID: 4800000, guid: 916c85e3053ef354b86530de1fa0970f, type: 3}
+  m_Parent: {fileID: 0}
+  m_ModifiedSerializedProperties: 0
+  m_ValidKeywords: []
+  m_InvalidKeywords: []
+  m_LightmapFlags: 4
+  m_EnableInstancingVariants: 0
+  m_DoubleSidedGI: 0
+  m_CustomRenderQueue: -1
+  stringTagMap: {}
+  disabledShaderPasses: []
+  m_LockedProperties: 
+  m_SavedProperties:
+    serializedVersion: 3
+    m_TexEnvs:
+    - _MainTex:
+        m_Texture: {fileID: 8400000, guid: c9f4b6fee9db78a46bf77f7bbb986f7d, type: 2}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    m_Ints: []
+    m_Floats:
+    - _ColorMask: 15
+    - _Repeat: 1
+    - _Stencil: 0
+    - _StencilComp: 8
+    - _StencilOp: 0
+    - _StencilReadMask: 255
+    - _StencilWriteMask: 255
+    m_Colors: []
+  m_BuildTextureStacks: []
+  m_AllowLocking: 1
 --- !u!1 &1642722884
 GameObject:
   m_ObjectHideFlags: 0
@@ -3867,6 +3932,57 @@ Transform:
   m_Children: []
   m_Father: {fileID: 584878304}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &1656117874
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1656117876}
+  - component: {fileID: 1656117875}
+  m_Layer: 5
+  m_Name: SnakeRender
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &1656117875
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1656117874}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7c3b89d9731aa1a448540755972a0748, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  RendTex: {fileID: 0}
+  _mat: {fileID: 0}
+  tileSize: 20
+--- !u!224 &1656117876
+RectTransform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1656117874}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 840862364}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_AnchorMin: {x: 0.5, y: 0.5}
+  m_AnchorMax: {x: 0.5, y: 0.5}
+  m_AnchoredPosition: {x: 0, y: 0}
+  m_SizeDelta: {x: 100, y: 100}
+  m_Pivot: {x: 0.5, y: 0.5}
 --- !u!1 &1686754999
 GameObject:
   m_ObjectHideFlags: 0
@@ -4080,42 +4196,74 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7c3b89d9731aa1a448540755972a0748, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  rendTex: {fileID: 8400000, guid: c9f4b6fee9db78a46bf77f7bbb986f7d, type: 2}
+  RendTex: {fileID: 0}
   _mat: {fileID: 0}
   tileSize: 20
---- !u!21 &1951106045
-Material:
-  serializedVersion: 8
+--- !u!1 &1991224648
+GameObject:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: Transparent/CustomSprite
-  m_Shader: {fileID: 4800000, guid: 916c85e3053ef354b86530de1fa0970f, type: 3}
-  m_Parent: {fileID: 0}
-  m_ModifiedSerializedProperties: 0
-  m_ValidKeywords: []
-  m_InvalidKeywords: []
-  m_LightmapFlags: 4
-  m_EnableInstancingVariants: 0
-  m_DoubleSidedGI: 0
-  m_CustomRenderQueue: -1
-  stringTagMap: {}
-  disabledShaderPasses: []
-  m_LockedProperties: 
-  m_SavedProperties:
-    serializedVersion: 3
-    m_TexEnvs:
-    - _MainTex:
-        m_Texture: {fileID: 2800000, guid: 0822012f3fd433b4f8aa14fda66f6522, type: 3}
-        m_Scale: {x: 1, y: 1}
-        m_Offset: {x: 0, y: 0}
-    m_Ints: []
-    m_Floats:
-    - _Repeat: 1
-    m_Colors: []
-  m_BuildTextureStacks: []
-  m_AllowLocking: 1
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1991224649}
+  - component: {fileID: 1991224651}
+  - component: {fileID: 1991224650}
+  m_Layer: 5
+  m_Name: SkinSelect
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!224 &1991224649
+RectTransform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1991224648}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children:
+  - {fileID: 632136236}
+  m_Father: {fileID: 816126224}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_AnchorMin: {x: 0.5, y: 0.5}
+  m_AnchorMax: {x: 0.5, y: 0.5}
+  m_AnchoredPosition: {x: 172.5062, y: 0}
+  m_SizeDelta: {x: 100, y: 100}
+  m_Pivot: {x: 0.5, y: 0.5}
+--- !u!114 &1991224650
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1991224648}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 46b06e2a8037bbb439d1036ca8632ad4, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  skinPref: {fileID: 2481476783623199698, guid: bd5d88220be32e646b2e87999e0b6cfd, type: 3}
+  snakePrev: {fileID: 840862366}
+  customScroll: {fileID: 632136240}
+  JsonTex: {fileID: 4900000, guid: 2382d3be30d12c54a823180e461a7fa7, type: 3}
+  SkinList:
+    skins: []
+  ItemList: []
+--- !u!222 &1991224651
+CanvasRenderer:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1991224648}
+  m_CullTransparentMesh: 1
 --- !u!1 &1996626748
 GameObject:
   m_ObjectHideFlags: 0
@@ -4181,7 +4329,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 394151564}
+  - {fileID: 1628489041}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -4215,7 +4363,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 06855300b1869f04cb84cbd04e651965, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _texture: {fileID: 8400000, guid: c9f4b6fee9db78a46bf77f7bbb986f7d, type: 2}
+  _texture: {fileID: 0}
   _width: 700
   _height: 700
   _color: {r: 1, g: 1, b: 1, a: 1}

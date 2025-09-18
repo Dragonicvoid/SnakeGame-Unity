@@ -207,4 +207,10 @@ public static class Util
 
     return new Vector2(from.x * mat[0, 0] - from.y * mat[0, 1], from.x * mat[1, 0] + from.y * mat[1, 1]);
   }
+
+  public static void DumpToConsole(object obj)
+  {
+    var output = JsonUtility.ToJson(obj, true);
+    Debug.Log(output);
+  }
 }

@@ -152,6 +152,17 @@ public class PlayerManager : MonoBehaviour, IPlayerManager
 
       enemyRender.SnakeType = skinData?.Type ?? SNAKE_TYPE.NORMAL;
       enemyRender.SkinData = skinData?.Skin ?? null;
+
+      if (!enemyRender.RendTex && enemyDisplay)
+      {
+        enemyRender.RendTex = new RenderTexture(
+          (int)ARENA_DEFAULT_SIZE.WIDTH,
+          (int)ARENA_DEFAULT_SIZE.HEIGHT,
+          UnityEngine.Experimental.Rendering.GraphicsFormat.R8G8B8A8_UNorm,
+          UnityEngine.Experimental.Rendering.GraphicsFormat.D32_SFloat_S8_UInt
+        );
+        enemyDisplay.Texture = enemyRender.RendTex;
+      }
       enemyRender?.SetSnakeBody(bodies);
     }
     else
@@ -160,6 +171,16 @@ public class PlayerManager : MonoBehaviour, IPlayerManager
 
       playerRender.SnakeType = skinData?.Type ?? SNAKE_TYPE.NORMAL;
       playerRender.SkinData = skinData?.Skin ?? null;
+      if (!playerRender.RendTex && playerDisplay)
+      {
+        playerRender.RendTex = new RenderTexture(
+          (int)ARENA_DEFAULT_SIZE.WIDTH,
+          (int)ARENA_DEFAULT_SIZE.HEIGHT,
+          UnityEngine.Experimental.Rendering.GraphicsFormat.R8G8B8A8_UNorm,
+          UnityEngine.Experimental.Rendering.GraphicsFormat.D32_SFloat_S8_UInt
+        );
+        playerDisplay.Texture = playerRender.RendTex;
+      }
       playerRender?.SetSnakeBody(bodies);
     }
 
