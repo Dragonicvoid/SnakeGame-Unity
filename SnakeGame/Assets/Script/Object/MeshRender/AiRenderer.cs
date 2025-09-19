@@ -9,6 +9,7 @@ using UnityEngine.Rendering;
 struct AiRendererVertex
 {
   public Vector3 Pos;
+  public float IsLine;
   public Color Color;
   public half2 UV;
 }
@@ -18,20 +19,31 @@ struct GraphicPos
   public Vector3 Pos;
   public Color Color;
 }
+
+struct LinePos
+{
+  public Vector3 Start;
+  public Vector3 End;
+  public Color Color;
+}
 public class AiRenderer : MonoBehaviour
 {
-  [SerializeField]
-  float updateTime = 1;
-  [SerializeField]
-  Color pathColor = Color.blue;
-  [SerializeField]
-  Color openListColor = Color.white;
-  [SerializeField]
-  Color closeListColor = Color.red;
-  [SerializeField]
-  Color wallColor = Color.green;
+  public float LineWidth = 3f;
+  public float UpdateTime = 1;
+  public Color LineColor = Color.black;
+  public Color PathColor = Color.blue;
+  public Color OpenListColor = Color.white;
+  public Color CloseListColor = Color.red;
+  public Color WallColor = Color.green;
+  public Color OccupyColor = Color.yellow;
 
-  List<GraphicPos> graphicPos = new List<GraphicPos>();
+  public List<bool> Mask = new List<bool> { true, true, true };
+
+  float lastUpdateTime = 0f;
+
+  List<GraphicPos> circlePos = new List<GraphicPos>();
+
+  List<LinePos> linePos = new List<LinePos>();
 
   SnakeConfig? snake;
 
@@ -39,9 +51,13 @@ public class AiRenderer : MonoBehaviour
 
   Mesh? mesh;
 
-  void Awake()
+  void Update()
   {
-    SetupScheduler();
+    if ((Time.time - lastUpdateTime) > UpdateTime)
+    {
+      updateDraw();
+      lastUpdateTime = Time.time;
+    }
   }
 
   void updateMeshRender()
@@ -64,14 +80,15 @@ public class AiRenderer : MonoBehaviour
       mesh.Clear();
     }
 
-    int attrbTotal = 3;
+    int attrbTotal = 4;
     NativeArray<VertexAttributeDescriptor> layout = new NativeArray<VertexAttributeDescriptor>(attrbTotal, Allocator.Temp, NativeArrayOptions.UninitializedMemory);
     layout[0] = new VertexAttributeDescriptor(VertexAttribute.Position, VertexAttributeFormat.Float32, 3);
     layout[1] = new VertexAttributeDescriptor(VertexAttribute.Color, VertexAttributeFormat.Float32, 4);
     layout[2] = new VertexAttributeDescriptor(VertexAttribute.TexCoord0, VertexAttributeFormat.Float16, 2);
+    layout[3] = new VertexAttributeDescriptor(VertexAttribute.Tangent, VertexAttributeFormat.Float32, 1);
 
     int vertexPerPos = 4;
-    int vertexCount = graphicPos.Count * vertexPerPos;
+    int vertexCount = (circlePos.Count + linePos.Count) * vertexPerPos;
     mesh.SetVertexBufferParams(vertexCount, layout);
     layout.Dispose();
 
@@ -79,18 +96,19 @@ public class AiRenderer : MonoBehaviour
 
     half h0 = new half(0f); half h1 = new half(1f);
 
-    for (int i = 0; i < graphicPos.Count; i++)
+    for (int i = 0; i < circlePos.Count; i++)
     {
       int padding = i * vertexPerPos;
       float TILE = ARENA_DEFAULT_SIZE.TILE;
       float halfWidth = TILE / 2;
       float halfHeight = TILE / 2;
 
-      GraphicPos graphic = graphicPos[i];
+      GraphicPos graphic = circlePos[i];
 
       verts[padding] = new AiRendererVertex
       {
         Pos = new Vector3(graphic.Pos.x - halfWidth, graphic.Pos.y - halfHeight),
+        IsLine = 0f,
         Color = graphic.Color,
         UV = new half2(h0, h0),
       };
@@ -98,6 +116,7 @@ public class AiRenderer : MonoBehaviour
       verts[padding + 1] = new AiRendererVertex
       {
         Pos = new Vector3(graphic.Pos.x - halfWidth, graphic.Pos.y + halfHeight),
+        IsLine = 0f,
         Color = graphic.Color,
         UV = new half2(h0, h1),
       };
@@ -105,6 +124,7 @@ public class AiRenderer : MonoBehaviour
       verts[padding + 2] = new AiRendererVertex
       {
         Pos = new Vector3(graphic.Pos.x + halfWidth, graphic.Pos.y + halfHeight),
+        IsLine = 0f,
         Color = graphic.Color,
         UV = new half2(h1, h1),
       };
@@ -112,6 +132,47 @@ public class AiRenderer : MonoBehaviour
       verts[padding + 3] = new AiRendererVertex
       {
         Pos = new Vector3(graphic.Pos.x + halfWidth, graphic.Pos.y - halfHeight),
+        IsLine = 0f,
+        Color = graphic.Color,
+        UV = new half2(h1, h0),
+      };
+    }
+
+    for (int i = 0; i < linePos.Count; i++)
+    {
+      int padding = (i + circlePos.Count) * vertexPerPos;
+      float halfWidth = LineWidth / 2;
+
+      LinePos graphic = linePos[i];
+
+      verts[padding] = new AiRendererVertex
+      {
+        Pos = new Vector3(graphic.Start.x - halfWidth, graphic.Start.y),
+        IsLine = 1f,
+        Color = graphic.Color,
+        UV = new half2(h0, h0),
+      };
+
+      verts[padding + 1] = new AiRendererVertex
+      {
+        Pos = new Vector3(graphic.End.x - halfWidth, graphic.End.y),
+        IsLine = 1f,
+        Color = graphic.Color,
+        UV = new half2(h0, h1),
+      };
+
+      verts[padding + 2] = new AiRendererVertex
+      {
+        Pos = new Vector3(graphic.End.x + halfWidth, graphic.End.y),
+        IsLine = 1f,
+        Color = graphic.Color,
+        UV = new half2(h1, h1),
+      };
+
+      verts[padding + 3] = new AiRendererVertex
+      {
+        Pos = new Vector3(graphic.Start.x + halfWidth, graphic.Start.y),
+        IsLine = 1f,
         Color = graphic.Color,
         UV = new half2(h1, h0),
       };
@@ -121,15 +182,28 @@ public class AiRenderer : MonoBehaviour
     verts.Dispose();
 
     int indexPerPos = 6;
-    int indexCount = graphicPos.Count * indexPerPos;
+    int indexCount = (circlePos.Count + linePos.Count) * indexPerPos;
     mesh.SetIndexBufferParams(indexCount, IndexFormat.UInt32);
 
     NativeArray<int> indices = new NativeArray<int>(indexCount, Allocator.Temp, NativeArrayOptions.UninitializedMemory);
 
-    for (int i = 0; i < graphicPos.Count; i++)
+    for (int i = 0; i < circlePos.Count; i++)
     {
       int padding = i * indexPerPos;
       int vertPad = i * vertexPerPos;
+
+      indices[padding] = vertPad;
+      indices[padding + 1] = vertPad + 1;
+      indices[padding + 2] = vertPad + 2;
+      indices[padding + 3] = vertPad;
+      indices[padding + 4] = vertPad + 2;
+      indices[padding + 5] = vertPad + 3;
+    }
+
+    for (int i = 0; i < linePos.Count; i++)
+    {
+      int padding = (i + circlePos.Count) * indexPerPos;
+      int vertPad = (i + circlePos.Count) * vertexPerPos;
 
       indices[padding] = vertPad;
       indices[padding + 1] = vertPad + 1;
@@ -164,16 +238,25 @@ public class AiRenderer : MonoBehaviour
     filter.mesh = mesh;
   }
 
-  public void SetupScheduler()
-  {
-    InvokeRepeating("updateDraw", 0f, updateTime);
-  }
-
   private void updateDraw()
   {
     clearDataPath();
-    drawPath();
-    // drawMap();
+
+    if (Mask[0])
+    {
+      drawMap();
+    }
+
+    if (Mask[1])
+    {
+      drawPath();
+    }
+
+    if (Mask[2])
+    {
+      drawLine();
+    }
+
     updateMeshRender();
   }
 
@@ -190,13 +273,13 @@ public class AiRenderer : MonoBehaviour
     List<AStarPoint> openList = snake.State.DebugData?.PathfindingState?.OpenList ?? new List<AStarPoint>();
     foreach (AStarPoint o in openList)
     {
-      drawTile(o.Point, openListColor);
+      drawTile(o.Point, OpenListColor);
     }
 
     List<AStarPoint> closeList = snake.State.DebugData?.PathfindingState?.CloseList ?? new List<AStarPoint>();
     foreach (AStarPoint c in closeList)
     {
-      drawTile(c.Point, closeListColor);
+      drawTile(c.Point, CloseListColor);
     }
   }
 
@@ -215,10 +298,22 @@ public class AiRenderer : MonoBehaviour
       for (int x = 0; x < maxCoordX; x++)
       {
         Vector2 pos = new Vector2(x * TILE - arenaWidth / 2 + TILE / 2, y * TILE - arenaHeight / 2 + TILE / 2);
-        graphicPos.Add(new GraphicPos
+        Color color = Color.white;
+
+        if (map[y][x].PlayerIDList.Count > 0)
+        {
+          color = OccupyColor;
+        }
+
+        if (map[y][x].Type != ARENA_OBJECT_TYPE.NONE)
+        {
+          color = getColorByType(map[y][x].Type);
+        }
+
+        circlePos.Add(new GraphicPos
         {
           Pos = new Vector3(pos.x, pos.y),
-          Color = getColorByType(map[y][x].Type),
+          Color = color,
         });
       }
     }
@@ -229,11 +324,12 @@ public class AiRenderer : MonoBehaviour
     switch (type)
     {
       case ARENA_OBJECT_TYPE.NONE:
-        return openListColor;
+        return OpenListColor;
+      case ARENA_OBJECT_TYPE.SPIKE:
       case ARENA_OBJECT_TYPE.WALL:
-        return wallColor;
+        return WallColor;
       default:
-        return openListColor;
+        return OpenListColor;
     }
   }
 
@@ -243,12 +339,33 @@ public class AiRenderer : MonoBehaviour
 
     if (color == null)
     {
-      color = pathColor;
+      color = PathColor;
     }
-    graphicPos.Add(new GraphicPos
+    circlePos.Add(new GraphicPos
     {
       Pos = new Vector3(pos.Value.x, pos.Value.y),
       Color = color ?? new Color32(),
+    });
+  }
+
+  private void drawLine()
+  {
+    if (snake == null) return;
+
+    Vector2 headPos = snake.State.Body[0].Position;
+
+    Vector2 rotTarget = snake.State.MovementDir;
+    rotTarget.Normalize();
+    rotTarget *= 50;
+    Vector2 targetPos = new Vector2(
+      headPos.x + rotTarget.x,
+      headPos.y + rotTarget.y
+    );
+    linePos.Add(new LinePos
+    {
+      Start = new Vector3(headPos.x, headPos.y),
+      End = new Vector3(targetPos.x, targetPos.y),
+      Color = LineColor,
     });
   }
 
@@ -265,6 +382,7 @@ public class AiRenderer : MonoBehaviour
   private void clearDataPath()
   {
     mesh?.Clear();
-    graphicPos.Clear();
+    circlePos.Clear();
+    linePos.Clear();
   }
 }

@@ -127,8 +127,8 @@ Shader "Transparent/SnakeRender"
                 float tex2UvX = isLeft * ((distUnclamped + secondTexClamp) / (2 * secondTexClamp - mainTexClamp)) +
                                 (1.0 - isLeft) * ((distUnclamped + mainTexClamp) / (2 * secondTexClamp - mainTexClamp) + 0.5);
 
-                float4 mainColor = tex2D(_MainTex, float2(tex1UvX, tex.actUv.y));
-                float4 edgeColor = tex2D(_SecondTex, float2(tex2UvX, tex.actUv.y));
+                float4 mainColor = tex2D(_MainTex, float2(tex1UvX, tex.uv.y));
+                float4 edgeColor = tex2D(_SecondTex, float2(tex2UvX, tex.uv.y));
                 
                 float4 o = lerp(mainColor, edgeColor, between(mainTexClamp, secondTexClamp, dist));
                 o.a *= (1.0 - step(secondTexClamp, abs(dist)));

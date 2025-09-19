@@ -34,7 +34,7 @@ public enum LAYER
     DEFAULT = 0,
     TRANSPARENT_FX = 1,
     IGNORE_RAYCAST = 2,
-    // Skip
+    DEBUG = 3,
     WATER = 4,
     UI = 5,
 

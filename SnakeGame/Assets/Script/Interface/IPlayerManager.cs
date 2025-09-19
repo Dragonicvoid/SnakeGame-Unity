@@ -21,6 +21,13 @@ public interface IPlayerManager
     string playerId,
   MovementOpts option
 );
+  public Vector2? TurnRadiusModification(
+      SnakeConfig player,
+      Vector2 newMovement,
+      float turnRadius,
+      Vector2? coorDir
+    );
+  public void UpdateDirection(SnakeConfig player, Vector2 botNewDir);
   public void UpdateCoordinate(float delta = 0.016f);
   public SnakeConfig? GetMainPlayer();
   public SnakeConfig? GetEnemy();

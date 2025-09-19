@@ -28,8 +28,8 @@ public static class BOT_CONFIG
   public const float AGGRESSIVE_CONE_RAD = 45f;
   public const float AGGRESSIVE_CONE_DIST = 250f;
   public const float AGGRESSIVE_COOLDOWN = 4f;
-  public const float TRIGGER_AREA_DST = 60f;
-  public const float TURN_RADIUS = 60f;
+  public const float TRIGGER_AREA_DST = 100f;
+  public const float TURN_RADIUS = 0f;
 }
 
 public static class TIME_CONFIG

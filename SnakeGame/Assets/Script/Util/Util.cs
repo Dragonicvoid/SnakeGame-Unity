@@ -201,9 +201,17 @@ public static class Util
     return Mathf.Floor(UnityEngine.Random.Range(0, max - min + 1)) + min;
   }
 
-  public static Vector2 RotateFromAngle(Vector2 from, float angle)
+  /**
+  * 0 degree is from vector2 (0, 1); 
+  */
+  public static Vector2 RotateFromDegree(Vector2 from, float angleInDeg)
   {
-    float[,] mat = new float[2, 2] { { Mathf.Cos(angle), -Mathf.Sin(angle) }, { Mathf.Sin(angle), Mathf.Cos(angle) } };
+    float actualAngle = angleInDeg += 90;
+    actualAngle %= 360;
+    actualAngle = actualAngle < 0 ? 360 - actualAngle : actualAngle;
+    float radian = Mathf.Deg2Rad * actualAngle;
+
+    float[,] mat = new float[2, 2] { { Mathf.Cos(radian), -Mathf.Sin(radian) }, { Mathf.Sin(radian), Mathf.Cos(radian) } };
 
     return new Vector2(from.x * mat[0, 0] - from.y * mat[0, 1], from.x * mat[1, 0] + from.y * mat[1, 1]);
   }

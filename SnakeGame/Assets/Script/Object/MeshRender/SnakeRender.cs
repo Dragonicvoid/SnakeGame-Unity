@@ -24,7 +24,7 @@ public class SnakeRender : MonoBehaviour, ISnakeRenderable
     }
 
     [SerializeField]
-    public RenderTexture RendTex;
+    public RenderTexture? RendTex;
     [SerializeField]
     Material? _mat;
     public Material? Mat
@@ -83,7 +83,7 @@ public class SnakeRender : MonoBehaviour, ISnakeRenderable
     void randomizeBody()
     {
         Vector2 lastPos = new Vector2(0, 0);
-        for (int i = 0; i < SnakeBodies.Count; i++)
+        for (int i = 0; i < SnakeBodies?.Count; i++)
         {
             SnakeBodies[i].Position = lastPos;
             Vector2 newDir = new Vector2(Random.Range(-1f, 1f), Random.Range(-1f, 1f));
@@ -117,6 +117,7 @@ public class SnakeRender : MonoBehaviour, ISnakeRenderable
 
     void setBodyMeshData()
     {
+        if (SnakeBodies?.Count <= 0) return;
         if (!mesh)
         {
             mesh = new Mesh
@@ -135,13 +136,13 @@ public class SnakeRender : MonoBehaviour, ISnakeRenderable
         attr[5] = new VertexAttributeDescriptor(VertexAttribute.TexCoord3, VertexAttributeFormat.Float32, 3);
 
         int vertexPerSnake = 4;
-        int vertexCount = vertexPerSnake * SnakeBodies.Count;
+        int vertexCount = vertexPerSnake * (SnakeBodies?.Count ?? 0);
         mesh.SetVertexBufferParams(vertexCount, attr);
         attr.Dispose();
 
         NativeArray<SnakeVertex> vertex = new NativeArray<SnakeVertex>(vertexCount, Allocator.Temp, NativeArrayOptions.UninitializedMemory);
 
-        for (int i = 0; i < SnakeBodies.Count; i++)
+        for (int i = 0; i < SnakeBodies?.Count; i++)
         {
             float x = SnakeBodies[i].Position.x;
             float y = SnakeBodies[i].Position.y;
@@ -229,12 +230,12 @@ public class SnakeRender : MonoBehaviour, ISnakeRenderable
         vertex.Dispose();
 
         int indexPerSnake = 6;
-        int indexCount = indexPerSnake * SnakeBodies.Count;
+        int indexCount = indexPerSnake * (SnakeBodies?.Count ?? 0);
         mesh.SetIndexBufferParams(indexCount, IndexFormat.UInt32);
 
         NativeArray<int> indices = new NativeArray<int>(indexCount, Allocator.Temp, NativeArrayOptions.UninitializedMemory);
 
-        for (int i = 0; i < SnakeBodies.Count; i++)
+        for (int i = 0; i < SnakeBodies?.Count; i++)
         {
             int padding = i * indexPerSnake;
             int vertPad = i * vertexPerSnake;
@@ -267,7 +268,7 @@ public class SnakeRender : MonoBehaviour, ISnakeRenderable
 
     void setRenderPass()
     {
-        if (!mesh || !meshRend || cmdBuffer == null) return;
+        if (!mesh || !meshRend || cmdBuffer == null || !RendTex) return;
 
         cmdBuffer.Clear();
         var lookMatrix = Camera.main.worldToCameraMatrix;
@@ -289,13 +290,15 @@ public class SnakeRender : MonoBehaviour, ISnakeRenderable
 
     }
 
-    public void SetSnakeSkin(SkinDetail skin, bool isPrimary)
+    public void SetSnakeSkin(SkinDetail? skin, bool isPrimary)
     {
+        if (skin == null) return;
+
         _snakeTexture?.SetSkin(skin, isPrimary);
 
         if (skin != null && Mat)
         {
-            Mat.SetTexture(isPrimary ? "_MainTex" : "_SecondTex", _snakeTexture.PrimaryTex);
+            Mat.SetTexture(isPrimary ? "_MainTex" : "_SecondTex", isPrimary ? _snakeTexture?.PrimaryTex : _snakeTexture?.SecondTex);
         }
     }
 

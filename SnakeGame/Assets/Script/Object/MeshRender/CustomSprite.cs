@@ -76,7 +76,7 @@ public class CustomSprite : MonoBehaviour
 
   Mesh? mesh;
 
-  MeshRenderer renderer;
+  MeshRenderer? meshRend;
 
   void OnEnable()
   {
@@ -101,19 +101,15 @@ public class CustomSprite : MonoBehaviour
 
   void setMaterial()
   {
-    renderer = GetComponent<MeshRenderer>();
-    if (!renderer)
+    meshRend = GetComponent<MeshRenderer>();
+    if (!meshRend)
     {
-      renderer = gameObject.AddComponent<MeshRenderer>();
+      meshRend = gameObject.AddComponent<MeshRenderer>();
     }
 
     if (Application.isPlaying)
     {
-      _mat = renderer.material;
-    }
-    else
-    {
-      _mat = renderer.sharedMaterial;
+      _mat = meshRend.material;
     }
 
     if (!_mat)
@@ -123,11 +119,7 @@ public class CustomSprite : MonoBehaviour
 
       if (Application.isPlaying)
       {
-        renderer.material = _mat;
-      }
-      else
-      {
-        renderer.sharedMaterial = _mat;
+        meshRend.material = _mat;
       }
     }
     _mat.SetTextureOffset("_MainTex", offset);

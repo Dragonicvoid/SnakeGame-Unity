@@ -97,15 +97,19 @@ public class ArenaManager : MonoBehaviour, IArenaManager
   {
     if (
       mapData != null &&
-      mapData[coord.Y] != null &&
-      mapData[coord.Y][coord.X] != null
+      Util.IsCoordInsideMap(coord.X, coord.Y)
     )
     {
       mapData[coord.Y][coord.X].Type = type;
     }
   }
 
-  public List<float>? FindNearestObstacleTowardPoint(SnakeConfig player, float radius)
+  /**
+ * Get all obstacle angle in reverse from snake head position
+ * assuming snake Movement Dir is Vector2(0,1).
+ * The result will be between 0-360 moving clockwise from snake move dir
+ */
+  public List<float>? FindObsAnglesFromSnake(SnakeConfig player, float radius)
   {
     SnakeBody? playerHead = player.State.Body[0];
 
@@ -125,19 +129,25 @@ public class ArenaManager : MonoBehaviour, IArenaManager
       }
     }
 
+    float ang = Mathf.Atan2(player.State.MovementDir.y, player.State.MovementDir.x);
+    float snakeAng = ang * Mathf.Rad2Deg;
+    Debug.Log(player.State.MovementDir);
+
     if (spikes.Count <= 0) return new List<float>();
 
     List<float> duplicateAngleDetection = new List<float>();
     List<float> detectedObstacleAngles = new List<float>();
     SnakeState state = player.State;
 
-    SnakeBody? botHeadPos = state.Body[0];
+    SnakeBody? botHead = state.Body[0];
+    Vector2 snakeDir = botHead.Velocity;
+
 
     foreach (SpikeConfig spike in spikes)
     {
       bool isDetectObs = isCircleHitBox(
-        botHeadPos.Position.x,
-        botHeadPos.Position.y,
+        botHead.Position.x,
+        botHead.Position.y,
         spike.Position.x,
         spike.Position.y,
         radius,
@@ -146,14 +156,23 @@ public class ArenaManager : MonoBehaviour, IArenaManager
 
       if (isDetectObs)
       {
-        float obstacleAngle = Mathf.Atan2(
-          botHeadPos.Position.y - spike.Position.y,
-          botHeadPos.Position.x - spike.Position.x
+        float snakeAngle = Mathf.Atan2(snakeDir.y, snakeDir.x);
+        float snakeAngleInDegree = snakeAngle * Mathf.Rad2Deg;
+
+        float invrsObsAngle = Mathf.Atan2(
+          botHead.Position.y - spike.Position.y,
+          botHead.Position.x - spike.Position.x
         );
-        if (duplicateAngleDetection.FindIndex((angle) => angle == obstacleAngle) == -1)
+        float angleInDegree = invrsObsAngle * Mathf.Rad2Deg;
+        angleInDegree = angleInDegree < 0 ? 180 + (180 + angleInDegree) : angleInDegree;
+
+        angleInDegree -= snakeAngleInDegree;
+        angleInDegree %= 360;
+        angleInDegree = angleInDegree < 0 ? 360 - angleInDegree : angleInDegree;
+
+        if (duplicateAngleDetection.FindIndex((angle) => angle == invrsObsAngle) == -1)
         {
-          duplicateAngleDetection.Add(obstacleAngle);
-          float angleInDegree = obstacleAngle * 180 / Mathf.PI;
+          duplicateAngleDetection.Add(invrsObsAngle);
           detectedObstacleAngles.Add(angleInDegree);
         }
       }
@@ -279,7 +298,7 @@ public class ArenaManager : MonoBehaviour, IArenaManager
 
     Coordinate coord = ArenaConverter.ConvertPosToCoord(pos.x, pos.y);
 
-    if (mapData[coord.Y] == null || mapData[coord.Y][coord.X] == null) return;
+    if (!Util.IsCoordInsideMap(coord.X, coord.Y)) return;
 
     mapData[coord.Y][coord.X].PlayerIDList.Add(playerId);
   }
@@ -298,13 +317,13 @@ public class ArenaManager : MonoBehaviour, IArenaManager
 
     Coordinate coord = ArenaConverter.ConvertPosToCoord(pos.x, pos.y);
 
-    if (mapData[coord.Y] == null || mapData[coord.Y][coord.X] == null) return;
-
+    if (!Util.IsCoordInsideMap(coord.X, coord.Y)) return;
 
     List<string> playerIds = mapData[coord.Y][coord.X].PlayerIDList;
     playerIds = Util.Filter(playerIds, (id) =>
     {
       return id != playerId;
     });
+    mapData[coord.Y][coord.X].PlayerIDList = playerIds;
   }
 }

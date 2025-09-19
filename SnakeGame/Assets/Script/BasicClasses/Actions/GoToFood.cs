@@ -7,7 +7,7 @@ public class GoToFood : BaseAction
 
     public override void Run(SnakeConfig player, SnakeActionData data)
     {
-        this.Player = player;
+        Player = player;
         CurrData = data;
 
         FoodConfig? foodTarget = data.DetectedFood;
@@ -15,7 +15,12 @@ public class GoToFood : BaseAction
         if (foodTarget == null) return;
 
         Vector2 foodAngle = ProcessBotMovementByFood(player, foodTarget);
-        this.UpdateDirection(foodAngle);
+
+        IPlayerManager? playerManager = CurrData.Manager.PlayerManager;
+
+        if (playerManager == null) return;
+
+        playerManager.UpdateDirection(Player, foodAngle);
     }
 
     public override float UpdateScore(PlannerFactor factor)

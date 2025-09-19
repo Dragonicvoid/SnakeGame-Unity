@@ -23,15 +23,8 @@ public interface IBaseAction
     SnakeConfig player,
     List<float> detectedObstacle
   );
-  public Vector2? TurnRadiusModification(
-    SnakeConfig player,
-    Vector2 newMovement,
-    float turnRadius,
-    Vector2? coorDir
-  );
-  public void UpdateDirection(Vector2 botNewDir);
-  public FoodConfig GetFoodById(string id);
-  public AStarResultData GetPath(
+  public FoodConfig? GetFoodById(string id);
+  public AStarResultData? GetPath(
     Vector2 curr,
     Vector2 target,
     List<Vector2>? predefinedPath

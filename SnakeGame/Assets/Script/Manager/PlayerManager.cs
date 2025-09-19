@@ -5,7 +5,7 @@ using UnityEngine;
 public class PlayerManager : MonoBehaviour, IPlayerManager
 {
   [SerializeField]
-  IArenaManager? arenaManager = null;
+  IRef<IArenaManager>? arenaManager = null;
 
   [SerializeField]
   SnakeRender? playerRender = null;
@@ -47,9 +47,10 @@ public class PlayerManager : MonoBehaviour, IPlayerManager
     PlayerList = new List<SnakeConfig>();
     eatAnim = new Dictionary<string, IEnumerator<object>>();
     GameplayMoveEvent.Instance.onSnakeMoveCalculated += onTouchMove;
+    GameEvent.Instance.onPlayerSizeIncrease += onSizeIncrease;
   }
 
-  void Update()
+  void FixedUpdate()
   {
     PlayerList.ForEach((p) =>
     {
@@ -117,7 +118,7 @@ public class PlayerManager : MonoBehaviour, IPlayerManager
         bodies,
         moveDir,
         new Vector2(),
-        25f,
+        10f,
         "",
         false,
         null,
@@ -194,7 +195,6 @@ public class PlayerManager : MonoBehaviour, IPlayerManager
     if (isBot)
     {
       aiRenderer?.SetSnakeToDebug(player);
-      aiRenderer?.SetupScheduler();
     }
   }
 
@@ -334,10 +334,79 @@ public class PlayerManager : MonoBehaviour, IPlayerManager
 
     if (player != null)
     {
-      dir = player.State.MovementDir;
+      dir = player.State.Body[0].Velocity;
     }
 
     return dir;
+  }
+
+  public void UpdateDirection(SnakeConfig player, Vector2 botNewDir)
+  {
+    if (player == null) return;
+
+    Vector2 currDir = GetPlayerDirection(player.Id);
+
+    Vector2 newDir = new Vector2(
+      Mathf.Ceil(botNewDir.x),
+      Mathf.Ceil(botNewDir.y)
+    );
+
+    if (newDir != null)
+    {
+      player.State.MovementDir = new Vector2(newDir.x, newDir.y);
+    }
+    List<Vector2> dirArray = new List<Vector2>();
+    for (
+      int limit = 0;
+      newDir != null &&
+      (currDir.x != newDir.x || currDir.y != newDir.y) &&
+      limit < 6;
+      limit++
+    )
+    {
+      newDir =
+        TurnRadiusModification(
+          player,
+          new Vector2(newDir.x, newDir.y),
+          BOT_CONFIG.TURN_RADIUS,
+          currDir
+        ) ?? new Vector2(0, 0);
+      currDir = new Vector2(newDir.x, newDir.y);
+      dirArray.Add(newDir);
+    }
+
+    if (dirArray.Count <= 0) return;
+
+    player.State.RotationQueue.Clear();
+    int idx = 0;
+    dirArray.ForEach((item) =>
+    {
+      float schedule = idx * 0.1f;
+      player.State.RotationQueue.Add(new SnakeRotationData(
+        Time.time + schedule,
+        item
+      ));
+      idx++;
+    });
+  }
+
+  public Vector2? TurnRadiusModification(
+    SnakeConfig player,
+    Vector2 newMovement,
+    float turnRadius,
+    Vector2? coorDir
+  )
+  {
+    coorDir = coorDir != null ? coorDir : GetPlayerDirection(player.Id);
+    if (coorDir == null) return null;
+
+    float turnDeg = turnRadius * 30 + 30;
+    Vector2 currDir = new Vector2(coorDir.Value.x, coorDir.Value.y);
+    Vector2 newDir = new Vector2(newMovement.x, newMovement.y);
+    float orientation = Util.GetOrientationBetweenVector(currDir, newDir);
+    float turnAngle = turnDeg * (orientation != 0 ? orientation : 1);
+    Vector2 result = Util.RotateFromDegree(currDir, turnAngle);
+    return result;
   }
 
   public void HandleMovement(
@@ -353,9 +422,9 @@ public class PlayerManager : MonoBehaviour, IPlayerManager
 
     SnakeState pState = player.State;
     List<SnakeBody> physicBody = pState.Body;
-    Vector2 movDir = pState.MovementDir;
     if (physicBody.Count <= 0) return;
 
+    Vector2 newVelo = new Vector2(pState.MovementDir.x, pState.MovementDir.y);
     if (option != null)
     {
       if (option.Direction != null)
@@ -363,35 +432,27 @@ public class PlayerManager : MonoBehaviour, IPlayerManager
         Vector2 normalized = new Vector2(option.Direction.Value.x, option.Direction.Value.y);
         normalized.Normalize();
 
-        movDir.x = normalized.x * pState.Speed;
-        movDir.y = normalized.y * pState.Speed;
+        newVelo = normalized;
       }
     }
     if (pState.InputDirection == null) pState.InputDirection = new Vector2(0, 0);
-    pState.InputDirection.Set(movDir.x, movDir.y);
+    pState.InputDirection.Set(newVelo.x, newVelo.y);
 
-    Vector2 velocity = new Vector2(movDir.x, movDir.y);
-
-    if (option?.InitialMovement != null)
+    if (option?.InitialMovement == true)
     {
-      physicBody[0].Velocity = new Vector2(velocity.x, velocity.y);
-      if (player.IsBot && option.Direction != null)
-        pState.MovementDir = new Vector2(option.Direction.Value.x, option.Direction.Value.y);
+      if (option.Direction != null)
+      {
+        physicBody[0].Velocity = new Vector2(option.Direction.Value.x, option.Direction.Value.y);
+      }
+
+      for (int i = 1; i < physicBody.Count; i++)
+      {
+        physicBody[i].Velocity = new Vector2(0, 0);
+      }
     }
     else
     {
-      physicBody[0].Velocity = new Vector2(velocity.x, velocity.y);
-
-      if (
-        1 >= physicBody.Count &&
-        (physicBody[1].Velocity.x != 0 || physicBody[1].Velocity.y != 0)
-      )
-      {
-        for (int i = 1; i < physicBody.Count; i++)
-        {
-          physicBody[1].Velocity = new Vector2(0, 0);
-        }
-      }
+      physicBody[0].Velocity = newVelo;
     }
   }
 
@@ -457,7 +518,7 @@ public class PlayerManager : MonoBehaviour, IPlayerManager
             Vector2 headPos = bodyState.Position;
 
             Vector2 snakeDir = new Vector2(bodyState.Velocity.x, bodyState.Velocity.y);
-            Vector2 newDir = snakeDir * new Vector2(TILE * delta, TILE * delta);
+            Vector2 newDir = snakeDir * new Vector2(TILE * delta * snakeState.Speed, TILE * delta * snakeState.Speed);
 
             if (bodyState.Obj) bodyState.Obj.transform.localPosition = new Vector3(
               headPos.x + newDir.x,
@@ -482,8 +543,8 @@ public class PlayerManager : MonoBehaviour, IPlayerManager
           {
             for (int x = -1; x <= 1; x++)
             {
-              arenaManager?.RemoveMapBody(new Vector2(prevPos.x + TILE * x, prevPos.y + TILE * y), snake.Id);
-              arenaManager?.SetMapBody(
+              arenaManager?.I.RemoveMapBody(new Vector2(prevPos.x + TILE * x, prevPos.y + TILE * y), snake.Id);
+              arenaManager?.I.SetMapBody(
                   new Vector2(finalPos.x + TILE * x, finalPos.y + TILE * y),
                   snake.Id
               );
@@ -501,12 +562,9 @@ public class PlayerManager : MonoBehaviour, IPlayerManager
 
   void onTouchMove(Vector2 delta)
   {
-    HandleMovement(PLAYER_ID, new MovementOpts
-    (
-        delta,
-        null,
-        null
-    ));
+    SnakeConfig? player = GetMainPlayer();
+    if (player == null) return;
+    UpdateDirection(player, delta);
   }
 
   void onSizeIncrease(SnakeConfig snake)

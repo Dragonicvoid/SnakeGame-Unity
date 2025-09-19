@@ -39,8 +39,8 @@ public class GoToPlayer : BaseAction
         ManagerActionData manager = data.Manager;
         if (manager == null) return;
 
-        IArenaManager arenaManager = manager.ArenaManager;
-        IPlayerManager playerManager = manager.PlayerManager;
+        IArenaManager? arenaManager = manager.ArenaManager;
+        IPlayerManager? playerManager = manager.PlayerManager;
 
         if (arenaManager == null || playerManager == null) return;
 
@@ -51,7 +51,7 @@ public class GoToPlayer : BaseAction
         if (mainPlayer == null) return;
 
         float TILE = ARENA_DEFAULT_SIZE.TILE;
-        Vector2 frontRay = mainPlayer.State.MovementDir;
+        Vector2 frontRay = mainPlayer.State.Body[0].Velocity;
         Vector2 currHeadPos = player.State.Body[0].Position;
         Vector2 mainPlayerHead = mainPlayer.State.Body[0].Position;
 
@@ -141,7 +141,7 @@ public class GoToPlayer : BaseAction
 
         if (newDir == null) return;
 
-        UpdateDirection(newDir);
+        playerManager.UpdateDirection(Player, newDir);
     }
 
     public override float UpdateScore(PlannerFactor factor)
@@ -239,7 +239,7 @@ public class GoToPlayer : BaseAction
 
     private bool isLeft(Vector2 targetVec, Vector2 currVec)
     {
-        return -targetVec.x * currVec.y + targetVec.y * currVec.x < 0;
+        return Util.GetOrientationBetweenVector(currVec, targetVec) >= 0;
     }
 
     bool isValidToBeAggresive(

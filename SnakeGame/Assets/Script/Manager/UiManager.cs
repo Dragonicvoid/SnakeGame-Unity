@@ -31,13 +31,13 @@ public class UiManager : MonoBehaviour
     startUI.SetActive(val);
   }
 
-  public void ShowEndUI(GameOverData data, bool val = true)
+  public void ShowEndUI(GameOverData? data, bool val = true)
   {
     if (endUI == null) return;
 
     endUI.SetActive(val);
 
-    if (endLabel == null || !val) return;
+    if (endLabel == null || !val || data == null) return;
 
     endLabel.text = data.IsWon == false ? "You Lose" : "You Won";
   }
@@ -70,7 +70,7 @@ public class UiManager : MonoBehaviour
 
     movUI.SetActive(show);
 
-    if (!show)
+    if (!show && movUIFront)
     {
       movUIFront.transform.localPosition = new Vector3(0, 0);
     }
@@ -82,7 +82,7 @@ public class UiManager : MonoBehaviour
 
   private void setMovUIFrontDelta(Vector2 pos)
   {
-    if (movUIFront == null) return;
+    if (movUIFront == null || movUI == null) return;
 
     Vector2 currPos = new Vector2(
       movUI.transform.position.x,

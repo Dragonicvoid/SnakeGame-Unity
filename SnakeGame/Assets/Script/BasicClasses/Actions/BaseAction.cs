@@ -83,151 +83,37 @@ public class BaseAction : IBaseAction
     List<float> detectedObstacle
   )
   {
+    float turnAngle = 0;
     if (detectedObstacle.Count > 0)
     {
-      float? turnAngle = null;
       if (detectedObstacle.Count == 1)
       {
-        turnAngle = detectedObstacle[0] + 135;
+        turnAngle = detectedObstacle[0] + Random.Range(-45, 45);
       }
       else
       {
-        float angleOne = detectedObstacle[detectedObstacle.Count - 1];
-        float angleTwo = detectedObstacle[0];
-        float highestAngleDifference = 360 - Mathf.Abs(angleTwo - angleOne);
-        for (int i = 1; i < detectedObstacle.Count; i++)
+        float totalAngle = 0;
+
+        for (int i = 0; i < detectedObstacle.Count; i++)
         {
-          float angleDiff = Mathf.Abs(
-            detectedObstacle[i] - detectedObstacle[i - 1]
-          );
-          if (angleDiff > highestAngleDifference)
-          {
-            angleOne = detectedObstacle[i - 1];
-            highestAngleDifference = angleDiff;
-          }
+          totalAngle += detectedObstacle[i];
         }
-        turnAngle = highestAngleDifference / 2 + angleOne;
+
+        turnAngle = Mathf.Floor(totalAngle / detectedObstacle.Count);
       }
-      if (turnAngle > 360)
-      {
-        turnAngle -= 360;
-      }
-      float turnAngleInRad = (turnAngle ?? 0f) * Mathf.PI / 180f;
-      Vector2 targetVec = new Vector2(
-        -Mathf.Cos(turnAngleInRad),
-        Mathf.Sin(2 * Mathf.PI - turnAngleInRad)
-      );
-      return targetVec;
     }
 
-    return null;
-  }
+    // Making radian 0 is (0,1);
+    turnAngle = turnAngle < 0 ? 360 - turnAngle : turnAngle;
+    turnAngle = 360 - turnAngle;
 
-  public Vector2? TurnRadiusModification(
-    SnakeConfig player,
-    Vector2 newMovement,
-    float turnRadius,
-    Vector2? coorDir
-  )
-  {
-    if (CurrData == null) return null;
-
-    ManagerActionData? manager = CurrData.Manager;
-    if (manager == null) return null;
-
-    IPlayerManager? playerManager = manager.PlayerManager;
-    coorDir = coorDir != null ? coorDir : playerManager?.GetPlayerDirection(player.Id);
-    if (coorDir == null) return null;
-
-    //TURN RADIUS config range 0 - 5, transform to degrees = 30 - 180
-    float turnRadians = Mathf.Deg2Rad * (turnRadius * 30 + 30);
-    Vector2 currDir = new Vector2(coorDir.Value.x, coorDir.Value.y);
-    Vector2 newDir = new Vector2(newMovement.x, newMovement.y);
-    float orientation = Util.GetOrientationBetweenVector(currDir, newDir);
-    float angle = Vector2.Angle(currDir, newDir);
-    if (Mathf.Abs(angle) < turnRadians) return newDir;
-    float turnAngle = turnRadians * orientation;
-    Vector2 result = Util.RotateFromAngle(currDir, turnAngle);
-    return result;
-  }
-
-  public void UpdateDirection(Vector2 botNewDir)
-  {
-    if (Player == null || CurrData == null) return;
-
-    ManagerActionData manager = CurrData.Manager;
-    if (manager == null) return;
-    IPlayerManager? playerManager = manager.PlayerManager;
-
-    if (playerManager == null) return;
-
-    Vector2 newDir = Player.State.MovementDir;
-    Vector2 currDir = playerManager.GetPlayerDirection(Player.Id);
-
-    newDir = new Vector2(
-      Mathf.Ceil(botNewDir.x * ARENA_DEFAULT_SIZE.TILE),
-      Mathf.Ceil(botNewDir.y * ARENA_DEFAULT_SIZE.TILE)
+    float angleInRadian = turnAngle * Mathf.Deg2Rad;
+    Vector2 targetVec = new Vector2(
+      -Mathf.Sin(angleInRadian),
+      Mathf.Cos(angleInRadian)
     );
 
-    if (newDir != null)
-    {
-      Player.State.MovementDir = new Vector2(newDir.x, newDir.y);
-    }
-
-    Vector2 targetDir = new Vector2(
-      newDir.x,
-      newDir.y
-    );
-    List<Vector2> dirArray = new List<Vector2>();
-    for (
-      int limit = 0;
-      newDir != null &&
-      currDir.x != targetDir.x &&
-      currDir.y != targetDir.y &&
-      limit < 6;
-      limit++
-    )
-    {
-      if (playerManager != null) return;
-      newDir =
-        TurnRadiusModification(
-          Player,
-          new Vector2(targetDir.x, targetDir.y),
-          BOT_CONFIG.TURN_RADIUS,
-          currDir
-        ) ?? new Vector2(0, 0);
-      if (newDir == null) return;
-      currDir = new Vector2(newDir.x, newDir.y);
-      dirArray.Add(newDir);
-    }
-
-    if (dirArray.Count <= 0) return;
-
-    Player.State.RotationQueue.Clear();
-    int idx = 0;
-    dirArray.ForEach((item) =>
-    {
-      float schedule = idx * 0.064f;
-      Player.State.RotationQueue.Add(new SnakeRotationData(
-        Time.time + idx * 0.064f,
-        item
-      ));
-      idx++;
-    });
-  }
-
-  IEnumerator<object> rotateHead(float schedule, IPlayerManager playerManager, Vector2 item)
-  {
-    yield return new WaitForSeconds(schedule);
-
-    if (Player != null)
-    {
-      playerManager.HandleMovement(Player.Id, new MovementOpts(
-      new Vector2(item.x, item.y),
-      null,
-      null
-      ));
-    }
+    return targetVec;
   }
 
   public FoodConfig? GetFoodById(string id)
@@ -306,8 +192,8 @@ public class BaseAction : IBaseAction
         currPlayerPos.y - mainPlayerPos.y
     );
     Vector2 mainPlayerVec = new Vector2(
-        targetPlayer.State.MovementDir.x,
-        targetPlayer.State.MovementDir.y
+        targetPlayer.State.Body[0].Velocity.x,
+        targetPlayer.State.Body[0].Velocity.y
     );
 
 

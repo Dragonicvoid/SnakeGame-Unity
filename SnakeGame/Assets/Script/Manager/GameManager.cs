@@ -20,9 +20,14 @@ public class GameManager : MonoBehaviour
   Coroutine? gameUpdateCorutine = null;
 
   private DIFFICULTY diff = DIFFICULTY.MEDIUM;
-  void Start()
-  {
 
+  bool paused = true;
+
+  void FixedUpdate()
+  {
+    if (paused) return;
+
+    gameUpdate();
   }
 
   public void StartGame()
@@ -36,21 +41,17 @@ public class GameManager : MonoBehaviour
     setCollisionEvent();
     setGameEvent();
 
-    gameUpdateCorutine = StartCoroutine(gameUpdate());
+    paused = false;
   }
 
-  IEnumerator<object> gameUpdate()
+  void gameUpdate()
   {
-    while (true)
-    {
-      yield return new WaitForSeconds(0.016f);
-      float deltaTime = Math.Min(0.016f, Time.deltaTime);
+    float deltaTime = Math.Min(0.016f, Time.deltaTime);
 
-      foreach (SnakeConfig snake in PlayerManager.I.PlayerList)
-      {
-        handleBotLogic(snake);
-        PlayerManager.I.UpdateCoordinate(deltaTime);
-      }
+    foreach (SnakeConfig snake in PlayerManager?.I.PlayerList ?? new List<SnakeConfig>())
+    {
+      handleBotLogic(snake);
+      PlayerManager?.I.UpdateCoordinate(deltaTime);
     }
   }
 
@@ -84,10 +85,7 @@ public class GameManager : MonoBehaviour
   {
     FoodManager?.I.StopSpawningFood();
     ArenaInput?.StopInputListener();
-    if (gameUpdateCorutine != null)
-    {
-      StopCoroutine(gameUpdateCorutine);
-    }
+    paused = true;
     stopCollisionEvent();
     stopGameEvent();
   }
@@ -238,7 +236,7 @@ public class GameManager : MonoBehaviour
     );
 
     detectedWall =
-      ArenaManager.I.FindNearestObstacleTowardPoint(
+      ArenaManager.I.FindObsAnglesFromSnake(
         snake,
         BOT_CONFIG.TRIGGER_AREA_DST
       ) ?? new List<float>();

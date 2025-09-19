@@ -442,7 +442,7 @@ GameObject:
   m_Component:
   - component: {fileID: 275928465}
   - component: {fileID: 275928466}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: AiDebugger
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -476,11 +476,15 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9e81a6edb10ede84ead0cafaee407de7, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  updateTime: 1
-  pathColor: {r: 0, g: 0, b: 1, a: 1}
-  openListColor: {r: 1, g: 1, b: 1, a: 1}
-  closeListColor: {r: 0, g: 0, b: 0, a: 1}
-  wallColor: {r: 0, g: 1, b: 0, a: 1}
+  LineWidth: 3
+  UpdateTime: 0
+  LineColor: {r: 0, g: 0, b: 0, a: 1}
+  PathColor: {r: 0, g: 0, b: 1, a: 1}
+  OpenListColor: {r: 1, g: 1, b: 1, a: 1}
+  CloseListColor: {r: 1, g: 0, b: 0, a: 1}
+  WallColor: {r: 0, g: 1, b: 0, a: 1}
+  OccupyColor: {r: 1, g: 0.92156863, b: 0.015686275, a: 1}
+  Mask: 000001
 --- !u!1 &406524936
 GameObject:
   m_ObjectHideFlags: 0
@@ -584,7 +588,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 437358769}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: Debugger
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -1639,7 +1643,7 @@ Camera:
   m_Depth: -1
   m_CullingMask:
     serializedVersion: 2
-    m_Bits: 4294967295
+    m_Bits: 1
   m_RenderingPath: -1
   m_TargetTexture: {fileID: 0}
   m_TargetDisplay: 0
@@ -3689,6 +3693,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a58d597f23f9bb749b5b31563de89f36, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  arenaManager:
+    target: {fileID: 755706906}
   playerRender: {fileID: 1883447290}
   enemyRender: {fileID: 736104851}
   playerDisplay: {fileID: 1996626752}
