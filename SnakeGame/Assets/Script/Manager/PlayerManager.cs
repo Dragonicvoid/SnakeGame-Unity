@@ -1,4 +1,5 @@
 #nullable enable
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -228,7 +229,7 @@ public class PlayerManager : MonoBehaviour, IPlayerManager
 
     if (state.Body.Count <= 0) return new List<float>();
 
-    SnakeBody botHeadPos = state.Body[0];
+    SnakeBody botHead = state.Body[0];
 
     foreach (SnakeConfig otherPlayer in PlayerList)
     {
@@ -238,8 +239,8 @@ public class PlayerManager : MonoBehaviour, IPlayerManager
       for (int i = 1; i < idxLen; i++)
       {
         bool detectOtherPlayer = isCircleOverlap(
-          botHeadPos.Position.x,
-          botHeadPos.Position.y,
+          botHead.Position.x,
+          botHead.Position.y,
           otherPlayer.State.Body[i].Position.x,
           otherPlayer.State.Body[i].Position.y,
           radius,
@@ -248,16 +249,23 @@ public class PlayerManager : MonoBehaviour, IPlayerManager
 
         if (detectOtherPlayer)
         {
-          float obstacleAngle = Mathf.Atan2(
-            botHeadPos.Position.y - otherPlayer.State.Body[i].Position.y,
-            botHeadPos.Position.x - otherPlayer.State.Body[i].Position.x
+          Vector2 snakeDir = new Vector2(botHead.Velocity.x, botHead.Velocity.y);
+          float headAngle = Mathf.Atan2(snakeDir.y, snakeDir.x);
+          float headInDegree = headAngle * Mathf.Rad2Deg;
 
+          float obstacleAngle = Mathf.Atan2(
+            botHead.Position.y - otherPlayer.State.Body[i].Position.y,
+            botHead.Position.x - otherPlayer.State.Body[i].Position.x
           );
+          float angleInDegree = obstacleAngle * Mathf.Rad2Deg;
+          float finalAngle = headInDegree < 0 ? (Mathf.Abs(headInDegree) + angleInDegree) : (360 - (headInDegree - angleInDegree));
+          finalAngle %= 360;
+          finalAngle = finalAngle < 0 ? (360 + finalAngle) : finalAngle;
+
           if (duplicateAngleDetection.FindIndex((a) => a == obstacleAngle) == -1)
           {
             duplicateAngleDetection.Add(obstacleAngle);
-            float angleInDegree = (obstacleAngle * 180) / Mathf.PI;
-            detectedObstacleAngles.Add(angleInDegree);
+            detectedObstacleAngles.Add(finalAngle);
           }
         }
       }
@@ -334,7 +342,8 @@ public class PlayerManager : MonoBehaviour, IPlayerManager
 
     if (player != null)
     {
-      dir = player.State.Body[0].Velocity;
+      dir = new Vector2(player.State.Body[0].Velocity.x, player.State.Body[0].Velocity.y);
+      dir.Normalize();
     }
 
     return dir;
@@ -346,44 +355,46 @@ public class PlayerManager : MonoBehaviour, IPlayerManager
 
     Vector2 currDir = GetPlayerDirection(player.Id);
 
-    Vector2 newDir = new Vector2(
-      Mathf.Ceil(botNewDir.x),
-      Mathf.Ceil(botNewDir.y)
-    );
-
-    if (newDir != null)
-    {
-      player.State.MovementDir = new Vector2(newDir.x, newDir.y);
-    }
+    player.State.MovementDir = new Vector2(botNewDir.x, botNewDir.y);
     List<Vector2> dirArray = new List<Vector2>();
+    float remaining = Mathf.Abs(Vector2.SignedAngle(currDir, botNewDir));
+
+    Vector2 newDir = new Vector2();
     for (
       int limit = 0;
-      newDir != null &&
-      (currDir.x != newDir.x || currDir.y != newDir.y) &&
-      limit < 6;
+      (Mathf.Abs(remaining) > 5) && limit < 6;
       limit++
     )
     {
       newDir =
         TurnRadiusModification(
           player,
-          new Vector2(newDir.x, newDir.y),
+          new Vector2(botNewDir.x, botNewDir.y),
           BOT_CONFIG.TURN_RADIUS,
+          remaining,
           currDir
         ) ?? new Vector2(0, 0);
+      if (newDir == null) break;
       currDir = new Vector2(newDir.x, newDir.y);
+      remaining = Vector2.SignedAngle(currDir, botNewDir);
       dirArray.Add(newDir);
     }
 
     if (dirArray.Count <= 0) return;
 
-    player.State.RotationQueue.Clear();
+    float startTime = Time.time;
+    if (player.State.RotationQueue.Count > 0)
+    {
+      startTime = player.State.RotationQueue[0].TimeToRun;
+    }
+
     int idx = 0;
+    player.State.RotationQueue.Clear();
     dirArray.ForEach((item) =>
     {
-      float schedule = idx * 0.1f;
+      float schedule = startTime + idx * TIME_CONFIG.TURNING_FRAME;
       player.State.RotationQueue.Add(new SnakeRotationData(
-        Time.time + schedule,
+        schedule,
         item
       ));
       idx++;
@@ -394,6 +405,7 @@ public class PlayerManager : MonoBehaviour, IPlayerManager
     SnakeConfig player,
     Vector2 newMovement,
     float turnRadius,
+    float remaining,
     Vector2? coorDir
   )
   {
@@ -404,8 +416,9 @@ public class PlayerManager : MonoBehaviour, IPlayerManager
     Vector2 currDir = new Vector2(coorDir.Value.x, coorDir.Value.y);
     Vector2 newDir = new Vector2(newMovement.x, newMovement.y);
     float orientation = Util.GetOrientationBetweenVector(currDir, newDir);
-    float turnAngle = turnDeg * (orientation != 0 ? orientation : 1);
-    Vector2 result = Util.RotateFromDegree(currDir, turnAngle);
+    float turnAngle = turnDeg * orientation;
+    float finalAngle = (Mathf.Abs(remaining) < turnAngle) ? (Mathf.Abs(remaining) * orientation) : turnAngle;
+    Vector2 result = Util.RotateFromDegree(currDir, finalAngle);
     return result;
   }
 
@@ -414,8 +427,6 @@ public class PlayerManager : MonoBehaviour, IPlayerManager
     MovementOpts? option
 )
   {
-    if (option?.Speed < 0) return;
-
     SnakeConfig? player = PlayerList.Find((x) => x.Id == playerId);
 
     if (player == null) return;

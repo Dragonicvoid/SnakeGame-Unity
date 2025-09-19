@@ -30,7 +30,9 @@ public class AiRenderer : MonoBehaviour
 {
   public float LineWidth = 3f;
   public float UpdateTime = 1;
-  public Color LineColor = Color.black;
+  public Color MoveDirColor = Color.black;
+  public Color VeloColor = Color.gray;
+  public Color InputColor = Color.magenta;
   public Color PathColor = Color.blue;
   public Color OpenListColor = Color.white;
   public Color CloseListColor = Color.red;
@@ -354,7 +356,7 @@ public class AiRenderer : MonoBehaviour
 
     Vector2 headPos = snake.State.Body[0].Position;
 
-    Vector2 rotTarget = snake.State.MovementDir;
+    Vector2 rotTarget = new Vector2(snake.State.MovementDir.x, snake.State.MovementDir.y);
     rotTarget.Normalize();
     rotTarget *= 50;
     Vector2 targetPos = new Vector2(
@@ -365,7 +367,35 @@ public class AiRenderer : MonoBehaviour
     {
       Start = new Vector3(headPos.x, headPos.y),
       End = new Vector3(targetPos.x, targetPos.y),
-      Color = LineColor,
+      Color = MoveDirColor,
+    });
+
+    Vector2 inputTarget = new Vector2(snake.State.InputDirection.x, snake.State.InputDirection.y);
+    inputTarget.Normalize();
+    inputTarget *= 50;
+    targetPos = new Vector2(
+      headPos.x + inputTarget.x,
+      headPos.y + inputTarget.y
+    );
+    linePos.Add(new LinePos
+    {
+      Start = new Vector3(headPos.x, headPos.y),
+      End = new Vector3(targetPos.x, targetPos.y),
+      Color = InputColor,
+    });
+
+    Vector2 veloTarget = new Vector2(snake.State.Body[0].Velocity.x, snake.State.Body[0].Velocity.y);
+    veloTarget.Normalize();
+    veloTarget *= 50;
+    targetPos = new Vector2(
+      headPos.x + veloTarget.x,
+      headPos.y + veloTarget.y
+    );
+    linePos.Add(new LinePos
+    {
+      Start = new Vector3(headPos.x, headPos.y),
+      End = new Vector3(targetPos.x, targetPos.y),
+      Color = VeloColor,
     });
   }
 

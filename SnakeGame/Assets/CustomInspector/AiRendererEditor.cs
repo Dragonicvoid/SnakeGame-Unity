@@ -11,8 +11,9 @@ public class AiRendererEditor : Editor
     myScript.LineWidth = EditorGUILayout.FloatField("Dir Line Width", myScript.LineWidth);
     myScript.UpdateTime = EditorGUILayout.FloatField("Update Interval", myScript.UpdateTime);
 
-    myScript.LineColor = EditorGUILayout.ColorField("Dir Line Color", myScript.LineColor);
-    myScript.PathColor = EditorGUILayout.ColorField("Path Color", myScript.PathColor);
+    myScript.MoveDirColor = EditorGUILayout.ColorField("Dir Line Color", myScript.MoveDirColor);
+    myScript.VeloColor = EditorGUILayout.ColorField("Dir Velo Color", myScript.VeloColor);
+    myScript.InputColor = EditorGUILayout.ColorField("Dir Input Color", myScript.InputColor);
     myScript.OpenListColor = EditorGUILayout.ColorField("Open Path Color", myScript.OpenListColor);
     myScript.CloseListColor = EditorGUILayout.ColorField("Close Path Color", myScript.CloseListColor);
     myScript.WallColor = EditorGUILayout.ColorField("Wall Color", myScript.WallColor);

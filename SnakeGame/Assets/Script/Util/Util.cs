@@ -88,18 +88,6 @@ public static class Util
     return sign == 0f ? 1f : sign;
   }
 
-  public static float CalculateAngleBetweenTwoDots(
-    float x1,
-    float y1,
-    float x2,
-    float y2
-  )
-  {
-    float deltaX = x1 - x2;
-    float deltaY = y1 - y2;
-    return Mathf.Atan2(deltaY, deltaX);
-  }
-
   public static float CalculateDistanceBetweenTwoDots(
     float x1,
     float y1,
@@ -203,17 +191,17 @@ public static class Util
 
   /**
   * 0 degree is from vector2 (0, 1); 
+  * Moving counter clockwise
   */
   public static Vector2 RotateFromDegree(Vector2 from, float angleInDeg)
   {
-    float actualAngle = angleInDeg += 90;
-    actualAngle %= 360;
-    actualAngle = actualAngle < 0 ? 360 - actualAngle : actualAngle;
+    float actualAngle = angleInDeg;
     float radian = Mathf.Deg2Rad * actualAngle;
 
-    float[,] mat = new float[2, 2] { { Mathf.Cos(radian), -Mathf.Sin(radian) }, { Mathf.Sin(radian), Mathf.Cos(radian) } };
+    float[,] mat = { { Mathf.Cos(radian), -Mathf.Sin(radian) }, { Mathf.Sin(radian), Mathf.Cos(radian) } };
+    Vector2 res = new Vector2(from.x * mat[0, 0] + from.y * mat[0, 1], from.x * mat[1, 0] + from.y * mat[1, 1]);
 
-    return new Vector2(from.x * mat[0, 0] - from.y * mat[0, 1], from.x * mat[1, 0] + from.y * mat[1, 1]);
+    return res;
   }
 
   public static void DumpToConsole(object obj)

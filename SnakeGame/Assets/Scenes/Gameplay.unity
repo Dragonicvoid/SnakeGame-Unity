@@ -478,7 +478,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   LineWidth: 3
   UpdateTime: 0
-  LineColor: {r: 0, g: 0, b: 0, a: 1}
+  MoveDirColor: {r: 0, g: 0, b: 0, a: 1}
+  VeloColor: {r: 0.5, g: 0.5, b: 0.5, a: 1}
+  InputColor: {r: 1, g: 0, b: 1, a: 1}
   PathColor: {r: 0, g: 0, b: 1, a: 1}
   OpenListColor: {r: 1, g: 1, b: 1, a: 1}
   CloseListColor: {r: 1, g: 0, b: 0, a: 1}
@@ -1643,7 +1645,7 @@ Camera:
   m_Depth: -1
   m_CullingMask:
     serializedVersion: 2
-    m_Bits: 1
+    m_Bits: 147457
   m_RenderingPath: -1
   m_TargetTexture: {fileID: 0}
   m_TargetDisplay: 0

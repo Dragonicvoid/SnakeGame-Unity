@@ -107,7 +107,7 @@ public class ArenaManager : MonoBehaviour, IArenaManager
   /**
  * Get all obstacle angle in reverse from snake head position
  * assuming snake Movement Dir is Vector2(0,1).
- * The result will be between 0-360 moving clockwise from snake move dir
+ * The result will be between 0-360 moving Counter-clockwise from Vector2(0,1);
  */
   public List<float>? FindObsAnglesFromSnake(SnakeConfig player, float radius)
   {
@@ -129,10 +129,6 @@ public class ArenaManager : MonoBehaviour, IArenaManager
       }
     }
 
-    float ang = Mathf.Atan2(player.State.MovementDir.y, player.State.MovementDir.x);
-    float snakeAng = ang * Mathf.Rad2Deg;
-    Debug.Log(player.State.MovementDir);
-
     if (spikes.Count <= 0) return new List<float>();
 
     List<float> duplicateAngleDetection = new List<float>();
@@ -140,8 +136,7 @@ public class ArenaManager : MonoBehaviour, IArenaManager
     SnakeState state = player.State;
 
     SnakeBody? botHead = state.Body[0];
-    Vector2 snakeDir = botHead.Velocity;
-
+    Vector2 snakeDir = new Vector2(botHead.Velocity.x, botHead.Velocity.y);
 
     foreach (SpikeConfig spike in spikes)
     {
@@ -156,24 +151,22 @@ public class ArenaManager : MonoBehaviour, IArenaManager
 
       if (isDetectObs)
       {
-        float snakeAngle = Mathf.Atan2(snakeDir.y, snakeDir.x);
-        float snakeAngleInDegree = snakeAngle * Mathf.Rad2Deg;
+        float headAngle = Mathf.Atan2(snakeDir.y, snakeDir.x);
+        float headInDegree = headAngle * Mathf.Rad2Deg;
 
         float invrsObsAngle = Mathf.Atan2(
           botHead.Position.y - spike.Position.y,
           botHead.Position.x - spike.Position.x
         );
         float angleInDegree = invrsObsAngle * Mathf.Rad2Deg;
-        angleInDegree = angleInDegree < 0 ? 180 + (180 + angleInDegree) : angleInDegree;
-
-        angleInDegree -= snakeAngleInDegree;
-        angleInDegree %= 360;
-        angleInDegree = angleInDegree < 0 ? 360 - angleInDegree : angleInDegree;
+        float finalAngle = headInDegree < 0 ? (Mathf.Abs(headInDegree) + angleInDegree) : (360 - (headInDegree - angleInDegree));
+        finalAngle %= 360;
+        finalAngle = finalAngle < 0 ? (360 + finalAngle) : finalAngle;
 
         if (duplicateAngleDetection.FindIndex((angle) => angle == invrsObsAngle) == -1)
         {
           duplicateAngleDetection.Add(invrsObsAngle);
-          detectedObstacleAngles.Add(angleInDegree);
+          detectedObstacleAngles.Add(finalAngle);
         }
       }
     }

@@ -35,6 +35,8 @@ public static class BOT_CONFIG
 public static class TIME_CONFIG
 {
   public const float FOOD_EXPIRED = 3;
+
+  public const float TURNING_FRAME = 0.05f;
 }
 
 public static class MAP

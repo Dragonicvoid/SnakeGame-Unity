@@ -25,6 +25,7 @@ public interface IPlayerManager
       SnakeConfig player,
       Vector2 newMovement,
       float turnRadius,
+      float remaining,
       Vector2? coorDir
     );
   public void UpdateDirection(SnakeConfig player, Vector2 botNewDir);

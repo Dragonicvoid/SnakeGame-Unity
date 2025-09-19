@@ -51,35 +51,49 @@ public class BaseAction : IBaseAction
 
   public Vector2 ProcessBotMovementByTarget(SnakeConfig player, Vector2 target)
   {
+    Vector2 dir = player.State.Body[0].Velocity;
     Vector2 headCood = player.State.Body[0].Position;
+
+    float headAngle = Mathf.Atan2(dir.y, dir.x);
+    float headInDegree = headAngle * Mathf.Rad2Deg;
+
     float dirTowardTarget = Mathf.Atan2(
       headCood.y - target.y,
       headCood.x - target.x
     );
-    Vector2 targetVec = new Vector2(
--Mathf.Cos(dirTowardTarget),
-  Mathf.Sin(2 * Mathf.PI - dirTowardTarget)
-    );
+    float angleInDegree = dirTowardTarget * Mathf.Rad2Deg;
+    float finalAngle = headInDegree < 0 ? (Mathf.Abs(headInDegree) + angleInDegree) : (360 - (headInDegree - angleInDegree));
+    finalAngle %= 360;
+    finalAngle = finalAngle < 0 ? (360 + finalAngle) : finalAngle;
+
+    Vector2 targetVec = Util.RotateFromDegree(dir, finalAngle);
     return targetVec;
   }
 
   public Vector2 ProcessBotMovementByFood(SnakeConfig player, FoodConfig targetFood)
   {
+    Vector2 dir = player.State.Body[0].Velocity;
     Vector2 headCood = player.State.Body[0].Position;
     Vector2 foodPos = targetFood.State.Position;
+
+    float headAngle = Mathf.Atan2(dir.y, dir.x);
+    float headInDegree = headAngle * Mathf.Rad2Deg;
+
     float dirTowardFood = Mathf.Atan2(
       headCood.y - foodPos.y,
       headCood.x - foodPos.x
     );
-    Vector2 targetVec = new Vector2(
-      -Mathf.Cos(dirTowardFood),
-      Mathf.Sin(2 * Mathf.PI - dirTowardFood)
-    );
+    float angleInDegree = dirTowardFood * Mathf.Rad2Deg;
+    float finalAngle = headInDegree < 0 ? (Mathf.Abs(headInDegree) + angleInDegree) : (360 - (headInDegree - angleInDegree));
+    finalAngle %= 360;
+    finalAngle = finalAngle < 0 ? (360 + finalAngle) : finalAngle;
+
+    Vector2 targetVec = Util.RotateFromDegree(dir, finalAngle);
     return targetVec;
   }
 
   public Vector2? ProcessBotMovementByFatalObs(
-    SnakeConfig _,
+    SnakeConfig snake,
     List<float> detectedObstacle
   )
   {
@@ -88,7 +102,7 @@ public class BaseAction : IBaseAction
     {
       if (detectedObstacle.Count == 1)
       {
-        turnAngle = detectedObstacle[0] + Random.Range(-45, 45);
+        turnAngle = detectedObstacle[0];
       }
       else
       {
@@ -103,15 +117,9 @@ public class BaseAction : IBaseAction
       }
     }
 
-    // Making radian 0 is (0,1);
-    turnAngle = turnAngle < 0 ? 360 - turnAngle : turnAngle;
-    turnAngle = 360 - turnAngle;
-
-    float angleInRadian = turnAngle * Mathf.Deg2Rad;
-    Vector2 targetVec = new Vector2(
-      -Mathf.Sin(angleInRadian),
-      Mathf.Cos(angleInRadian)
-    );
+    turnAngle += Random.Range(-30, 30);
+    Vector2 dir = new Vector2(snake.State.Body[0].Velocity.x, snake.State.Body[0].Velocity.y);
+    Vector2 targetVec = Util.RotateFromDegree(dir, turnAngle);
 
     return targetVec;
   }
