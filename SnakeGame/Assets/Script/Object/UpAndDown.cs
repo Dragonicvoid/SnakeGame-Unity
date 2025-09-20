@@ -32,7 +32,7 @@ public class UpAndDown : MonoBehaviour
     initPos = new Vector3(sprite.transform.position.x, sprite.transform.position.y);
   }
 
-  void Start()
+  void OnEnable()
   {
     TweenData data = new TweenData
     {

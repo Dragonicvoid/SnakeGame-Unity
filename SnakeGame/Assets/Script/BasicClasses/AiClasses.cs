@@ -35,10 +35,10 @@ public class PlannerFactor
 }
 
 [Serializable]
-public class AStarPoint
+public class AStarPointData
 {
-  public Vector2? Point { get; set; }
-  public AStarPoint? PrevPoint { get; set; }
+  public AStarVector Point { get; set; }
+  public AStarPointData? PrevPoint { get; set; }
   public float CurrGoal { get; set; }
   public float CurrHeuristic { get; set; }
   public float CurrF
@@ -49,10 +49,10 @@ public class AStarPoint
     }
   }
 
-  public AStarPoint(Vector2 origin, Vector2 target)
+  public AStarPointData(Vector2 origin, Vector2 target)
   {
     CurrHeuristic = Vector2.Distance(origin, target);
-    Point = origin;
+    Point = new AStarVector(origin.x, origin.y);
   }
 }
 
@@ -73,16 +73,16 @@ public class AStarResultData
 
 public class AStarSearchData
 {
-  public List<AStarPoint> OpenList { get; set; }
-  public List<AStarPoint> CloseList { get; set; }
-  public Dictionary<string, AStarPoint> MemoiPoint { get; set; }
-  public AStarPoint? PathFound { get; set; }
+  public List<AStarPointData> OpenList { get; set; }
+  public List<AStarPointData> CloseList { get; set; }
+  public Dictionary<string, AStarPointData> MemoiPoint { get; set; }
+  public AStarPointData? PathFound { get; set; }
 
   public AStarSearchData(
-    List<AStarPoint> OpenList,
-    List<AStarPoint> CloseList,
-    Dictionary<string, AStarPoint> MemoiPoint,
-    AStarPoint? PathFound
+    List<AStarPointData> OpenList,
+    List<AStarPointData> CloseList,
+    Dictionary<string, AStarPointData> MemoiPoint,
+    AStarPointData? PathFound
   )
   {
     this.OpenList = OpenList;
@@ -92,5 +92,25 @@ public class AStarSearchData
     {
       this.PathFound = PathFound;
     }
+  }
+}
+
+[Serializable]
+public class AStarVector
+{
+  public float x { get; set; }
+
+  public float y { get; set; }
+
+  public AStarVector(float x, float y)
+  {
+    this.x = x;
+    this.y = y;
+  }
+
+  public void Set(float x, float y)
+  {
+    this.x = x;
+    this.y = y;
   }
 }

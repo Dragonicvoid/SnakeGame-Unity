@@ -62,6 +62,13 @@ public class AiRenderer : MonoBehaviour
     }
   }
 
+  void Awake()
+  {
+#if UNITY_EDITOR
+    Camera.main.cullingMask |= 1 << ((int)LAYER.DEBUG);
+#endif
+  }
+
   void updateMeshRender()
   {
     MeshRenderer renderer = GetComponent<MeshRenderer>();
@@ -272,16 +279,16 @@ public class AiRenderer : MonoBehaviour
       drawTile(p, null);
     }
 
-    List<AStarPoint> openList = snake.State.DebugData?.PathfindingState?.OpenList ?? new List<AStarPoint>();
-    foreach (AStarPoint o in openList)
+    List<AStarPointData> openList = snake.State.DebugData?.PathfindingState?.OpenList ?? new List<AStarPointData>();
+    foreach (AStarPointData o in openList)
     {
-      drawTile(o.Point, OpenListColor);
+      drawTile(new Vector2(o.Point.x, o.Point.y), OpenListColor);
     }
 
-    List<AStarPoint> closeList = snake.State.DebugData?.PathfindingState?.CloseList ?? new List<AStarPoint>();
-    foreach (AStarPoint c in closeList)
+    List<AStarPointData> closeList = snake.State.DebugData?.PathfindingState?.CloseList ?? new List<AStarPointData>();
+    foreach (AStarPointData c in closeList)
     {
-      drawTile(c.Point, CloseListColor);
+      drawTile(new Vector2(c.Point.x, c.Point.y), CloseListColor);
     }
   }
 

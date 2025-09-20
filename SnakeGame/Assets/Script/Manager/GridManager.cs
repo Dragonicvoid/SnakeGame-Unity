@@ -102,10 +102,10 @@ public class GridManager : MonoBehaviour, IGridManager
 
     if (grid == null) return;
 
-    int index = grid.Foods.FindIndex((f) => f == food);
+    int index = grid.Foods.FindIndex((f) => f.Id == food.Id);
     if (index != -1)
     {
-      grid.Foods = Util.Slice(grid.Foods, index, grid.Foods.Count - 1);
+      grid.Foods = Util.RemoveFromIdx(grid.Foods, index);
     }
   }
 

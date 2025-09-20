@@ -486,7 +486,7 @@ MonoBehaviour:
   CloseListColor: {r: 1, g: 0, b: 0, a: 1}
   WallColor: {r: 0, g: 1, b: 0, a: 1}
   OccupyColor: {r: 1, g: 0.92156863, b: 0.015686275, a: 1}
-  Mask: 000001
+  Mask: 000101
 --- !u!1 &406524936
 GameObject:
   m_ObjectHideFlags: 0

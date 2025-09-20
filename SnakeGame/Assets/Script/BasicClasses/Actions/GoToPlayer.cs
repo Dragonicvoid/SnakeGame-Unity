@@ -129,7 +129,7 @@ public class GoToPlayer : BaseAction
       mainPlayerSide.y
         );
 
-        AStarResultData? path = GetPath(this.Player.State.Body[0].Position, targetPos, new List<Vector2>{
+        AStarResultData? path = GetPath(Player.State.Body[0].Position, targetPos, new List<Vector2>{
           mainPlayerSide,
             frontPlayerSide,
             otherPlayerSide,
@@ -137,7 +137,7 @@ public class GoToPlayer : BaseAction
 
         if (path == null || path.Result.Count <= 0) return;
 
-        newDir = ProcessBotMovementByTarget(this.Player, path.Result[0]);
+        newDir = ProcessBotMovementByTarget(Player, path.Result[0]);
 
         if (newDir == null) return;
 
@@ -157,7 +157,7 @@ public class GoToPlayer : BaseAction
             Cooldown = BOT_CONFIG.AGGRESSIVE_COOLDOWN;
             aggresiveDuration = BOT_CONFIG.AGGRRESIVE_TIME;
             firstTime = false;
-            aggresiveEndsTStamp = Cooldown > 0 ? Cooldown * -1000 : 0;
+            aggresiveEndsTStamp = Cooldown > 0 ? (Cooldown * -1) : 0;
         }
 
         SnakeConfig? mainPlayer = playerList.Find((p) =>
@@ -184,21 +184,21 @@ public class GoToPlayer : BaseAction
         // and on aggressive cooldown
         if (!isValidToBeAggresive(playerList, player, null)) return Score;
 
-        if (!inPlayerCone && !this.isAggresive) return Score;
+        if (!inPlayerCone && !isAggresive) return Score;
 
         float currentTStamp = Time.time;
-        float deltaTStamp = currentTStamp - this.aggresiveStartTStamp;
+        float deltaTStamp = currentTStamp - aggresiveStartTStamp;
         // lose aggresion after duration
-        if (this.isAggresive && deltaTStamp / 1000 > this.aggresiveDuration)
+        if (isAggresive && (deltaTStamp > aggresiveDuration))
         {
-            this.isAggresive = false;
-            this.aggresiveEndsTStamp = currentTStamp;
+            isAggresive = false;
+            aggresiveEndsTStamp = currentTStamp;
             return Score;
         }
 
         Score += ACTION_SCORE.BECOME_AGGRESIVE;
 
-        if (deltaTStamp / 1000 < this.forceToChangePath)
+        if (deltaTStamp < forceToChangePath)
         {
             return Score;
         }

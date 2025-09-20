@@ -3,14 +3,21 @@ using UnityEngine;
 
 public static class AStarFunctions
 {
-  public static string GetStringCoordName(Vector2 pos)
+  public static string GetStringCoordName(AStarVector pos)
   {
     (int x, int y) = GetIdxByPos(pos);
     string result = "Coord_" + x + "_" + y;
     return result;
   }
 
-  public static (int x, int y) GetIdxByPos(Vector2 pos)
+  public static string GetStringCoordName(Vector2 pos)
+  {
+    (int x, int y) = GetIdxByPos(new AStarVector(pos.x, pos.y));
+    string result = "Coord_" + x + "_" + y;
+    return result;
+  }
+
+  public static (int x, int y) GetIdxByPos(AStarVector pos)
   {
     float tile = ARENA_DEFAULT_SIZE.TILE;
     float width = ARENA_DEFAULT_SIZE.WIDTH;
@@ -34,8 +41,8 @@ public static class AStarFunctions
     float closestDist = float.MaxValue;
     for (int i = 0; i < result.Count; i++)
     {
-      Vector2 currTile = result[i];
-      float currDist = Vector2.Distance(currTile, currPos);
+      AStarVector currTile = new AStarVector(result[i].x, result[i].y);
+      float currDist = Vector2.Distance(new Vector2(currTile.x, currTile.y), new Vector2(currPos.x, currPos.y));
 
       if (currDist < closestDist)
       {

@@ -3,7 +3,7 @@ using UnityEngine;
 
 public class GoToFood : BaseAction
 {
-    int minBodySize = 9;
+    int minBodySize = 20;
 
     public override void Run(SnakeConfig player, SnakeActionData data)
     {
@@ -28,11 +28,8 @@ public class GoToFood : BaseAction
         FoodConfig? food = factor.DetectedFood;
         float foodScore = food != null ? ACTION_SCORE.FOUND_FOOD_NEARBY : 0;
 
-        float bodyFactor = Mathf.Max(
-          factor.Player.State.Body.Count - minBodySize,
-          0
-        );
-        float bodyFactScore = bodyFactor * ACTION_SCORE.SMALL_BODY;
+        float bodyFactor = factor.Player.State.Body.Count - minBodySize;
+        float bodyFactScore = bodyFactor * -1 * ACTION_SCORE.SMALL_BODY;
 
         Score = bodyFactScore + foodScore;
         return Score;

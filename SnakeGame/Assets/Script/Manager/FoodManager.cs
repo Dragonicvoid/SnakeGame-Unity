@@ -90,7 +90,6 @@ public class FoodManager : MonoBehaviour, IFoodManager
       }
 
       FoodConfig food = new FoodConfig(foodCounter.ToString(), new FoodState(pos, false), 0, obj);
-
       gridManager?.I.AddFood(food);
       FoodList.Add(food);
 
@@ -110,6 +109,8 @@ public class FoodManager : MonoBehaviour, IFoodManager
       (dist, data) =>
       {
         data.Food.State.Eaten = true;
+        removeFood(data.Food);
+        data.Snake.State.TargetFood = null;
       },
       (dist, data) =>
       {
@@ -121,7 +122,6 @@ public class FoodManager : MonoBehaviour, IFoodManager
       },
       (dist, data) =>
       {
-        removeFood(data.Food);
         GameEvent.Instance.PlayerSizeIncrease(data.Snake);
       });
     IEnumerator<object> coroutine = Tween.Create(tweenData);
@@ -132,10 +132,9 @@ public class FoodManager : MonoBehaviour, IFoodManager
   {
     gridManager?.I.RemoveFood(food);
     foodSpawner?.RemoveFood(food.Object);
-    FoodList = Util.Filter(FoodList, (item) =>
-    {
-      return item.Id != food.Id;
-    });
+
+    int idx = FoodList.FindIndex((f) => f.Id == food.Id);
+    FoodList = Util.RemoveFromIdx(FoodList, idx);
   }
 
   public void RemoveAllFood()

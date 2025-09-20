@@ -51,8 +51,9 @@ public class GameManager : MonoBehaviour
     foreach (SnakeConfig snake in PlayerManager?.I.PlayerList ?? new List<SnakeConfig>())
     {
       handleBotLogic(snake);
-      PlayerManager?.I.UpdateCoordinate(deltaTime);
     }
+
+    PlayerManager?.I.UpdateCoordinate(deltaTime);
   }
 
   private void CreatePlayer()
@@ -224,12 +225,9 @@ public class GameManager : MonoBehaviour
     List<float> detectedPlayer = new List<float>();
     List<float> detectedWall = new List<float>();
     FoodConfig? detectedFood = null;
-    //handle bot Booster Activation
-    // this.processBotBoosterUsage(player);
 
-    //if bot in the middle of turning sequene, disable the turn logic
     if (snake.State.InDirectionChange) return;
-    //detect player and food
+
     detectedPlayer = PlayerManager.I.FindNearestPlayerTowardPoint(
       snake,
       BOT_CONFIG.TRIGGER_AREA_DST
@@ -301,7 +299,6 @@ public class GameManager : MonoBehaviour
     }
 
     IBaseAction currAction = Planner.Plan(possibleActions, factor);
-
     bool differentAction = currAction != snake.Action;
     if (currAction != null && snake.Action?.AllowToChange() == true)
     {

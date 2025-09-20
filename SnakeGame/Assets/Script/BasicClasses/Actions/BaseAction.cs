@@ -58,8 +58,8 @@ public class BaseAction : IBaseAction
     float headInDegree = headAngle * Mathf.Rad2Deg;
 
     float dirTowardTarget = Mathf.Atan2(
-      headCood.y - target.y,
-      headCood.x - target.x
+      target.y - headCood.y,
+      target.x - headCood.x
     );
     float angleInDegree = dirTowardTarget * Mathf.Rad2Deg;
     float finalAngle = headInDegree < 0 ? (Mathf.Abs(headInDegree) + angleInDegree) : (360 - (headInDegree - angleInDegree));
@@ -80,8 +80,8 @@ public class BaseAction : IBaseAction
     float headInDegree = headAngle * Mathf.Rad2Deg;
 
     float dirTowardFood = Mathf.Atan2(
-      headCood.y - foodPos.y,
-      headCood.x - foodPos.x
+      foodPos.y - headCood.y,
+      foodPos.x - headCood.x
     );
     float angleInDegree = dirTowardFood * Mathf.Rad2Deg;
     float finalAngle = headInDegree < 0 ? (Mathf.Abs(headInDegree) + angleInDegree) : (360 - (headInDegree - angleInDegree));
@@ -116,6 +116,8 @@ public class BaseAction : IBaseAction
         turnAngle = Mathf.Floor(totalAngle / detectedObstacle.Count);
       }
     }
+
+    if (turnAngle == 0) return null;
 
     turnAngle += Random.Range(-30, 30);
     Vector2 dir = new Vector2(snake.State.Body[0].Velocity.x, snake.State.Body[0].Velocity.y);
@@ -157,9 +159,9 @@ public class BaseAction : IBaseAction
     if (PrevPathfindingData == null)
     {
       PrevPathfindingData = new AStarSearchData(
-          new List<AStarPoint>(),
-          new List<AStarPoint>(),
-          new Dictionary<string, AStarPoint>(),
+          new List<AStarPointData>(),
+          new List<AStarPointData>(),
+          new Dictionary<string, AStarPointData>(),
           null
       );
     }
@@ -195,28 +197,25 @@ public class BaseAction : IBaseAction
     Vector2 mainPlayerPos = targetPlayer.State.Body[0].Position;
     Vector2 currPlayerPos = currPlayer.State.Body[0].Position;
 
-    Vector2 currPlayerVec = new Vector2(
-        currPlayerPos.x - mainPlayerPos.x,
-        currPlayerPos.y - mainPlayerPos.y
-    );
     Vector2 mainPlayerVec = new Vector2(
-        targetPlayer.State.Body[0].Velocity.x,
-        targetPlayer.State.Body[0].Velocity.y
+        mainPlayerPos.x - currPlayerPos.x,
+        mainPlayerPos.y - currPlayerPos.y
     );
-
+    Vector2 BotDir = new Vector2(
+        currPlayer.State.Body[0].Velocity.x,
+        currPlayer.State.Body[0].Velocity.y
+    );
 
     float angle =
       Mathf.Acos(
-        (currPlayerVec.x * mainPlayerVec.x +
-          currPlayerVec.y * mainPlayerVec.y) /
-          (Vector2.Distance(Vector2.zero, mainPlayerVec) * Vector2.Distance(Vector2.zero, currPlayerVec))
-      ) *
-        180 /
-      Mathf.PI;
+        (mainPlayerVec.x * BotDir.x +
+          mainPlayerVec.y * BotDir.y) /
+          (Vector2.Distance(Vector2.zero, mainPlayerVec) * Vector2.Distance(Vector2.zero, BotDir))
+      ) * Mathf.Rad2Deg;
 
     if (
       Vector2.Distance(currPlayerPos, mainPlayerPos) <= playerMinDist &&
-      angle <= playerConeDegree / 2
+      angle <= (playerConeDegree / 2)
     )
       return true;
 
@@ -242,7 +241,7 @@ public class BaseAction : IBaseAction
 
   public bool AllowToChange()
   {
-    float deltaTime = Time.time - this.LastActionTStamp;
+    float deltaTime = Time.time - LastActionTStamp;
     return deltaTime >= ForceRun;
   }
 }

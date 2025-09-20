@@ -233,7 +233,7 @@ public class PlayerManager : MonoBehaviour, IPlayerManager
 
     foreach (SnakeConfig otherPlayer in PlayerList)
     {
-      if (otherPlayer.Id == currentPlayer.Id) return new List<float>();
+      if (otherPlayer.Id == currentPlayer.Id) continue;
 
       int idxLen = otherPlayer.State.Body.Count;
       for (int i = 1; i < idxLen; i++)

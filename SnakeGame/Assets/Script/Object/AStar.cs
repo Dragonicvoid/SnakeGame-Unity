@@ -22,7 +22,7 @@ public class AStar
     AStarSearchData prevData,
     string id,
     List<Vector2>? predefinedPath = null,
-    int maxDepth = 10
+    int maxDepth = 1
   )
   {
     float TILE = ARENA_DEFAULT_SIZE.TILE;
@@ -32,7 +32,7 @@ public class AStar
 
     if (prevData.OpenList.Count <= 0)
     {
-      AStarPoint aStarPoint = new AStarPoint(origin, target);
+      AStarPointData aStarPoint = new AStarPointData(origin, target);
       prevData.OpenList.Add(aStarPoint);
 
       bool memoiExist = prevData.MemoiPoint.TryGetValue(AStarFunctions.GetStringCoordName(origin), out _);
@@ -56,30 +56,26 @@ public class AStar
           lowestFIdx = j;
         }
       }
-      AStarPoint currentPoint = prevData.OpenList[lowestFIdx];
+      AStarPointData currentPoint = prevData.OpenList[lowestFIdx];
 
       // found path
       if (
-        (currentPoint.Point.HasValue &&
-          Vector2.Distance(currentPoint.Point.Value, target) <= TILE) ||
+        (Vector2.Distance(new Vector2(currentPoint.Point.x, currentPoint.Point.y), target) <= TILE) ||
         currDepth >= maxDepth
       )
       {
-        if (
-          currentPoint.Point.HasValue &&
-          Vector2.Distance(currentPoint.Point.Value, target) <= TILE
-        )
+        if (Vector2.Distance(new Vector2(currentPoint.Point.x, currentPoint.Point.y), target) <= TILE)
         {
           prevData.PathFound = currentPoint;
         }
 
-        AStarPoint curr = Util.DeepCopy(currentPoint);
+        AStarPointData curr = Util.DeepCopy(currentPoint);
         List<Vector2> result = new List<Vector2>();
         while (curr.PrevPoint != null && curr.Point != null)
         {
-          Vector2 currPoint = curr.Point.Value;
+          AStarVector currPoint = curr.Point;
           currPoint.Set(currPoint.x + offset, currPoint.y + offset);
-          result.Add((Vector2)curr.Point);
+          result.Add(new Vector2(curr.Point.x, curr.Point.y));
           curr = Util.DeepCopy(curr.PrevPoint);
         }
 
@@ -92,7 +88,7 @@ public class AStar
         return new AStarResultData(result, prevData);
       }
 
-      Func<AStarPoint, bool> compare = (el) =>
+      Func<AStarPointData, bool> compare = (el) =>
       {
         return (
           el.Point?.x != currentPoint.Point?.x ||
@@ -101,9 +97,7 @@ public class AStar
       };
       prevData.OpenList = Util.Filter(prevData.OpenList, compare);
       prevData.CloseList.Add(currentPoint);
-      List<Vector2> neighbor = currentPoint.Point.HasValue
-        ? getNeighbor((Vector2)currentPoint.Point)
-        : new List<Vector2>();
+      List<AStarVector> neighbor = getNeighbor(currentPoint.Point);
 
       for (int i = 0; i < neighbor.Count; i++)
       {
@@ -111,8 +105,7 @@ public class AStar
         if (
           prevData.CloseList.Find(
             (el) =>
-              el.Point.HasValue &&
-              AStarFunctions.GetStringCoordName(neighbor[i]) == AStarFunctions.GetStringCoordName(el.Point.Value)
+              AStarFunctions.GetStringCoordName(neighbor[i]) == AStarFunctions.GetStringCoordName(el.Point)
           ) != null
         )
         {
@@ -122,12 +115,10 @@ public class AStar
         float gScore =
           currentPoint.CurrGoal +
           getCoordCost(neighbor[i]) +
-          (currentPoint.Point.HasValue
-            ? Vector2.Distance(currentPoint.Point.Value, neighbor[i])
-            : 0f);
+          Vector2.Distance(new Vector2(currentPoint.Point.x, currentPoint.Point.y), new Vector2(neighbor[i].x, neighbor[i].y));
         bool gScoreIsBest = false;
 
-        AStarPoint? currNeighbor;
+        AStarPointData? currNeighbor;
         bool memoiExist = prevData.MemoiPoint.TryGetValue(
           AStarFunctions.GetStringCoordName(neighbor[i]),
           out currNeighbor
@@ -136,7 +127,7 @@ public class AStar
         if (prevData.OpenList.Find((el) => neighbor[i] == el.Point) == null)
         {
           // new node
-          currNeighbor = new AStarPoint(neighbor[i], target);
+          currNeighbor = new AStarPointData(new Vector2(neighbor[i].x, neighbor[i].y), target);
 
           if (memoiExist)
           {
@@ -163,9 +154,7 @@ public class AStar
         {
           currNeighbor.PrevPoint = currentPoint;
           currNeighbor.CurrGoal = gScore;
-          currNeighbor.CurrHeuristic = currNeighbor.Point.HasValue
-            ? Mathf.Pow(Vector2.Distance(currNeighbor.Point.Value, target), 2)
-            : currNeighbor.CurrHeuristic;
+          currNeighbor.CurrHeuristic = Mathf.Pow(Vector2.Distance(new Vector2(currNeighbor.Point.x, currNeighbor.Point.y), target), 2);
         }
       }
 
@@ -174,13 +163,13 @@ public class AStar
 
     if (prevData.PathFound != null)
     {
-      AStarPoint curr = Util.DeepCopy(prevData.PathFound);
+      AStarPointData curr = Util.DeepCopy(prevData.PathFound);
       List<Vector2> result = new List<Vector2>();
       while (curr.PrevPoint != null && curr.Point != null)
       {
-        Vector2 currPoint = curr.Point.Value;
+        AStarVector currPoint = curr.Point;
         currPoint.Set(currPoint.x + offset, currPoint.y + offset);
-        result.Add(currPoint);
+        result.Add(new Vector2(currPoint.x, currPoint.y));
         curr = Util.DeepCopy(curr.PrevPoint);
       }
 
@@ -188,26 +177,23 @@ public class AStar
       result.AddRange(predefinedPath);
       result = AStarFunctions.SliceByPosition(result, origin);
       return new AStarResultData(result, prevData);
-      ;
     }
 
-    Debug.Log("NO PATH");
-    return new AStarResultData(new List<Vector2>(), prevData)
-;
+    return new AStarResultData(new List<Vector2>(), prevData);
   }
 
-  private List<Vector2> getNeighbor(Vector2 pos)
+  private List<AStarVector> getNeighbor(AStarVector pos)
   {
     float TILE = ARENA_DEFAULT_SIZE.TILE;
     float HEIGHT = ARENA_DEFAULT_SIZE.HEIGHT;
     float WIDTH = ARENA_DEFAULT_SIZE.WIDTH;
     (int x, int y) = AStarFunctions.GetIdxByPos(pos);
-    List<Vector2> result = new List<Vector2>();
+    List<AStarVector> result = new List<AStarVector>();
 
     // Left, Right, Up, Down
     if (isValidPosition(x + padding, y))
     {
-      result.Add(new Vector2(
+      result.Add(new AStarVector(
       (x + padding) * TILE - WIDTH / 2,
         y * TILE - HEIGHT / 2
       ));
@@ -215,7 +201,7 @@ public class AStar
 
     if (isValidPosition(x - padding, y))
     {
-      result.Add(new Vector2(
+      result.Add(new AStarVector(
       (x - padding) * TILE - WIDTH / 2,
         y * TILE - HEIGHT / 2
       ));
@@ -223,7 +209,7 @@ public class AStar
 
     if (isValidPosition(x, y + padding))
     {
-      result.Add(new Vector2(
+      result.Add(new AStarVector(
       x * TILE - WIDTH / 2,
         (y + padding) * TILE - HEIGHT / 2
       ));
@@ -231,7 +217,7 @@ public class AStar
 
     if (isValidPosition(x, y - padding))
     {
-      result.Add(new Vector2(
+      result.Add(new AStarVector(
        x * TILE - WIDTH / 2,
         (y - padding) * TILE - HEIGHT / 2
       ));
@@ -244,7 +230,7 @@ public class AStar
       isValidPosition(x, y + padding)
     )
     {
-      result.Add(new Vector2(
+      result.Add(new AStarVector(
        (x + padding) * TILE - WIDTH / 2,
         (y + padding) * TILE - HEIGHT / 2
       ));
@@ -256,7 +242,7 @@ public class AStar
       isValidPosition(x, y + padding)
     )
     {
-      result.Add(new Vector2(
+      result.Add(new AStarVector(
       (x - padding) * TILE - WIDTH / 2,
         (y + padding) * TILE - HEIGHT / 2
       ));
@@ -268,7 +254,7 @@ public class AStar
       isValidPosition(x, y - padding)
     )
     {
-      result.Add(new Vector2(
+      result.Add(new AStarVector(
       (x - padding) * TILE - WIDTH / 2,
         (y - padding) * TILE - HEIGHT / 2
       ));
@@ -280,7 +266,7 @@ public class AStar
       isValidPosition(x, y - padding)
     )
     {
-      result.Add(new Vector2(
+      result.Add(new AStarVector(
       (x + padding) * TILE - WIDTH / 2,
         (y - padding) * TILE - HEIGHT / 2
       ));
@@ -322,7 +308,7 @@ public class AStar
     return safeObstacle && occupyByOther == null && neighbor;
   }
 
-  private int getCoordCost(Vector2 pos)
+  private int getCoordCost(AStarVector pos)
   {
     (int x, int y) = AStarFunctions.GetIdxByPos(pos);
     if (map[y] == null || map[y][x] == null) return 1;

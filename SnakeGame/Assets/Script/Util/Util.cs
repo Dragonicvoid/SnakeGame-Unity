@@ -20,6 +20,27 @@ public static class Util
     return inputList.Skip(startIndex).Take(elementCount).ToList();
   }
 
+  public static List<T> AddToIndex<T>(List<T> inputList, int idx, T value)
+  {
+    List<T> firstHalf = Slice(inputList, 0, idx - 1);
+    firstHalf.Add(value);
+    List<T> secondHalf = Slice(inputList, idx, inputList.Count - 1);
+    List<T> newList = new List<T>(firstHalf);
+    newList.AddRange(secondHalf);
+
+    return newList;
+  }
+
+  public static List<T> RemoveFromIdx<T>(List<T> inputList, int idx)
+  {
+    List<T> firstHalf = Slice(inputList, 0, idx - 1);
+    List<T> secondHalf = ((idx + 1) >= inputList.Count) ? new List<T>() : Slice(inputList, idx + 1, inputList.Count - 1);
+    List<T> newList = new List<T>(firstHalf);
+    newList.AddRange(secondHalf);
+
+    return newList;
+  }
+
   public static T DeepCopy<T>(T other)
   {
     using (MemoryStream ms = new MemoryStream())

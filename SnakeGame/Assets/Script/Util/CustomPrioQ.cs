@@ -4,7 +4,7 @@ using System.Collections.Generic;
 
 public class CustomPrioQ<T>
 {
-    List<T> Items = new List<T>();
+    public List<T> Items = new List<T>();
 
     Func<T, T, bool> comparator = (T a, T b) =>
     {
@@ -42,12 +42,8 @@ public class CustomPrioQ<T>
         {
             if (comparator(value, Items[i]))
             {
-                List<T> firstHalf = Util.Slice(Items, 0, i);
-                firstHalf.Add(value);
-                List<T> secondHalf = Util.Slice(Items, i, Items.Count - 1);
-                List<T> newList = new List<T>(firstHalf);
-                newList.AddRange(secondHalf);
-                return;
+                Items = Util.AddToIndex(Items, i, value);
+                break;
             }
         }
 

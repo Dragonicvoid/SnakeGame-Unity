@@ -3,6 +3,7 @@ using Unity.Collections;
 using UnityEngine;
 using UnityEngine.Rendering;
 using Unity.Mathematics;
+using System.Linq;
 
 [ExecuteInEditMode]
 public class CustomSprite : MonoBehaviour
@@ -107,9 +108,9 @@ public class CustomSprite : MonoBehaviour
       meshRend = gameObject.AddComponent<MeshRenderer>();
     }
 
-    if (Application.isPlaying)
+    if (Application.isPlaying && meshRend.materials.Length > 0)
     {
-      _mat = meshRend.material;
+      _mat = meshRend.materials[0];
     }
 
     if (!_mat)
@@ -119,6 +120,14 @@ public class CustomSprite : MonoBehaviour
 
       if (Application.isPlaying)
       {
+        if (meshRend.materials.Length > 0)
+        {
+          meshRend.materials[0] = _mat;
+        }
+        else
+        {
+          meshRend.materials.Append(_mat);
+        }
         meshRend.material = _mat;
       }
     }
