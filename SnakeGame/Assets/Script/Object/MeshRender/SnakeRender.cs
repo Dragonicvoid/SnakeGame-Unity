@@ -280,6 +280,10 @@ public class SnakeRender : MonoBehaviour, ISnakeRenderable
             cmdBuffer.SetRenderTarget(RendTex);
             cmdBuffer.ClearRenderTarget(true, true, Color.clear, 1f);
             cmdBuffer.DrawMesh(mesh, Matrix4x4.identity, _mat, 0, 0);
+
+            // Hack resize Web-view
+            cmdBuffer.SetRenderTarget(PersistentData.Instance.RenderTex);
+            cmdBuffer.ClearRenderTarget(false, false, Color.clear, 1f);
         }
 
         Graphics.ExecuteCommandBuffer(cmdBuffer);
@@ -319,11 +323,4 @@ public class SnakeRender : MonoBehaviour, ISnakeRenderable
             Destroy(_mat);
         }
     }
-
-#if !UNITY_EDITOR
-void OnDestroy()
-  {
-    destroyMat();
-  }
-#endif
 }

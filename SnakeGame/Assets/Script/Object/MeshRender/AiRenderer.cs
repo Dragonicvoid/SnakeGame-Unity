@@ -92,9 +92,9 @@ public class AiRenderer : MonoBehaviour
     int attrbTotal = 4;
     NativeArray<VertexAttributeDescriptor> layout = new NativeArray<VertexAttributeDescriptor>(attrbTotal, Allocator.Temp, NativeArrayOptions.UninitializedMemory);
     layout[0] = new VertexAttributeDescriptor(VertexAttribute.Position, VertexAttributeFormat.Float32, 3);
-    layout[1] = new VertexAttributeDescriptor(VertexAttribute.Color, VertexAttributeFormat.Float32, 4);
-    layout[2] = new VertexAttributeDescriptor(VertexAttribute.TexCoord0, VertexAttributeFormat.Float16, 2);
-    layout[3] = new VertexAttributeDescriptor(VertexAttribute.Tangent, VertexAttributeFormat.Float32, 1);
+    layout[1] = new VertexAttributeDescriptor(VertexAttribute.Tangent, VertexAttributeFormat.Float32, 1);
+    layout[2] = new VertexAttributeDescriptor(VertexAttribute.Color, VertexAttributeFormat.Float32, 4);
+    layout[3] = new VertexAttributeDescriptor(VertexAttribute.TexCoord0, VertexAttributeFormat.Float16, 2);
 
     int vertexPerPos = 4;
     int vertexCount = (circlePos.Count + linePos.Count) * vertexPerPos;

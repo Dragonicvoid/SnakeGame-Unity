@@ -238,6 +238,10 @@ public class SnakeTexture : MonoBehaviour
       cmdBuff.ClearRenderTarget(true, true, Color.clear, 1f);
       cmdBuff.DrawMesh(mesh, Matrix4x4.identity, mat, 0, 0);
 
+      // Hack resize Web-view
+      cmdBuff.SetRenderTarget(PersistentData.Instance.RenderTex);
+      cmdBuff.ClearRenderTarget(false, false, Color.clear, 1f);
+
       Graphics.ExecuteCommandBuffer(cmdBuff);
     }
   }

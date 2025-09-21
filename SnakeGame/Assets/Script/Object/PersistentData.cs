@@ -16,7 +16,10 @@ public class PersistentData : MonoBehaviour
   void Start()
   {
     SceneManager.LoadScene(1, LoadSceneMode.Single);
+    RenderTex = RenderTexture.active;
   }
+
+  public RenderTexture RenderTex;
 
   public int SelectedMap = 0;
 

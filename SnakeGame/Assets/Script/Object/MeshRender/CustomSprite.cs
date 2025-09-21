@@ -128,7 +128,6 @@ public class CustomSprite : MonoBehaviour
         {
           meshRend.materials.Append(_mat);
         }
-        meshRend.material = _mat;
       }
     }
     _mat.SetTextureOffset("_MainTex", offset);
@@ -224,11 +223,4 @@ public class CustomSprite : MonoBehaviour
       Destroy(_mat);
     }
   }
-
-#if !UNITY_EDITOR
-void OnDestroy()
-  {
-    destroyMat();
-  }
-#endif
 }
