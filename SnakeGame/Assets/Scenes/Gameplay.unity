@@ -2250,7 +2250,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &898140843
 Transform:
   m_ObjectHideFlags: 0
@@ -3968,7 +3968,7 @@ GameObject:
   - component: {fileID: 1656117876}
   - component: {fileID: 1656117875}
   - component: {fileID: 1656117877}
-  m_Layer: 5
+  m_Layer: 15
   m_Name: SnakeRender
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -4341,7 +4341,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &1996626749
 Transform:
   m_ObjectHideFlags: 0

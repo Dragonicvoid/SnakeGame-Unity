@@ -1,6 +1,7 @@
 #nullable enable
 using System.Collections.Generic;
 using Unity.Collections;
+using Unity.Mathematics;
 using UnityEngine;
 using UnityEngine.Rendering;
 
@@ -15,9 +16,9 @@ public class SnakeRender : MonoBehaviour, ISnakeRenderable
     [System.Runtime.InteropServices.StructLayout(System.Runtime.InteropServices.LayoutKind.Sequential)]
     struct SnakeVertex
     {
-        public Vector3 pos;
-        public uint bodyCount;
-        public Vector2 uv;
+        public Vector4 pos;
+        public float bodyCount;
+        public half2 uv;
         public Vector2 center;
         public Vector3 nextPos;
         public Vector3 prevPos;
@@ -80,19 +81,6 @@ public class SnakeRender : MonoBehaviour, ISnakeRenderable
         Render();
     }
 
-    void randomizeBody()
-    {
-        Vector2 lastPos = new Vector2(0, 0);
-        for (int i = 0; i < SnakeBodies?.Count; i++)
-        {
-            SnakeBodies[i].Position = lastPos;
-            Vector2 newDir = new Vector2(Random.Range(-1f, 1f), Random.Range(-1f, 1f));
-            newDir.Normalize();
-            lastPos = new Vector2(lastPos.x + newDir.x * tileSize / 2, lastPos.y + newDir.y * tileSize / 2);
-        }
-        Render();
-    }
-
     public void Render()
     {
         setBodyMeshData();
@@ -128,9 +116,9 @@ public class SnakeRender : MonoBehaviour, ISnakeRenderable
 
         int descrCount = 6;
         NativeArray<VertexAttributeDescriptor> attr = new NativeArray<VertexAttributeDescriptor>(descrCount, Allocator.Temp, NativeArrayOptions.UninitializedMemory);
-        attr[0] = new VertexAttributeDescriptor(VertexAttribute.Position, VertexAttributeFormat.Float32, 3);
-        attr[1] = new VertexAttributeDescriptor(VertexAttribute.Tangent, VertexAttributeFormat.UInt32, 1);
-        attr[2] = new VertexAttributeDescriptor(VertexAttribute.TexCoord0, VertexAttributeFormat.Float32, 2);
+        attr[0] = new VertexAttributeDescriptor(VertexAttribute.Position, VertexAttributeFormat.Float32, 4);
+        attr[1] = new VertexAttributeDescriptor(VertexAttribute.Tangent, VertexAttributeFormat.Float32, 1);
+        attr[2] = new VertexAttributeDescriptor(VertexAttribute.TexCoord0, VertexAttributeFormat.Float16, 2);
         attr[3] = new VertexAttributeDescriptor(VertexAttribute.TexCoord1, VertexAttributeFormat.Float32, 2);
         attr[4] = new VertexAttributeDescriptor(VertexAttribute.TexCoord2, VertexAttributeFormat.Float32, 3);
         attr[5] = new VertexAttributeDescriptor(VertexAttribute.TexCoord3, VertexAttributeFormat.Float32, 3);
@@ -188,38 +176,39 @@ public class SnakeRender : MonoBehaviour, ISnakeRenderable
             float snakeSize = tileSize;
             int padding = i * vertexPerSnake;
 
+            half h0 = new half(0f), h1 = new half(1f);
             vertex[padding] = new SnakeVertex
             {
-                pos = new Vector3(x - snakeSize, y - snakeSize, r),
-                bodyCount = (uint)SnakeBodies.Count - (uint)i,
-                uv = new Vector2(0f, 0f),
+                pos = new Vector4(x - snakeSize, y - snakeSize, r, 1.0f),
+                bodyCount = SnakeBodies.Count - i,
+                uv = new half2(h0, h0),
                 center = new Vector2(x, y),
                 nextPos = new Vector3(nextXNorm ?? 0, nextYNorm ?? 0, nextR),
                 prevPos = new Vector3(prevXNorm ?? 0, prevYNorm ?? 0, prevR),
             };
             vertex[padding + 1] = new SnakeVertex
             {
-                pos = new Vector3(x - snakeSize, y + snakeSize, r),
-                bodyCount = (uint)SnakeBodies.Count - (uint)i,
-                uv = new Vector2(0f, 1f),
+                pos = new Vector4(x - snakeSize, y + snakeSize, r, 1.0f),
+                bodyCount = SnakeBodies.Count - i,
+                uv = new half2(h0, h1),
                 center = new Vector2(x, y),
                 nextPos = new Vector3(nextXNorm ?? 0, nextYNorm ?? 0, nextR),
                 prevPos = new Vector3(prevXNorm ?? 0, prevYNorm ?? 0, prevR),
             };
             vertex[padding + 2] = new SnakeVertex
             {
-                pos = new Vector3(x + snakeSize, y + snakeSize, r),
-                bodyCount = (uint)SnakeBodies.Count - (uint)i,
-                uv = new Vector2(1f, 1f),
+                pos = new Vector4(x + snakeSize, y + snakeSize, r, 1.0f),
+                bodyCount = SnakeBodies.Count - i,
+                uv = new half2(h1, h1),
                 center = new Vector2(x, y),
                 nextPos = new Vector3(nextXNorm ?? 0, nextYNorm ?? 0, nextR),
                 prevPos = new Vector3(prevXNorm ?? 0, prevYNorm ?? 0, prevR),
             };
             vertex[padding + 3] = new SnakeVertex
             {
-                pos = new Vector3(x + snakeSize, y - snakeSize, r),
-                bodyCount = (uint)SnakeBodies.Count - (uint)i,
-                uv = new Vector2(1f, 0f),
+                pos = new Vector4(x + snakeSize, y - snakeSize, r, 1.0f),
+                bodyCount = SnakeBodies.Count - i,
+                uv = new half2(h1, h0),
                 center = new Vector2(x, y),
                 nextPos = new Vector3(nextXNorm ?? 0, nextYNorm ?? 0, nextR),
                 prevPos = new Vector3(prevXNorm ?? 0, prevYNorm ?? 0, prevR),
@@ -254,7 +243,7 @@ public class SnakeRender : MonoBehaviour, ISnakeRenderable
         mesh.bounds = new Bounds
         {
             center = transform.localPosition,
-            extents = new Vector3(350, 350)
+            extents = new Vector3(350, 350, 0)
         };
         mesh.subMeshCount = 1;
         mesh.SetSubMesh(0, new SubMeshDescriptor
@@ -264,6 +253,16 @@ public class SnakeRender : MonoBehaviour, ISnakeRenderable
             topology = MeshTopology.Triangles,
             baseVertex = 0,
         });
+
+        if (Application.isPlaying)
+        {
+            MeshFilter filter = GetComponent<MeshFilter>();
+            if (!filter)
+            {
+                filter = gameObject.AddComponent<MeshFilter>();
+            }
+            filter.mesh = mesh;
+        }
     }
 
     void setRenderPass()

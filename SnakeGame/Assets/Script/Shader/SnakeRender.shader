@@ -25,7 +25,7 @@ Shader "Transparent/SnakeRender"
             struct appdata
             {
                 float4 vertex : POSITION;
-                uint body_count : TANGENT;
+                float body_count : TANGENT;
                 half2 uv : TEXCOORD0;
                 float2 center : TEXCOORD1;
                 float3 next_pos_norm : TEXCOORD2;
@@ -35,8 +35,8 @@ Shader "Transparent/SnakeRender"
             struct v2f
             {
                 float4 vertex : SV_POSITION;
-                uint body_count : TANGENT;
-                float2 uv : TEXCOORD0;
+                float body_count : TANGENT;
+                half2 uv : TEXCOORD0;
                 float2 center : TEXCOORD1;
                 float2 next_pos_norm : TEXCOORD2;
                 float2 prev_pos_norm : TEXCOORD3;
@@ -60,7 +60,7 @@ Shader "Transparent/SnakeRender"
                 sdfData prevData;
                 float2 prevNorm;
                 float2 nextNorm;
-                uint body_count;
+                float body_count;
             };
 
             sampler2D _MainTex;
@@ -70,7 +70,7 @@ Shader "Transparent/SnakeRender"
             {
                 v2f o;
                 o.radius = v.vertex.z;
-                o.vertex = UnityObjectToClipPos(v.vertex);
+                o.vertex = UnityObjectToClipPos(float4(v.vertex.xy, -1., v.vertex.w));
                 o.next_pos_norm = v.next_pos_norm;
                 o.prev_pos_norm = v.prev_pos_norm;
                 o.body_count = v.body_count;
