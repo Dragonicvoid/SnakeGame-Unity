@@ -109,7 +109,6 @@ public class FoodManager : MonoBehaviour, IFoodManager
       (dist, data) =>
       {
         data.Food.State.Eaten = true;
-        removeFood(data.Food);
         data.Snake.State.TargetFood = null;
       },
       (dist, data) =>
@@ -122,6 +121,7 @@ public class FoodManager : MonoBehaviour, IFoodManager
       },
       (dist, data) =>
       {
+        removeFood(data.Food);
         GameEvent.Instance.PlayerSizeIncrease(data.Snake);
       });
     IEnumerator<object> coroutine = Tween.Create(tweenData);

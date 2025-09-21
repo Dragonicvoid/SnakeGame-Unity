@@ -23,9 +23,6 @@ public class SkinSelectItem : MonoBehaviour
   [SerializeField]
   GameObject? selectSprite = null;
 
-  [SerializeField]
-  CustomSprite? sprite = null;
-
   Material? mat = null;
 
   public SkinDetail? SkinData = null;
@@ -59,11 +56,6 @@ public class SkinSelectItem : MonoBehaviour
 
   void OnEnable()
   {
-    GameObject targetObj = GameObject.FindGameObjectWithTag("Draw");
-    if (targetObj)
-    {
-      sprite = targetObj.GetComponent<CustomSprite>();
-    }
     setName();
     getImage();
 
@@ -136,12 +128,6 @@ public class SkinSelectItem : MonoBehaviour
       UnityEngine.Experimental.Rendering.GraphicsFormat.R8G8B8A8_UNorm,
       UnityEngine.Experimental.Rendering.GraphicsFormat.D32_SFloat_S8_UInt
     );
-      rendTex.enableRandomWrite = true;
-    }
-
-    if (sprite)
-    {
-      sprite.Texture = rendTex;
     }
 
     preview.texture = rendTex;
@@ -180,8 +166,8 @@ public class SkinSelectItem : MonoBehaviour
 
     mesh.SetVertexBufferParams(4, attr);
     attr.Dispose();
-    float currHeight = 100 / 2f;
-    float currWidth = 100 / 2f;
+    float currHeight = (int)(preview?.rectTransform.rect.height ?? 0) / 2f;
+    float currWidth = (int)(preview?.rectTransform.rect.width ?? 0) / 2f;
 
     NativeArray<VertexType> vertex = new NativeArray<VertexType>(4, Allocator.Temp, NativeArrayOptions.UninitializedMemory);
 

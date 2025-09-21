@@ -32,9 +32,6 @@ Shader "Debug/AiRenderer"
                 half2 uv : TEXCOORD0;
             };
 
-            sampler2D _MainTex;
-            float4 _MainTex_ST;
-
             float when_lt(float x, float y) {
                 return max(sign(y - x), 0.0);
             }

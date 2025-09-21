@@ -61,7 +61,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c49a080ce6cab3e41a8c2defd2163fb1, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  preview: {fileID: 8639807118021318782}
+  preview: {fileID: 3559014428317327320}
   labelName: {fileID: 1753421363895729138}
   selectSprite: {fileID: 3790950203017064581}
   sprite: {fileID: 0}
@@ -70,7 +70,6 @@ MonoBehaviour:
     name: 
     shader_name: 
     texture_name: 
-  tex: {fileID: 2800000, guid: aba182c0ad1788848b8fcf88cb032950, type: 3}
 --- !u!114 &7304564074499024109
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -212,7 +211,7 @@ GameObject:
   m_Component:
   - component: {fileID: 9125260100282438915}
   - component: {fileID: 5637594630898700782}
-  - component: {fileID: 8639807118021318782}
+  - component: {fileID: 3559014428317327320}
   m_Layer: 5
   m_Name: SkinPreview
   m_TagString: Untagged
@@ -247,7 +246,7 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 7958169799853492220}
   m_CullTransparentMesh: 1
---- !u!114 &8639807118021318782
+--- !u!114 &3559014428317327320
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}

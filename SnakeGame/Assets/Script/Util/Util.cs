@@ -66,21 +66,6 @@ public static class Util
     return result;
   }
 
-  public static List<string> GetQuery()
-  {
-#if (UNITY_WEBGL || UNITY_ANDROID) && !UNITY_EDITOR
-      string parameters = Application.absoluteURL.Substring(Application.absoluteURL.IndexOf("?") + 1);
-      return parameters.Split(new char[] { '&', '=' });
-#else
-    return new List<string>(Environment.GetCommandLineArgs());
-#endif
-  }
-
-  public static bool ShouldDrawPathfinding()
-  {
-    return GetQuery().FindIndex((param) => param == "drawPathfinding") != -1;
-  }
-
   public static bool IsCoordInsideMap(float x, float y)
   {
     float TILE = ARENA_DEFAULT_SIZE.TILE;
@@ -229,5 +214,14 @@ public static class Util
   {
     var output = JsonUtility.ToJson(obj, true);
     Debug.Log(output);
+  }
+
+  public static Texture2D ToTexture2D(RenderTexture rTex)
+  {
+    Texture2D tex = new Texture2D(128, 128, TextureFormat.RGBA32, false);
+    RenderTexture.active = rTex;
+    tex.ReadPixels(new Rect(0, 0, rTex.width, rTex.height), 0, 0);
+    tex.Apply();
+    return tex;
   }
 }
