@@ -2,13 +2,15 @@
 %TAG !u! tag:unity3d.com,2011:
 --- !u!78 &1
 TagManager:
-  serializedVersion: 2
-  tags: []
+  serializedVersion: 3
+  tags:
+  - Event
+  - Draw
   layers:
   - Default
   - TransparentFX
   - Ignore Raycast
-  - 
+  - Debug
   - Water
   - UI
   - 
@@ -19,13 +21,13 @@ TagManager:
   - 
   - 
   - 
-  - 
-  - 
-  - 
-  - 
-  - 
-  - 
-  - 
+  - Physics_Food
+  - Physics_Player
+  - Physics_Food_Grabber
+  - Physics_Obstacle
+  - Physics_Enemy
+  - Physics_Player_Bodies
+  - Physics_Enemy_Bodies
   - 
   - 
   - 
@@ -50,27 +52,3 @@ TagManager:
   - Light Layer 5
   - Light Layer 6
   - Light Layer 7
-  - 
-  - 
-  - 
-  - 
-  - 
-  - 
-  - 
-  - 
-  - 
-  - 
-  - 
-  - 
-  - 
-  - 
-  - 
-  - 
-  - 
-  - 
-  - 
-  - 
-  - 
-  - 
-  - 
-  - 
