@@ -15,10 +15,10 @@ public class PlayerManager : MonoBehaviour, IPlayerManager
   SnakeRender? enemyRender = null;
 
   [SerializeField]
-  CustomSprite? playerDisplay = null;
+  TrailVfx? playerVfx = null;
 
   [SerializeField]
-  CustomSprite? enemyDisplay = null;
+  TrailVfx? enemyVfx = null;
 
   [SerializeField]
   SkinSelect? skinSelect = null;
@@ -119,7 +119,7 @@ public class PlayerManager : MonoBehaviour, IPlayerManager
         bodies,
         moveDir,
         new Vector2(),
-        10f,
+        GENERAL_CONFIG.SPEED,
         "",
         false,
         null,
@@ -155,15 +155,15 @@ public class PlayerManager : MonoBehaviour, IPlayerManager
       enemyRender.SnakeType = skinData?.Type ?? SNAKE_TYPE.NORMAL;
       enemyRender.SetSnakeSkin(skinData?.Skin, true);
 
-      if (!enemyRender.RendTex && enemyDisplay)
+      if (!enemyRender.RendTex && enemyVfx)
       {
         enemyRender.RendTex = new RenderTexture(
           (int)ARENA_DEFAULT_SIZE.WIDTH,
           (int)ARENA_DEFAULT_SIZE.HEIGHT,
           UnityEngine.Experimental.Rendering.GraphicsFormat.R8G8B8A8_UNorm,
-          UnityEngine.Experimental.Rendering.GraphicsFormat.D32_SFloat_S8_UInt
+          UnityEngine.Experimental.Rendering.GraphicsFormat.S8_UInt
         );
-        enemyDisplay.Texture = enemyRender.RendTex;
+        enemyVfx.SetSnakeTex(enemyRender.RendTex);
       }
       enemyRender?.SetSnakeBody(bodies);
     }
@@ -173,15 +173,15 @@ public class PlayerManager : MonoBehaviour, IPlayerManager
 
       playerRender.SnakeType = skinData?.Type ?? SNAKE_TYPE.NORMAL;
       playerRender.SetSnakeSkin(skinData?.Skin, true);
-      if (!playerRender.RendTex && playerDisplay)
+      if (!playerRender.RendTex && playerVfx)
       {
         playerRender.RendTex = new RenderTexture(
           (int)ARENA_DEFAULT_SIZE.WIDTH,
           (int)ARENA_DEFAULT_SIZE.HEIGHT,
           UnityEngine.Experimental.Rendering.GraphicsFormat.R8G8B8A8_UNorm,
-          UnityEngine.Experimental.Rendering.GraphicsFormat.D32_SFloat_S8_UInt
+          UnityEngine.Experimental.Rendering.GraphicsFormat.S8_UInt
         );
-        playerDisplay.Texture = playerRender.RendTex;
+        playerVfx.SetSnakeTex(playerRender.RendTex);
       }
       playerRender?.SetSnakeBody(bodies);
     }

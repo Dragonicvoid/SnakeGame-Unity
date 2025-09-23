@@ -149,6 +149,7 @@ MonoBehaviour:
   repeat: 1
   tiling: {x: 0, y: 0}
   offset: {x: 0, y: 0}
+  mat: {fileID: 2100000, guid: ebe2380f392b8ca468434d0c4a63bcb5, type: 2}
 --- !u!23 &8361648207920683066
 MeshRenderer:
   m_ObjectHideFlags: 0

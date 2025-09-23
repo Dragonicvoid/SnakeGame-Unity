@@ -126,7 +126,7 @@ public class SkinSelectItem : MonoBehaviour
       (int)preview.rectTransform.rect.width,
       (int)preview.rectTransform.rect.height,
       UnityEngine.Experimental.Rendering.GraphicsFormat.R8G8B8A8_UNorm,
-      UnityEngine.Experimental.Rendering.GraphicsFormat.D32_SFloat_S8_UInt
+      UnityEngine.Experimental.Rendering.GraphicsFormat.S8_UInt
     );
     }
 

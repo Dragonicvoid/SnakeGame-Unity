@@ -1,5 +1,10 @@
 using System.Collections.Generic;
 
+public static class GENERAL_CONFIG
+{
+  public const float SPEED = 10f;
+}
+
 public static class ARENA_DEFAULT_SIZE
 {
   public const float SNAKE = 20f;
