@@ -32,16 +32,8 @@ public class GameManager : MonoBehaviour
 
   public void StartGame()
   {
-    ArenaManager?.I.InitializedMap();
-    gameStartTime = Time.fixedTime;
-    UiManager?.ShowStartUI(false);
-    ArenaInput?.StartInputListener();
-
-    CreatePlayer();
-    setCollisionEvent();
-    setGameEvent();
-
-    paused = false;
+    UiEvent.Instance.onGameStartAnimFinish += onGameStartAnimFinish;
+    UiManager?.StartGame();
   }
 
   void gameUpdate()
@@ -93,6 +85,7 @@ public class GameManager : MonoBehaviour
 
   public void GoToMainMenu()
   {
+    UiManager?.EndGame();
     FoodManager?.I.RemoveAllFood();
     PlayerManager?.I.RemoveAllPlayers();
     FoodManager?.I.RemoveAllFood();
@@ -208,6 +201,21 @@ public class GameManager : MonoBehaviour
   {
     stopGame();
     UiManager?.ShowEndUI(data);
+  }
+
+  void onGameStartAnimFinish()
+  {
+    ArenaManager?.I.InitializedMap();
+
+    UiEvent.Instance.onGameStartAnimFinish -= onGameStartAnimFinish;
+    gameStartTime = Time.fixedTime;
+    ArenaInput?.StartInputListener();
+
+    CreatePlayer();
+    setCollisionEvent();
+    setGameEvent();
+
+    paused = false;
   }
 
   void handleBotLogic(SnakeConfig snake)

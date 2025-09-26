@@ -12,6 +12,8 @@ public class ArenaManager : MonoBehaviour, IArenaManager
   IRef<IObstacleManager>? obsManager;
   [SerializeField]
   AiRenderer? aiDebugger;
+  [SerializeField]
+  SpikeVfx? spikeVfx;
 
   private List<List<TileMapData>> mapData = new List<List<TileMapData>>();
 
@@ -24,9 +26,7 @@ public class ArenaManager : MonoBehaviour, IArenaManager
   public Vector2 CenterPos { get { return centerPos; } set { centerPos = value; } }
 
   void Awake()
-  {
-    InitializedMap();
-  }
+  { }
 
   public void InitializedMap()
   {
@@ -63,6 +63,11 @@ public class ArenaManager : MonoBehaviour, IArenaManager
         int idx = y * map.Row + x;
         handleTileByType((ARENA_OBJECT_TYPE)map.Maps[idx], new Coordinate(x, y));
       }
+    }
+
+    if (obsManager != null)
+    {
+      spikeVfx?.SetSpikeData(obsManager.I.Spikes);
     }
 
     aiDebugger?.SetMapToDebug(mapData);

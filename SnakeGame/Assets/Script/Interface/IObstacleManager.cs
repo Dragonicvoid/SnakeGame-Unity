@@ -1,8 +1,8 @@
 using System.Collections.Generic;
-using UnityEngine;
 
 public interface IObstacleManager
 {
+  public List<ObstacleData> Spikes { set; get; }
   public void InitializeObstacleMap();
   public void ClearObstacle();
   public void CreateSpike(Coordinate coor);

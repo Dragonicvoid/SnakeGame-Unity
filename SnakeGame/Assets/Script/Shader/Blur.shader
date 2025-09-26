@@ -3,15 +3,14 @@ Shader "Transparent/Blur"
     Properties 
     {
         _MainTex ("Texture", 2D) = "white" {}
-        _Offset ("Blur Offset", float) = 1
+        _Intensity ("Blur Intensity", float) = 1
     }
     SubShader
     {
-        Tags { "Queue"="Transparent" "RenderType"="Transparent" }
+        Tags { "Queue"="Transparent" "IgnoreProjector"="True" "RenderType"="Transparent" }
         LOD 100
 
         Blend SrcAlpha OneMinusSrcAlpha
-        ZTest Less
 
         Pass
         {
@@ -35,7 +34,7 @@ Shader "Transparent/Blur"
 
             sampler2D _MainTex;
             float4 _MainTex_TexelSize;
-            float _Offset;
+            float _Intensity;
 
             v2f vert (appdata v)
             {
@@ -49,7 +48,7 @@ Shader "Transparent/Blur"
                 float4 total = float4(0., 0., 0., 0.);
                 for(int i = -1; i <= 1; i++) {
                     for(int j = -1; j <= 1; j++) {
-                        fixed4 col = tex2D(_MainTex, float2(uv.x + _MainTex_TexelSize.x * i * _Offset, uv.y + _MainTex_TexelSize.y * j * _Offset));
+                        fixed4 col = tex2D(_MainTex, float2(uv.x + _MainTex_TexelSize.x * i * _Intensity, uv.y + _MainTex_TexelSize.y * j * _Intensity));
                         total += col;
                     }
                 }

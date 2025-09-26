@@ -16,12 +16,26 @@ public class UiManager : MonoBehaviour
   GameObject? movUI = null;
   [SerializeField]
   GameObject? movUIFront = null;
+  [SerializeField]
+  Background? background = null;
 
   private float movMaxLength = 50;
 
   void Awake()
   {
     setListener();
+  }
+
+  public void StartGame()
+  {
+    ShowStartUI(false);
+    background?.GoToGameplayPos();
+  }
+
+  public void EndGame()
+  {
+    UiEvent.Instance.onGameEndAnimFinish += onGameEndAnimFinish;
+    background?.GoToMainMenuPos();
   }
 
   public void ShowStartUI(bool val = true)
@@ -62,6 +76,12 @@ public class UiManager : MonoBehaviour
   private void onTouchEnd()
   {
     showMovUI(false, null);
+  }
+
+  private void onGameEndAnimFinish()
+  {
+    UiEvent.Instance.onGameEndAnimFinish -= onGameEndAnimFinish;
+    ShowStartUI(true);
   }
 
   private void showMovUI(bool show, Vector2? pos)

@@ -53,6 +53,7 @@ MonoBehaviour:
   repeat: 1
   tiling: {x: 0.8, y: 0.8}
   offset: {x: 0.2, y: 0}
+  mat: {fileID: 0}
 --- !u!23 &1852540336210066372
 MeshRenderer:
   m_ObjectHideFlags: 0

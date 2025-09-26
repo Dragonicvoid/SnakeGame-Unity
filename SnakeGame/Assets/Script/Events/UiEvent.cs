@@ -23,4 +23,18 @@ public class UiEvent : MonoBehaviour
         if (onPrevSkinDoneRender != null)
             onPrevSkinDoneRender();
     }
+
+    public event Action onGameStartAnimFinish;
+    public void GameStartAnimFinish()
+    {
+        if (onGameStartAnimFinish != null)
+            onGameStartAnimFinish();
+    }
+
+    public event Action onGameEndAnimFinish;
+    public void GameEndAnimFinish()
+    {
+        if (onGameEndAnimFinish != null)
+            onGameEndAnimFinish();
+    }
 }

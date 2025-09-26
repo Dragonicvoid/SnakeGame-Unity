@@ -224,4 +224,9 @@ public static class Util
     tex.Apply();
     return tex;
   }
+
+  public static float EaseOut(float x, float pow)
+  {
+    return 1 - Mathf.Pow(1 - x, pow);
+  }
 }
