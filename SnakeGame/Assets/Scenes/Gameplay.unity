@@ -256,6 +256,34 @@ PrefabInstance:
       propertyPath: meshToSdf
       value: 
       objectReference: {fileID: 0}
+    - target: {fileID: 8174064189807196, guid: a2c2d1b2e6df0c846927ddf10371ee38, type: 3}
+      propertyPath: normalColor.a
+      value: 0.48235294
+      objectReference: {fileID: 0}
+    - target: {fileID: 8174064189807196, guid: a2c2d1b2e6df0c846927ddf10371ee38, type: 3}
+      propertyPath: normalColor.b
+      value: 0.0249644
+      objectReference: {fileID: 0}
+    - target: {fileID: 8174064189807196, guid: a2c2d1b2e6df0c846927ddf10371ee38, type: 3}
+      propertyPath: normalColor.g
+      value: 0.0249644
+      objectReference: {fileID: 0}
+    - target: {fileID: 8174064189807196, guid: a2c2d1b2e6df0c846927ddf10371ee38, type: 3}
+      propertyPath: normalColor.r
+      value: 0.103773594
+      objectReference: {fileID: 0}
+    - target: {fileID: 8174064189807196, guid: a2c2d1b2e6df0c846927ddf10371ee38, type: 3}
+      propertyPath: activateColor.b
+      value: 0.041651852
+      objectReference: {fileID: 0}
+    - target: {fileID: 8174064189807196, guid: a2c2d1b2e6df0c846927ddf10371ee38, type: 3}
+      propertyPath: activateColor.g
+      value: 0.041651852
+      objectReference: {fileID: 0}
+    - target: {fileID: 8174064189807196, guid: a2c2d1b2e6df0c846927ddf10371ee38, type: 3}
+      propertyPath: activateColor.r
+      value: 0.6792453
+      objectReference: {fileID: 0}
     - target: {fileID: 2783319994100303081, guid: a2c2d1b2e6df0c846927ddf10371ee38, type: 3}
       propertyPath: m_LocalPosition.x
       value: 700

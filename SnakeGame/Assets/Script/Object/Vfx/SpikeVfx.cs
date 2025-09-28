@@ -12,9 +12,8 @@ public class SpikeVfx : MonoBehaviour
   struct VertexSpikeType
   {
     public Vector3 pos;
-    public Vector4 color;
 
-    public Vector3 uv;
+    public half2 uv;
   }
 
   struct VertexQuadType
@@ -24,6 +23,21 @@ public class SpikeVfx : MonoBehaviour
     public half2 uv;
   }
 
+  [SerializeField]
+  [Range(0, 10)]
+  int blurIntensity = 4;
+
+  [SerializeField]
+  [Range(0, 500)]
+  float playerRangeToReact = 100f;
+
+  [SerializeField]
+  float spikeDistance = 5f;
+  [SerializeField]
+  Color normalColor = Color.white;
+  [SerializeField]
+  Color activateColor = Color.red;
+
   List<SnakeConfig> snakes;
 
   List<ObstacleData> spikes;
@@ -31,6 +45,8 @@ public class SpikeVfx : MonoBehaviour
   Material? quadMat;
 
   Material? spikeMat;
+
+  Material? blurMat;
 
   Mesh? quadMesh;
 
@@ -85,7 +101,7 @@ public class SpikeVfx : MonoBehaviour
 
     if (!quadMat)
     {
-      Shader shader = Shader.Find("Transparent/CustomSprite");
+      Shader shader = Shader.Find("Custom/SpikePostFx");
       quadMat = new Material(shader);
     }
 
@@ -105,8 +121,10 @@ public class SpikeVfx : MonoBehaviour
       Shader shader = Shader.Find("Custom/SpikeVfx");
       spikeMat = new Material(shader);
     }
-    spikeMat.SetFloat("_MaxDistance", 100f);
-    spikeMat.SetFloat("_SpikeHeight", 5f);
+    spikeMat.SetFloat("_MaxDistance", playerRangeToReact);
+    spikeMat.SetFloat("_SpikeHeight", spikeDistance);
+    spikeMat.SetColor("_NormalColor", normalColor);
+    spikeMat.SetColor("_ActivateColor", activateColor);
   }
 
   void setQuadMesh()
@@ -184,13 +202,12 @@ public class SpikeVfx : MonoBehaviour
     }
     spikeMesh.Clear();
 
-    int totalAttribute = 3;
-    int vertexPerSpike = 8;
+    int totalAttribute = 2;
+    int vertexPerSpike = 12;
     int vertexCount = vertexPerSpike * spikes.Count;
     NativeArray<VertexAttributeDescriptor> attr = new NativeArray<VertexAttributeDescriptor>(totalAttribute, Allocator.Temp, NativeArrayOptions.UninitializedMemory);
     attr[0] = new VertexAttributeDescriptor(VertexAttribute.Position, VertexAttributeFormat.Float32, 3);
-    attr[1] = new VertexAttributeDescriptor(VertexAttribute.Color, VertexAttributeFormat.Float32, 4);
-    attr[2] = new VertexAttributeDescriptor(VertexAttribute.TexCoord0, VertexAttributeFormat.Float32, 3);
+    attr[1] = new VertexAttributeDescriptor(VertexAttribute.TexCoord0, VertexAttributeFormat.Float16, 2);
 
     spikeMesh.SetVertexBufferParams(vertexCount, attr);
     attr.Dispose();
@@ -203,20 +220,47 @@ public class SpikeVfx : MonoBehaviour
     {
       int padding = i * vertexPerSpike;
       Vector2 pos = spikes[i].Position;
-      vertex[padding] = new VertexSpikeType { pos = new Vector3(pos.x - currWidth, pos.y - currHeight, -currDepth), color = Color.black, uv = new Vector3(0, 0, 0) };
-      vertex[padding + 1] = new VertexSpikeType { pos = new Vector3(pos.x + currWidth, pos.y - currHeight, -currDepth), color = Color.black, uv = new Vector3(1, 0, 0) };
-      vertex[padding + 2] = new VertexSpikeType { pos = new Vector3(pos.x + currWidth, pos.y + currHeight, -currDepth), color = Color.black, uv = new Vector3(1, 1, 0) };
-      vertex[padding + 3] = new VertexSpikeType { pos = new Vector3(pos.x - currWidth, pos.y + currHeight, -currDepth), color = Color.black, uv = new Vector3(0, 1, 0) };
-      vertex[padding + 4] = new VertexSpikeType { pos = new Vector3(pos.x - currWidth, pos.y - currHeight, currDepth), color = Color.black, uv = new Vector3(0, 0, 1) };
-      vertex[padding + 5] = new VertexSpikeType { pos = new Vector3(pos.x + currWidth, pos.y - currHeight, currDepth), color = Color.black, uv = new Vector3(1, 0, 1) };
-      vertex[padding + 6] = new VertexSpikeType { pos = new Vector3(pos.x + currWidth, pos.y + currHeight, currDepth), color = Color.black, uv = new Vector3(1, 1, 1) };
-      vertex[padding + 7] = new VertexSpikeType { pos = new Vector3(pos.x - currWidth, pos.y + currHeight, currDepth), color = Color.black, uv = new Vector3(0, 1, 1) };
+
+      half h0 = new half(0f), h1 = new half(1f), h05 = new half(0.5f);
+
+      vertex[padding] = new VertexSpikeType { pos = new Vector3(pos.x - currWidth, pos.y - currHeight, -currDepth), uv = new half2(h0, h0) };
+      vertex[padding + 1] = new VertexSpikeType { pos = new Vector3(pos.x + currWidth, pos.y - currHeight, -currDepth), uv = new half2(h1, h0) };
+      vertex[padding + 2] = new VertexSpikeType { pos = new Vector3(pos.x + currWidth, pos.y + currHeight, -currDepth), uv = new half2(h1, h1) };
+      vertex[padding + 3] = new VertexSpikeType { pos = new Vector3(pos.x - currWidth, pos.y + currHeight, -currDepth), uv = new half2(h0, h1) };
+      vertex[padding + 4] = new VertexSpikeType { pos = new Vector3(pos.x - currWidth, pos.y - currHeight, currDepth), uv = new half2(h0, h0) };
+      vertex[padding + 5] = new VertexSpikeType { pos = new Vector3(pos.x + currWidth, pos.y - currHeight, currDepth), uv = new half2(h1, h0) };
+      vertex[padding + 6] = new VertexSpikeType { pos = new Vector3(pos.x + currWidth, pos.y + currHeight, currDepth), uv = new half2(h1, h1) };
+      vertex[padding + 7] = new VertexSpikeType { pos = new Vector3(pos.x - currWidth, pos.y + currHeight, currDepth), uv = new half2(h0, h1) };
+
+      // Back
+      Vector3 posToCheck = new Vector3(pos.x, pos.y + currHeight, 0);
+      float heightDist = getSpikeHeightDist(posToCheck);
+      posToCheck = new Vector3(posToCheck.x, posToCheck.y + heightDist * spikeDistance, posToCheck.z);
+      vertex[padding + 8] = new VertexSpikeType { pos = posToCheck, uv = new half2(h05, h05) };
+
+      // Forward
+      posToCheck = new Vector3(pos.x, pos.y - currHeight, 0);
+      heightDist = getSpikeHeightDist(posToCheck);
+      posToCheck = new Vector3(posToCheck.x, posToCheck.y - heightDist * spikeDistance, posToCheck.z);
+      vertex[padding + 9] = new VertexSpikeType { pos = posToCheck, uv = new half2(h05, h05) };
+
+      // Left
+      posToCheck = new Vector3(pos.x - currWidth, pos.y, 0);
+      heightDist = getSpikeHeightDist(posToCheck);
+      posToCheck = new Vector3(posToCheck.x - heightDist * spikeDistance, posToCheck.y, posToCheck.z);
+      vertex[padding + 10] = new VertexSpikeType { pos = posToCheck, uv = new half2(h05, h05) };
+
+      // Right
+      posToCheck = new Vector3(pos.x + currWidth, pos.y, 0);
+      heightDist = getSpikeHeightDist(posToCheck);
+      posToCheck = new Vector3(posToCheck.x + heightDist * spikeDistance, posToCheck.y, posToCheck.z);
+      vertex[padding + 11] = new VertexSpikeType { pos = posToCheck, uv = new half2(h05, h05) };
     }
 
     spikeMesh.SetVertexBufferData(vertex, 0, 0, vertexCount);
     vertex.Dispose();
 
-    int indexPerSpike = 36;
+    int indexPerSpike = 60;
     int indexCount = indexPerSpike * spikes.Count;
     spikeMesh.SetIndexBufferParams(indexCount, IndexFormat.UInt32);
 
@@ -227,52 +271,89 @@ public class SpikeVfx : MonoBehaviour
       int indicesPadding = i * vertexPerSpike;
 
       // Front
-      indices[idxPadding] = indicesPadding + 2;
-      indices[idxPadding + 1] = indicesPadding + 1;
-      indices[idxPadding + 2] = indicesPadding;
+      indices[idxPadding] = indicesPadding + 1;
+      indices[idxPadding + 1] = indicesPadding;
+      indices[idxPadding + 2] = indicesPadding + 9;
+
       indices[idxPadding + 3] = indicesPadding;
       indices[idxPadding + 4] = indicesPadding + 3;
-      indices[idxPadding + 5] = indicesPadding + 2;
+      indices[idxPadding + 5] = indicesPadding + 9;
+
+      indices[idxPadding + 6] = indicesPadding + 3;
+      indices[idxPadding + 7] = indicesPadding + 2;
+      indices[idxPadding + 8] = indicesPadding + 9;
+
+      indices[idxPadding + 9] = indicesPadding + 2;
+      indices[idxPadding + 10] = indicesPadding + 1;
+      indices[idxPadding + 11] = indicesPadding + 9;
 
       // Right
-      indices[idxPadding + 6] = indicesPadding + 6;
-      indices[idxPadding + 7] = indicesPadding + 5;
-      indices[idxPadding + 8] = indicesPadding + 1;
-      indices[idxPadding + 9] = indicesPadding + 1;
-      indices[idxPadding + 10] = indicesPadding + 2;
-      indices[idxPadding + 11] = indicesPadding + 6;
+      indices[idxPadding + 12] = indicesPadding + 5;
+      indices[idxPadding + 13] = indicesPadding + 1;
+      indices[idxPadding + 14] = indicesPadding + 11;
+
+      indices[idxPadding + 15] = indicesPadding + 1;
+      indices[idxPadding + 16] = indicesPadding + 2;
+      indices[idxPadding + 17] = indicesPadding + 11;
+
+      indices[idxPadding + 18] = indicesPadding + 2;
+      indices[idxPadding + 19] = indicesPadding + 6;
+      indices[idxPadding + 20] = indicesPadding + 11;
+
+      indices[idxPadding + 21] = indicesPadding + 6;
+      indices[idxPadding + 22] = indicesPadding + 5;
+      indices[idxPadding + 23] = indicesPadding + 11;
+
 
       // Back
-      indices[idxPadding + 12] = indicesPadding + 7;
-      indices[idxPadding + 13] = indicesPadding + 4;
-      indices[idxPadding + 14] = indicesPadding + 5;
-      indices[idxPadding + 15] = indicesPadding + 5;
-      indices[idxPadding + 16] = indicesPadding + 6;
-      indices[idxPadding + 17] = indicesPadding + 7;
+      indices[idxPadding + 24] = indicesPadding + 1;
+      indices[idxPadding + 25] = indicesPadding + 5;
+      indices[idxPadding + 26] = indicesPadding + 8;
+
+      indices[idxPadding + 27] = indicesPadding + 5;
+      indices[idxPadding + 28] = indicesPadding + 6;
+      indices[idxPadding + 29] = indicesPadding + 8;
+
+      indices[idxPadding + 30] = indicesPadding + 6;
+      indices[idxPadding + 31] = indicesPadding + 7;
+      indices[idxPadding + 32] = indicesPadding + 8;
+
+      indices[idxPadding + 33] = indicesPadding + 7;
+      indices[idxPadding + 34] = indicesPadding + 1;
+      indices[idxPadding + 35] = indicesPadding + 8;
 
       // Left
-      indices[idxPadding + 18] = indicesPadding + 3;
-      indices[idxPadding + 19] = indicesPadding + 0;
-      indices[idxPadding + 20] = indicesPadding + 4;
-      indices[idxPadding + 21] = indicesPadding + 4;
-      indices[idxPadding + 22] = indicesPadding + 7;
-      indices[idxPadding + 23] = indicesPadding + 3;
+      indices[idxPadding + 36] = indicesPadding;
+      indices[idxPadding + 37] = indicesPadding + 4;
+      indices[idxPadding + 38] = indicesPadding + 10;
+
+      indices[idxPadding + 39] = indicesPadding + 1;
+      indices[idxPadding + 40] = indicesPadding + 7;
+      indices[idxPadding + 41] = indicesPadding + 10;
+
+      indices[idxPadding + 42] = indicesPadding + 7;
+      indices[idxPadding + 43] = indicesPadding + 3;
+      indices[idxPadding + 44] = indicesPadding + 10;
+
+      indices[idxPadding + 45] = indicesPadding + 3;
+      indices[idxPadding + 46] = indicesPadding;
+      indices[idxPadding + 47] = indicesPadding + 10;
 
       // Top
-      indices[idxPadding + 24] = indicesPadding + 6;
-      indices[idxPadding + 25] = indicesPadding + 2;
-      indices[idxPadding + 26] = indicesPadding + 3;
-      indices[idxPadding + 27] = indicesPadding + 3;
-      indices[idxPadding + 28] = indicesPadding + 7;
-      indices[idxPadding + 29] = indicesPadding + 6;
+      indices[idxPadding + 48] = indicesPadding + 6;
+      indices[idxPadding + 49] = indicesPadding + 2;
+      indices[idxPadding + 50] = indicesPadding + 3;
+      indices[idxPadding + 51] = indicesPadding + 3;
+      indices[idxPadding + 52] = indicesPadding + 7;
+      indices[idxPadding + 53] = indicesPadding + 6;
 
       // Bot
-      indices[idxPadding + 30] = indicesPadding + 1;
-      indices[idxPadding + 31] = indicesPadding + 5;
-      indices[idxPadding + 32] = indicesPadding + 4;
-      indices[idxPadding + 33] = indicesPadding + 4;
-      indices[idxPadding + 34] = indicesPadding;
-      indices[idxPadding + 35] = indicesPadding + 1;
+      indices[idxPadding + 54] = indicesPadding + 1;
+      indices[idxPadding + 55] = indicesPadding + 5;
+      indices[idxPadding + 56] = indicesPadding + 4;
+      indices[idxPadding + 57] = indicesPadding + 4;
+      indices[idxPadding + 58] = indicesPadding;
+      indices[idxPadding + 59] = indicesPadding + 1;
 
     }
     spikeMesh.SetIndexBufferData(indices, 0, 0, indexCount);
@@ -302,6 +383,7 @@ public class SpikeVfx : MonoBehaviour
 
       if (!spikeMat || cmdBuffer == null || !spikeMesh) continue;
 
+      updateSpikeMesh();
       cmdBuffer.Clear();
 
       if (snakes != null)
@@ -317,27 +399,47 @@ public class SpikeVfx : MonoBehaviour
           Vector2 pos = snakes[i].State.Body[0].Position;
           snakesPos[i] = new Vector4(pos.x, pos.y, 0, 0);
         }
-        cmdBuffer.SetGlobalVectorArray("_PlayerPos", snakesPos);
+        spikeMat.SetVectorArray("_PlayerPos", snakesPos);
       }
-      cmdBuffer.SetGlobalVector("_CamPos", new Vector3(0, 0, -10));
+      spikeMat.SetVector("_CamPos", new Vector3(0, 0, -10));
 
       Matrix4x4 lookMatrix = Util.CreateViewMatrix(new Vector3(0, 0, -600), Quaternion.identity, Vector3.one).inverse;
       Matrix4x4 orthoMatrix = Matrix4x4.Perspective(60, ARENA_DEFAULT_SIZE.WIDTH / ARENA_DEFAULT_SIZE.HEIGHT, 0.03f, 1000f);
       cmdBuffer.SetViewProjectionMatrices(lookMatrix, orthoMatrix);
 
-      int depthID = Shader.PropertyToID("_ParticleDepthTexture");
+      int tempID = Shader.PropertyToID("_temp1");
 
-      cmdBuffer.GetTemporaryRT(depthID, (int)ARENA_DEFAULT_SIZE.WIDTH, (int)ARENA_DEFAULT_SIZE.HEIGHT, 0, FilterMode.Bilinear, RenderTextureFormat.ARGB32);
-      cmdBuffer.SetRenderTarget(depthID);
+      cmdBuffer.GetTemporaryRT(tempID, (int)ARENA_DEFAULT_SIZE.WIDTH, (int)ARENA_DEFAULT_SIZE.HEIGHT, 0, FilterMode.Bilinear, RenderTextureFormat.ARGB32);
+      cmdBuffer.SetRenderTarget(tempID);
       cmdBuffer.ClearRenderTarget(true, true, Color.clear, 1f);
       cmdBuffer.DrawMesh(spikeMesh, Matrix4x4.identity, spikeMat, 0, 0);
-      cmdBuffer.SetGlobalTexture("_ParticleDepthTexture", depthID);
+      cmdBuffer.Blit(tempID, quadTex);
 
-      cmdBuffer.Blit(depthID, quadTex);
+      cmdBuffer.ReleaseTemporaryRT(tempID);
 
-      cmdBuffer.ReleaseTemporaryRT(depthID);
+      // Hack resize Web-view
+      cmdBuffer.SetRenderTarget(PersistentData.Instance.RenderTex);
+      cmdBuffer.ClearRenderTarget(false, false, Color.clear, 1f);
 
       Graphics.ExecuteCommandBuffer(cmdBuffer);
     }
+  }
+
+  float getSpikeHeightDist(Vector3 currPos)
+  {
+    float closest = float.MaxValue;
+
+    for (int i = 0; i < snakes.Count; i++)
+    {
+      if (snakes[i].State.Body.Count <= 0) break;
+
+      Vector2 pos = snakes[i].State.Body[0].Position;
+      float dist = Vector2.Distance(pos, currPos);
+      closest = dist < closest ? dist : closest;
+    }
+
+    float heightDist = Mathf.Max(0f, 1.0f - (closest / playerRangeToReact));
+
+    return heightDist;
   }
 }
