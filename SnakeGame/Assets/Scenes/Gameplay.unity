@@ -252,6 +252,10 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 1244131105}
     m_Modifications:
+    - target: {fileID: 8174064189807196, guid: a2c2d1b2e6df0c846927ddf10371ee38, type: 3}
+      propertyPath: meshToSdf
+      value: 
+      objectReference: {fileID: 0}
     - target: {fileID: 2783319994100303081, guid: a2c2d1b2e6df0c846927ddf10371ee38, type: 3}
       propertyPath: m_LocalPosition.x
       value: 700
@@ -262,7 +266,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 2852364426152825537, guid: a2c2d1b2e6df0c846927ddf10371ee38, type: 3}
       propertyPath: m_IsActive
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 3547206799359238326, guid: a2c2d1b2e6df0c846927ddf10371ee38, type: 3}
       propertyPath: m_Size.x
@@ -282,7 +286,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 9209302376996963929, guid: a2c2d1b2e6df0c846927ddf10371ee38, type: 3}
       propertyPath: m_LocalPosition.x
-      value: -700
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 9209302376996963929, guid: a2c2d1b2e6df0c846927ddf10371ee38, type: 3}
       propertyPath: m_LocalPosition.y
@@ -320,7 +324,9 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
-    m_RemovedComponents: []
+    m_RemovedComponents:
+    - {fileID: 3403487853640415195, guid: a2c2d1b2e6df0c846927ddf10371ee38, type: 3}
+    - {fileID: 5668713976724067027, guid: a2c2d1b2e6df0c846927ddf10371ee38, type: 3}
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
     m_AddedComponents: []
@@ -506,7 +512,7 @@ MonoBehaviour:
   QuadWidth: 700
   QuadHeight: 700
   color: {r: 1, g: 1, b: 1, a: 1}
-  totalBlock: 7
+  totalBlock: 29
   camForMatrix: {fileID: 748515579}
   blurIteration: 0
 --- !u!1 &275928464
@@ -2050,7 +2056,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: -194, y: 0}
+  m_AnchoredPosition: {x: -114, y: 0}
   m_SizeDelta: {x: 200, y: 260}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &840862365
@@ -2108,6 +2114,39 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 840862363}
   m_CullTransparentMesh: 1
+--- !u!21 &883060413
+Material:
+  serializedVersion: 8
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_Name: Transparent/AlphaReducer
+  m_Shader: {fileID: 4800000, guid: eef0d7bb15a4a94408f59e72be3985ce, type: 3}
+  m_Parent: {fileID: 0}
+  m_ModifiedSerializedProperties: 0
+  m_ValidKeywords: []
+  m_InvalidKeywords: []
+  m_LightmapFlags: 4
+  m_EnableInstancingVariants: 0
+  m_DoubleSidedGI: 0
+  m_CustomRenderQueue: -1
+  stringTagMap: {}
+  disabledShaderPasses: []
+  m_LockedProperties: 
+  m_SavedProperties:
+    serializedVersion: 3
+    m_TexEnvs:
+    - _MainTex:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    m_Ints: []
+    m_Floats:
+    - _Reduce: 0.01
+    m_Colors: []
+  m_BuildTextureStacks: []
+  m_AllowLocking: 1
 --- !u!1 &898140842
 GameObject:
   m_ObjectHideFlags: 0
@@ -2120,7 +2159,7 @@ GameObject:
   - component: {fileID: 898140844}
   - component: {fileID: 898140845}
   m_Layer: 0
-  m_Name: EnemyDisplay
+  m_Name: EnemyTrail
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -2156,7 +2195,11 @@ MonoBehaviour:
   trailColor: {r: 1, g: 0.24056602, b: 0.24056602, a: 1}
   rtSize: 700
   alphaReduce: 0.0001
+  sprite: {fileID: 0}
+  tempSprite: {fileID: 0}
   temp: {fileID: 0}
+  trailMat: {fileID: 2065888315}
+  alphaMat: {fileID: 883060413}
 --- !u!23 &898140845
 MeshRenderer:
   m_ObjectHideFlags: 0
@@ -2578,7 +2621,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 172, y: 158.16}
+  m_AnchoredPosition: {x: 113.493805, y: 158.16}
   m_SizeDelta: {x: 200, y: 50}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1137099569
@@ -2654,6 +2697,76 @@ Material:
     m_Floats:
     - _Repeat: 1
     m_Colors: []
+  m_BuildTextureStacks: []
+  m_AllowLocking: 1
+--- !u!21 &1200859829
+Material:
+  serializedVersion: 8
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_Name: Transparent/AlphaReducer
+  m_Shader: {fileID: 4800000, guid: eef0d7bb15a4a94408f59e72be3985ce, type: 3}
+  m_Parent: {fileID: 0}
+  m_ModifiedSerializedProperties: 0
+  m_ValidKeywords: []
+  m_InvalidKeywords: []
+  m_LightmapFlags: 4
+  m_EnableInstancingVariants: 0
+  m_DoubleSidedGI: 0
+  m_CustomRenderQueue: -1
+  stringTagMap: {}
+  disabledShaderPasses: []
+  m_LockedProperties: 
+  m_SavedProperties:
+    serializedVersion: 3
+    m_TexEnvs:
+    - _MainTex:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    m_Ints: []
+    m_Floats:
+    - _Reduce: 0.01
+    m_Colors: []
+  m_BuildTextureStacks: []
+  m_AllowLocking: 1
+--- !u!21 &1239471229
+Material:
+  serializedVersion: 8
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_Name: Transparent/TrailVfx
+  m_Shader: {fileID: 4800000, guid: aa6490960e1765949b41e5251d547e8e, type: 3}
+  m_Parent: {fileID: 0}
+  m_ModifiedSerializedProperties: 0
+  m_ValidKeywords: []
+  m_InvalidKeywords: []
+  m_LightmapFlags: 4
+  m_EnableInstancingVariants: 0
+  m_DoubleSidedGI: 0
+  m_CustomRenderQueue: -1
+  stringTagMap: {}
+  disabledShaderPasses: []
+  m_LockedProperties: 
+  m_SavedProperties:
+    serializedVersion: 3
+    m_TexEnvs:
+    - _MainTex:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _PrevTex:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    m_Ints: []
+    m_Floats: []
+    m_Colors:
+    - _TrailCol: {r: 0.33980063, g: 0.37546465, b: 0.8679245, a: 1}
   m_BuildTextureStacks: []
   m_AllowLocking: 1
 --- !u!1 &1244131104
@@ -3364,6 +3477,7 @@ MonoBehaviour:
   sBodyPref: {fileID: 5947583522335873371, guid: eb7eec4ebb9c873438efeede786bc5fe, type: 3}
   sFoodGrabPref: {fileID: 2496594985580051409, guid: d1edb0889ebcf1d40ae170953c1a302f, type: 3}
   aiRenderer: {fileID: 275928466}
+  spikeVfx: {fileID: 77043767}
 --- !u!1 &1596514678
 GameObject:
   m_ObjectHideFlags: 0
@@ -3912,7 +4026,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 172.5062, y: 0}
+  m_AnchoredPosition: {x: 114, y: 0}
   m_SizeDelta: {x: 100, y: 100}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1991224650
@@ -3954,7 +4068,7 @@ GameObject:
   - component: {fileID: 1996626750}
   - component: {fileID: 1996626751}
   m_Layer: 0
-  m_Name: PlayerDisplay
+  m_Name: PlayerTrail
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -3990,7 +4104,11 @@ MonoBehaviour:
   trailColor: {r: 0.33980063, g: 0.37546465, b: 0.8679245, a: 1}
   rtSize: 700
   alphaReduce: 0.0001
+  sprite: {fileID: 0}
+  tempSprite: {fileID: 0}
   temp: {fileID: 0}
+  trailMat: {fileID: 1239471229}
+  alphaMat: {fileID: 1200859829}
 --- !u!23 &1996626751
 MeshRenderer:
   m_ObjectHideFlags: 0
@@ -4072,7 +4190,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: -194, y: -181.1}
+  m_AnchoredPosition: {x: -114, y: -181.1}
   m_SizeDelta: {x: 151.3735, y: 46.0207}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &2062205721
@@ -4169,6 +4287,43 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2062205719}
   m_CullTransparentMesh: 1
+--- !u!21 &2065888315
+Material:
+  serializedVersion: 8
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_Name: Transparent/TrailVfx
+  m_Shader: {fileID: 4800000, guid: aa6490960e1765949b41e5251d547e8e, type: 3}
+  m_Parent: {fileID: 0}
+  m_ModifiedSerializedProperties: 0
+  m_ValidKeywords: []
+  m_InvalidKeywords: []
+  m_LightmapFlags: 4
+  m_EnableInstancingVariants: 0
+  m_DoubleSidedGI: 0
+  m_CustomRenderQueue: -1
+  stringTagMap: {}
+  disabledShaderPasses: []
+  m_LockedProperties: 
+  m_SavedProperties:
+    serializedVersion: 3
+    m_TexEnvs:
+    - _MainTex:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _PrevTex:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    m_Ints: []
+    m_Floats: []
+    m_Colors:
+    - _TrailCol: {r: 1, g: 0.24056602, b: 0.24056602, a: 1}
+  m_BuildTextureStacks: []
+  m_AllowLocking: 1
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0

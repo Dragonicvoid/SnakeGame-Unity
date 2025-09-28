@@ -229,4 +229,19 @@ public static class Util
   {
     return 1 - Mathf.Pow(1 - x, pow);
   }
+
+  // credit: https://discussions.unity.com/t/how-do-i-calculate-a-view-matrix-using-matrix4x4-lookat/246263/2
+  public static Matrix4x4 CreateViewMatrix(Vector3 pos, Quaternion rot, Vector3 scale)
+  {
+    Matrix4x4 viewMatrix = Matrix4x4.TRS(pos, rot, scale).inverse;
+    if (SystemInfo.usesReversedZBuffer)
+    {
+      viewMatrix.m20 = -viewMatrix.m20;
+      viewMatrix.m21 = -viewMatrix.m21;
+      viewMatrix.m22 = -viewMatrix.m22;
+      viewMatrix.m23 = -viewMatrix.m23;
+    }
+
+    return viewMatrix;
+  }
 }

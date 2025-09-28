@@ -22,6 +22,12 @@ public class TrailVfx : MonoBehaviour
   [SerializeField]
   float alphaReduce = 0.01f;
 
+  [SerializeField]
+  CustomSprite sprite;
+
+  [SerializeField]
+  CustomSprite tempSprite;
+
   bool hasFirstDrawn = false;
 
   [SerializeField]
@@ -31,13 +37,19 @@ public class TrailVfx : MonoBehaviour
 
   RenderTexture? prevTex;
 
+  RenderTexture? quadTex;
+
   Mesh? mesh;
 
   MeshRenderer? meshRend;
 
-  Material? mat;
+  [SerializeField]
+  Material? trailMat;
 
+  [SerializeField]
   Material? alphaMat;
+
+  Material? quadMat;
 
   CommandBuffer? cmdBuffer;
 
@@ -65,12 +77,32 @@ public class TrailVfx : MonoBehaviour
       );
     }
 
+    if (!quadTex)
+    {
+      quadTex = new RenderTexture(
+        (int)ARENA_DEFAULT_SIZE.WIDTH,
+        (int)ARENA_DEFAULT_SIZE.HEIGHT,
+        UnityEngine.Experimental.Rendering.GraphicsFormat.R8G8B8A8_UNorm,
+        UnityEngine.Experimental.Rendering.GraphicsFormat.S8_UInt
+      );
+    }
+
     temp = new RenderTexture(
         (int)ARENA_DEFAULT_SIZE.WIDTH,
         (int)ARENA_DEFAULT_SIZE.HEIGHT,
         UnityEngine.Experimental.Rendering.GraphicsFormat.R8G8B8A8_UNorm,
         UnityEngine.Experimental.Rendering.GraphicsFormat.S8_UInt
       );
+
+    if (sprite)
+    {
+      sprite.Texture = prevTex;
+    }
+
+    if (tempSprite)
+    {
+      tempSprite.Texture = temp;
+    }
 
     renderCoroutine = StartCoroutine(render());
   }
@@ -90,28 +122,36 @@ public class TrailVfx : MonoBehaviour
     }
     alphaMat.SetFloat("_Reducer", alphaReduce);
 
-    if (!mat)
+    if (!trailMat)
     {
       Shader shader = Shader.Find("Transparent/TrailVfx");
-      mat = new Material(shader);
+      trailMat = new Material(shader);
+    }
+
+    if (!quadMat)
+    {
+      Shader shader = Shader.Find("Transparent/CustomSprite");
+      quadMat = new Material(shader);
     }
 
     if (Application.isPlaying)
     {
       if (meshRend.materials.Length > 0)
       {
-        meshRend.materials[0] = mat;
+        meshRend.materials[0] = quadMat;
       }
       else
       {
-        meshRend.materials.Append(mat);
+        meshRend.materials.Append(quadMat);
       }
-      meshRend.material = mat;
+      meshRend.material = quadMat;
     }
 
-    mat.SetTexture("_MainTex", snakeTex);
-    mat.SetTexture("_PrevTex", prevTex);
-    mat.SetColor("_TrailCol", trailColor);
+    trailMat.SetTexture("_MainTex", snakeTex);
+    trailMat.SetTexture("_PrevTex", prevTex);
+    trailMat.SetColor("_TrailCol", trailColor);
+
+    quadMat.SetTexture("_MainTex", quadTex);
   }
 
   void setMesh()
@@ -183,37 +223,67 @@ public class TrailVfx : MonoBehaviour
     while (true)
     {
       float deltaTime = Time.deltaTime;
-      yield return new WaitForEndOfFrame();
+      yield return new WaitForSeconds(0.05f);
       if (cmdBuffer != null && prevTex && alphaMat)
       {
         cmdBuffer.Clear();
-        alphaMat.SetFloat("_Reducer", deltaTime);
+        alphaMat.SetFloat("_Reduce", deltaTime);
         var lookMatrix = Camera.main.worldToCameraMatrix;
         var orthoMatrix = Matrix4x4.Ortho(-rtSize / 2, rtSize / 2, -rtSize / 2, rtSize / 2, 0.3f, 1000f);
         cmdBuffer.SetViewProjectionMatrices(lookMatrix, orthoMatrix);
 
-        cmdBuffer.SetRenderTarget(temp);
-        cmdBuffer.ClearRenderTarget(true, false, Color.clear, 1f);
+        int temp1 = Shader.PropertyToID("_Temp1");
+        int temp2 = Shader.PropertyToID("_Temp2");
+
+        cmdBuffer.GetTemporaryRT(temp1, (int)700, (int)700, 0, FilterMode.Bilinear, RenderTextureFormat.ARGB32);
+        cmdBuffer.GetTemporaryRT(temp2, (int)700, (int)700, 0, FilterMode.Bilinear, RenderTextureFormat.ARGB32);
 
         if (!hasFirstDrawn)
         {
+          cmdBuffer.SetRenderTarget(temp2);
+          cmdBuffer.ClearRenderTarget(true, true, Color.clear, 1f);
+          cmdBuffer.SetRenderTarget(temp1);
           cmdBuffer.ClearRenderTarget(true, true, Color.clear, 1f);
           hasFirstDrawn = true;
         }
         else
         {
-          cmdBuffer.Blit(snakeTex, prevTex, mat, 0, 0);
-          cmdBuffer.Blit(prevTex, temp, alphaMat, 0, 0);
-          cmdBuffer.SetRenderTarget(prevTex);
-          cmdBuffer.ClearRenderTarget(true, false, Color.clear, 1f);
-          cmdBuffer.Blit(temp, prevTex, alphaMat, 0, 0);
+          // cmdBuffer.SetRenderTarget(prevTex);
+          // cmdBuffer.ClearRenderTarget(true, true, Color.clear, 1f);
+          // cmdBuffer.SetRenderTarget(quadTex);
+          // cmdBuffer.ClearRenderTarget(true, true, Color.clear, 1f);
+
+          // cmdBuffer.Blit(snakeTex, temp1, trailMat, 0, 0);
+          // cmdBuffer.Blit(temp1, temp2, alphaMat, 0, 0);
+          // cmdBuffer.Blit(temp2, prevTex);
+          // cmdBuffer.Blit(snakeTex, quadTex, trailMat, 0, 0);
+
+          cmdBuffer.SetRenderTarget(temp1);
+          cmdBuffer.ClearRenderTarget(true, true, Color.clear, 1f);
+          cmdBuffer.SetRenderTarget(temp2);
+          cmdBuffer.ClearRenderTarget(true, true, Color.clear, 1f);
+          cmdBuffer.SetRenderTarget(quadTex);
+          cmdBuffer.ClearRenderTarget(true, true, Color.clear, 1f);
+          cmdBuffer.SetRenderTarget(temp);
+          cmdBuffer.ClearRenderTarget(true, true, Color.clear, 1f);
+
+          cmdBuffer.Blit(snakeTex, temp1, trailMat, 0, 0);
+          cmdBuffer.Blit(temp1, temp2, alphaMat, 0, 0);
+          cmdBuffer.Blit(temp2, prevTex, quadMat, 0, 0);
+
+          cmdBuffer.Blit(snakeTex, temp1, trailMat, 0, 0);
+          cmdBuffer.Blit(temp1, quadTex, quadMat, 0, 0);
         }
+
+        cmdBuffer.ReleaseTemporaryRT(temp1);
+        cmdBuffer.ReleaseTemporaryRT(temp2);
 
         // Hack resize Web-view
         cmdBuffer.SetRenderTarget(PersistentData.Instance.RenderTex);
         cmdBuffer.ClearRenderTarget(false, false, Color.clear, 1f);
 
         Graphics.ExecuteCommandBuffer(cmdBuffer);
+
       }
     }
   }

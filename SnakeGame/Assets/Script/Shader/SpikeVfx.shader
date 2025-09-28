@@ -1,141 +1,255 @@
-// This part of the code is from of Volume-Rendering Code
-// by github.com/mattatz
-// credit: https://github.com/mattatz/unity-volume-rendering
-Shader "Transparent/SpikeVfx"
+Shader "Custom/SpikeVfx"
 {
     Properties
     {
-        _MainTex ("Texture", 3D) = "" {}
-        _Color ("Color", Color) = (1., 1., 1., 1.)
+        _Matcap("Matcap", 2D) = "white" {}
+        _MaxDistance("Distance max to spike before it expands", float) = 20.
+        _SpikeHeight("Spike Height", float) = 5.
     }
     SubShader
     {
-      Tags { "Queue"="Transparent" "IgnoreProjector"="True" "RenderType"="Transparent" }
-      Blend SrcAlpha OneMinusSrcAlpha
-      LOD 200
+        Tags { "Queue"="Transparent" "IgnoreProjector"="True" "RenderType"="Transparent" }
 
-      Pass
-      {
-          CGPROGRAM
-          #pragma vertex vert
-          #pragma fragment frag
+        LOD 100
 
-          #include "UnityCG.cginc"
+        ZWrite On
+        Blend SrcAlpha OneMinusSrcAlpha
 
-          #ifndef ITERATIONS
-              #define ITERATIONS 100
-          #endif
+        Pass
+        {
+            CGPROGRAM
+            #pragma vertex vert
+            #pragma geometry geometry
+            #pragma fragment frag
 
-          struct appdata
-          {
-              float4 vertex : POSITION;
-              float2 uv : TEXCOORD0;
-          };
+            #pragma prefer_hlslcc gles
+            #pragma exclude_renderers d3d11_9x
+            #pragma target 2.0
+            #pragma require geometry
+           
+            #include "UnityCG.cginc"
 
-          struct v2f
-          {
-              float4 vertex : SV_POSITION;
-              float2 uv : TEXCOORD0;
-              float3 world : TEXCOORD1;
-              float3 local : TEXCOORD2;
-          };
+            // Global Var
+            float3 _CamPos;
+            float4 _PlayerPos[2];
 
-          struct Ray {
-              float3 origin;
-              float3 dir;
-          };
+            // Property
+            float _MaxDistance;
+            float _SpikeHeight;
 
-          struct AABB {
-              float3 min;
-              float3 max;
-          };
-
-          sampler3D _MainTex;
-          float4 _MainTex_ST;
-          float4 _Color;
-
-          bool intersect(Ray r, AABB aabb, out float t0, out float t1)
-          {
-            float3 invR = 1.0 / r.dir;
-            float3 tbot = invR * (aabb.min - r.origin);
-            float3 ttop = invR * (aabb.max - r.origin);
-            float3 tmin = min(ttop, tbot);
-            float3 tmax = max(ttop, tbot);
-            float2 t = max(tmin.xx, tmin.yz);
-            t0 = max(t.x, t.y);
-            t = min(tmax.xx, tmax.yz);
-            t1 = min(t.x, t.y);
-            return t0 <= t1;
-          }
-
-          float3 get_uv(float3 p) {
-            return (p + 0.5);
-          }
-
-          float sample_volume(float3 uv, float3 p)
-          {
-            // Assuming it is RenderTexture 3D using Red Color
-            // Like Texture3D from mesh to SDF
-            float v = 1.0 - tex3D(_MainTex, uv).r;
-            return v;
-          }
-
-          v2f vert (appdata v)
-          {
-            v2f o;
-            o.vertex = UnityObjectToClipPos(v.vertex);
-            o.uv = TRANSFORM_TEX(v.uv, _MainTex);
-
-            o.world = mul(unity_ObjectToWorld, v.vertex).xyz;
-            o.local = v.vertex.xyz;
-            return o;
-          }
-
-          fixed4 frag (v2f i) : SV_Target
-          {
-            Ray ray;
-            ray.origin = i.local;
-            float3 dir = (i.world - _WorldSpaceCameraPos);
-            ray.dir = normalize(mul(unity_WorldToObject, dir));
-
-            AABB aabb;
-            aabb.min = float3(-0.5, -0.5, -0.5);
-            aabb.max = float3(0.5, 0.5, 0.5);
-
-            float tnear;
-            float tfar;
-            intersect(ray, aabb, tnear, tfar);
-
-            tnear = max(0.0, tnear);
-
-            float3 start = ray.origin;
-            float3 end = ray.origin + ray.dir * tfar;
-            float dist = abs(tfar - tnear);
-            float step_size = dist / float(ITERATIONS);
-            float3 ds = normalize(end - start) * step_size;
-
-            float4 dst = float4(0, 0, 0, 0);
-            float3 p = start;
-
-            [unroll]
-            for (int iter = 0; iter < ITERATIONS; iter++)
+            struct appdata
             {
-              float3 uv = get_uv(p);
-              float v = sample_volume(uv, p);
-              float4 src = float4(v, v, v, v);
-              src.a *= 0.5;
-              src.rgb *= src.a;
+                float4 vertex : POSITION;   
+                float2 uv : TEXCOORD0;
+            };
 
-              // blend
-              dst = (1.0 - dst.a) * src + dst;
-              p += ds;
+            struct v2g
+            {
+                float4 vertex : POSITION;   
+                float2 uv : TEXCOORD0;
+            };
 
-              if (dst.a > 0.95) break;
+            struct g2f
+            {
+                float4 vertex : SV_POSITION;
+                float2 uv : TEXCOORD0;
+                float depth : DEPTH;
+            };
+
+            float when_lt(float x, float y) {
+                return max(sign(y - x), 0.0);
             }
 
-            return saturate(dst) * _Color;
-          }
-          ENDCG
-      }
+            float when_ge(float x, float y) {
+                return 1.0 - when_lt(x, y);
+            }
+
+            // Credits: this geometry shader code is based on this video
+            // https://www.youtube.com/watch?v=7C-mA08mp8o
+            float3 GetNormalFromTriangle(float3 a, float3 b, float3 c) {
+                return normalize(cross(b - a, c - a));
+            }
+
+            g2f SetupVertex(float3 positionWS, float3 normalWS, float2 uv) {
+                // TODO: Might want to use lightning for this
+                // so keep the normal calculated for now
+                g2f output = (g2f)0;
+                output.vertex = UnityObjectToClipPos(positionWS);
+                output.uv = uv;
+                output.depth = abs(_CamPos.z - positionWS.z) / 12.;
+                return output;
+            }
+
+            void SetupAndOutputTriangle(inout TriangleStream<g2f> outputStream, v2g a, v2g b, v2g c) {
+                outputStream.RestartStrip();
+                float3 normalWS = GetNormalFromTriangle(a.vertex, b.vertex, c.vertex);
+
+                // Should be clockwise
+                outputStream.Append(SetupVertex(a.vertex, normalWS, a.uv));
+                outputStream.Append(SetupVertex(c.vertex, normalWS, c.uv));
+                outputStream.Append(SetupVertex(b.vertex, normalWS, b.uv));
+            }
+
+            float4 GetSquareCenterFromTriangle(float4 a, float4 b, float4 c) {
+                return when_ge(distance(a,c), distance(a,b)) * ((a + c) / 2) + when_lt(distance(a,c), distance(a,b)) * ((a + b) / 2);
+            }
+
+            float2 GetSquareCenterFromTriangle(float2 a, float2 b, float2 c) {
+                return when_ge(distance(a,c), distance(a,b)) * ((a + c) / 2) + when_lt(distance(a,c), distance(a,b)) * ((a + b) / 2);
+            }
+
+            float getClosestPlayerDist(float3 currPos) {
+                float closest = _MaxDistance;
+
+                [unroll]
+                for (int i = 0; i < 2; i++) {
+                    float dist = distance(_PlayerPos[i], currPos);
+                    closest = when_lt(dist, closest) * dist + when_ge(dist, closest) * closest;
+                }
+
+                return closest;
+            }
+           
+            v2g vert (appdata v)
+            {
+                v2g o;               
+                o.vertex = v.vertex;   
+                o.uv = v.uv;
+                return o;
+            }
+
+            [maxvertexcount(6)]
+            void geometry (triangle v2g inputs[3], inout TriangleStream<g2f> outputStream)
+            {
+                v2g center = (v2g)0;
+                // Assuming Spike is always a cube the triangles Will always 
+                // have same normal within 1 face
+
+                float3 triNormal = GetNormalFromTriangle(inputs[0].vertex, inputs[1].vertex, inputs[2].vertex);
+                float3 centerPos = GetSquareCenterFromTriangle(inputs[0].vertex, inputs[1].vertex, inputs[2].vertex);
+                float3 heightIncrease = triNormal * _SpikeHeight * max(0., 1.0 - (getClosestPlayerDist(centerPos) / _MaxDistance));
+
+                center.vertex = float4(float3(centerPos + heightIncrease), 0.);
+                center.uv = GetSquareCenterFromTriangle(inputs[0].vertex, inputs[1].vertex, inputs[2].vertex);
+
+                SetupAndOutputTriangle(outputStream, inputs[0], inputs[1], center);
+                SetupAndOutputTriangle(outputStream, inputs[1], inputs[2], center);
+            }
+           
+            float4 frag (g2f i) : SV_Target
+            {
+                return float4(i.depth,i.depth,i.depth, 1.);
+            }
+            ENDCG
+        }
+
+        // Pass
+        // {
+        //     Blend One One
+
+        //     ZTest Always
+        //     ZWrite Off
+
+        //     CGPROGRAM
+        //     #pragma vertex vert
+        //     #pragma fragment frag
+           
+        //     #include "UnityCG.cginc"
+
+        //     struct appdata
+        //     {
+        //         float4 vertex : POSITION;   
+        //         float4 uv : TEXCOORD0;
+        //     };
+
+        //     struct v2f
+        //     {
+        //         float4 vertex : SV_POSITION;
+        //         float2 uv : TEXCOORD0;
+        //         float4 screenPos : TEXCOORD1;
+        //         float depth : DEPTH;
+        //         float size : TEXCOORD2;
+        //     };
+           
+        //     v2f vert (appdata v)
+        //     {
+        //         v2f o;               
+        //         o.vertex = UnityObjectToClipPos(v.vertex);   
+        //         o.screenPos = ComputeScreenPos(o.vertex);
+        //         COMPUTE_EYEDEPTH(o.depth);
+        //         o.uv = v.uv;
+        //         o.size = v.uv.z;
+        //         return o;
+        //     }
+
+        //     uniform sampler2D _ParticleDepthTexture;
+
+        //     float4 frag (v2f i) : SV_Target
+        //     {
+        //         float2 toCenter = (i.uv - 0.5) * 2;
+        //         float radius = i.size * 0.5;
+        //         float z = sqrt(1.0 - toCenter.x * toCenter.x - toCenter.y * toCenter.y) * radius;
+
+        //         float underlyingDepth = tex2D(_ParticleDepthTexture, i.screenPos.xy / i.screenPos.w).r;
+        //         float decodedDepth = underlyingDepth / _ProjectionParams.w;
+        //         float dz = saturate(decodedDepth - i.depth + z);
+
+        //         toCenter *= dz;
+
+        //         return float4(toCenter, dz, dz / z) * 100;
+        //     }
+        //     ENDCG
+        // }
+
+        // Pass
+        // {
+        //     CGPROGRAM
+        //     #pragma vertex vert
+        //     #pragma fragment frag
+           
+        //     #include "UnityCG.cginc"
+
+        //     struct appdata
+        //     {
+        //         float4 vertex : POSITION;   
+        //         float2 uv : TEXCOORD0;
+        //     };
+
+        //     struct v2f
+        //     {
+        //         float4 vertex : SV_POSITION;
+        //         float2 uv : TEXCOORD0;
+        //         float4 screenPos : TEXCOORD1;
+        //     };
+           
+        //     v2f vert (appdata v)
+        //     {
+        //         v2f o;               
+        //         o.vertex = UnityObjectToClipPos(v.vertex);   
+        //         o.uv = v.uv;
+        //         o.screenPos = ComputeScreenPos(o.vertex);
+        //         return o;
+        //     }
+
+        //     sampler2D _AdditiveTexture;
+        //     sampler2D _Matcap;
+
+        //     float4 frag (v2f i) : SV_Target
+        //     {
+        //         clip(length(i.uv - 0.5) > 0.5 ? -1 : 1);
+
+        //         float4 merged = tex2D(_AdditiveTexture, i.screenPos.xy / i.screenPos.w);
+        //         merged.xy /= merged.z;
+        //         merged.z = sqrt(1.0 - merged.x * merged.x - merged.y * merged.y);
+
+        //         float2 normal = merged.xy * 0.5 + 0.5;
+
+        //         float4 mc = tex2D(_Matcap, normal);
+               
+
+        //         return mc;
+        //     }
+        //     ENDCG
+        // }
     }
 }

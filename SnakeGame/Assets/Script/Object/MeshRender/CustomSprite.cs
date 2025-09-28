@@ -5,7 +5,6 @@ using UnityEngine.Rendering;
 using Unity.Mathematics;
 using System.Linq;
 
-[ExecuteInEditMode]
 public class CustomSprite : MonoBehaviour
 {
   [System.Runtime.InteropServices.StructLayout(System.Runtime.InteropServices.LayoutKind.Sequential)]

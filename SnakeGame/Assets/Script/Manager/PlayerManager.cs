@@ -35,6 +35,9 @@ public class PlayerManager : MonoBehaviour, IPlayerManager
   [SerializeField]
   AiRenderer? aiRenderer = null;
 
+  [SerializeField]
+  SpikeVfx? spikeVfx = null;
+
   public List<SnakeConfig> PlayerList { set; get; }
 
   string PLAYER_ID = "MAIN_PLAYER";
@@ -147,6 +150,7 @@ public class PlayerManager : MonoBehaviour, IPlayerManager
     );
 
     PlayerList.Add(player);
+    spikeVfx?.SetSnakes(PlayerList);
 
     if (isBot)
     {

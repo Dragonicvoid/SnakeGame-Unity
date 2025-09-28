@@ -46,13 +46,6 @@ Shader "Transparent/TrailVfx"
                 return o;
             }
 
-            float2 padUV(float2 uv, float offset) {
-                float nonZeroOffset = max(offset, 0.);
-                float tMax = 1. + nonZeroOffset;
-                float tMin = -nonZeroOffset;
-                return uv * (tMax - tMin) + tMin;
-            }
-
             fixed4 frag (v2f i) : SV_Target
             {
                 float4 mainTex = tex2D(_MainTex, i.uv);

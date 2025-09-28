@@ -3,7 +3,7 @@ Shader "Transparent/AlphaReducer"
     Properties 
     {
         _MainTex ("Texture", 2D) = "white" {}
-        _Reduce ("Alpha to reduce each call", Float) = 0.01
+        _Reduce ("Alpha to reduce each call", Float) = 0.001
     }
     SubShader
     {
@@ -46,7 +46,7 @@ Shader "Transparent/AlphaReducer"
             fixed4 frag (v2f i) : SV_Target
             {
                 float4 col = tex2D(_MainTex, i.uv);
-                col.a = col.a - _Reduce;
+                col.a = max(col.a - _Reduce, 0.0);
                 return col;
             }
             ENDCG

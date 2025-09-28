@@ -52,7 +52,7 @@ Shader "Transparent/BackgroundBlock"
             fixed4 frag (v2f i) : SV_Target
             {
                 float4 color = _Color;
-                color.a = 1.0 - i.depth01;
+                color.a = max(1.0 - i.depth01, 0.15);
                 return color;
             }
             ENDCG
