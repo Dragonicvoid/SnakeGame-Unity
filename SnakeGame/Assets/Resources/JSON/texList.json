@@ -2,21 +2,27 @@
   "skins": [
     {
       "id": 1001,
-      "name": "Snake Skin",
-      "shader_name": "Transparent/CustomSprite",
-      "texture_name": "Image/snake_skin"
+      "name": "Transparent Skin",
+      "shader_name": "Snake/TransparentWavy",
+      "texture_name": "",
+      "main_size": 0.125,
+      "second_size": 0.025
     },
     {
       "id": 1002,
       "name": "Brick Skin",
       "shader_name": "Transparent/CustomSprite",
-      "texture_name": "Image/test"
+      "texture_name": "Image/test",
+      "main_size": 0.125,
+      "second_size": 0.025
     },
     {
       "id": 2001,
       "name": "Snake Skin Move",
       "shader_name": "Transparent/CustomSprite",
-      "texture_name": "Image/test"
+      "texture_name": "Image/test",
+      "main_size": 0.125,
+      "second_size": 0.025
     }
   ]
 }

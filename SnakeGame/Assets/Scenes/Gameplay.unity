@@ -539,7 +539,7 @@ MonoBehaviour:
   BlockThickness: 2
   QuadWidth: 700
   QuadHeight: 700
-  color: {r: 1, g: 1, b: 1, a: 1}
+  color: {r: 0.62352943, g: 0.5568628, b: 0.4862745, a: 1}
   totalBlock: 29
   camForMatrix: {fileID: 748515579}
   blurIteration: 0
@@ -2133,6 +2133,8 @@ MonoBehaviour:
     name: 
     shader_name: 
     texture_name: 
+    main_size: 0
+    second_size: 0
   SnakeType: 0
 --- !u!222 &840862367
 CanvasRenderer:

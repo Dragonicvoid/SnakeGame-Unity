@@ -338,7 +338,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   RenderTex: {fileID: 0}
-  SelectedMap: 1
+  SelectedMap: 0
 --- !u!4 &1092449369
 Transform:
   m_ObjectHideFlags: 0

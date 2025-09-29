@@ -51,7 +51,7 @@ public class StartSnakePrev : MonoBehaviour
     if (snakeRender != null && renTex != null)
     {
       snakeShape = new List<SnakeBody>();
-      for (int i = 6; i >= -6; i--)
+      for (int i = 2; i >= -2; i--)
       {
         snakeShape.Add(new SnakeBody(
           new Vector2(0, snakeSize * i),

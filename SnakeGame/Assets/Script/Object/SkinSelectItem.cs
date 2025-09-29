@@ -97,6 +97,12 @@ public class SkinSelectItem : MonoBehaviour
 
   IEnumerator<object> getTextureAndLoadImage()
   {
+    if ((SkinData?.texture_name ?? "") == "")
+    {
+      setTexture(null);
+
+      yield break;
+    }
     ResourceRequest request = Resources.LoadAsync<Texture2D>(SkinData?.texture_name ?? "");
 
     while (!request.isDone)
@@ -115,19 +121,23 @@ public class SkinSelectItem : MonoBehaviour
     }
   }
 
-  void setTexture(Texture2D tex)
+  void setTexture(Texture2D? tex)
   {
     if (!preview) return;
 
     if (tex)
     {
       this.tex = tex;
+    }
+
+    if (!rendTex)
+    {
       rendTex = new RenderTexture(
-      (int)preview.rectTransform.rect.width,
-      (int)preview.rectTransform.rect.height,
-      UnityEngine.Experimental.Rendering.GraphicsFormat.R8G8B8A8_UNorm,
-      UnityEngine.Experimental.Rendering.GraphicsFormat.S8_UInt
-    );
+        (int)preview.rectTransform.rect.width,
+        (int)preview.rectTransform.rect.height,
+        UnityEngine.Experimental.Rendering.GraphicsFormat.R8G8B8A8_UNorm,
+        UnityEngine.Experimental.Rendering.GraphicsFormat.S8_UInt
+      );
     }
 
     preview.texture = rendTex;
@@ -145,15 +155,17 @@ public class SkinSelectItem : MonoBehaviour
       if (shader)
       {
         mat = new Material(shader);
-        mat.SetTexture("_MainTex", tex);
+
+        if (tex)
+        {
+          mat.SetTexture("_MainTex", tex);
+        }
       }
     }
   }
 
   void SetMesh()
   {
-    if (!tex) return;
-
     if (!mesh)
     {
       mesh = new Mesh { name = SkinData.name + "_Mesh" };
@@ -202,7 +214,7 @@ public class SkinSelectItem : MonoBehaviour
 
   void drawRenderTex()
   {
-    if (cmdBuffer == null || rendTex == null || mat == null) return;
+    if (cmdBuffer == null || rendTex == null || mat == null || mesh == null) return;
 
     cmdBuffer.Clear();
     var lookMatrix = Camera.main.worldToCameraMatrix;

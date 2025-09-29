@@ -372,7 +372,7 @@ public class Background : MonoBehaviour
       cmdBuffer.SetViewProjectionMatrices(lookMatrix, orthoMatrix);
 
       cmdBuffer.SetRenderTarget(blockRendTex);
-      cmdBuffer.ClearRenderTarget(true, true, Color.yellow, 1f);
+      cmdBuffer.ClearRenderTarget(true, true, color, 1f);
       cmdBuffer.DrawMesh(blockMesh, Matrix4x4.identity, blockMat, 0, 0);
 
       int blur1 = Shader.PropertyToID("_Temp1");

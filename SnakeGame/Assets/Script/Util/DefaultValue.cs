@@ -7,13 +7,13 @@ public static class GENERAL_CONFIG
 
 public static class ARENA_DEFAULT_SIZE
 {
-  public const float SNAKE = 20f;
+  public const float SNAKE = 40f;
   public const float TILE = 20f;
   public const float WIDTH = 700f;
   public const float HEIGHT = 700f;
   public const float GRID_WIDTH = 200f;
   public const float GRID_HEIGHT = 200f;
-  public const float FOOD_GRABBER = 100f;
+  public const float FOOD_GRABBER = 150f;
 }
 
 public static class ACTION_SCORE
@@ -33,7 +33,7 @@ public static class BOT_CONFIG
   public const float AGGRESSIVE_CONE_RAD = 360f;
   public const float AGGRESSIVE_CONE_DIST = 700f;
   public const float AGGRESSIVE_COOLDOWN = 4f;
-  public const float TRIGGER_AREA_DST = 60f;
+  public const float TRIGGER_AREA_DST = 100f;
   public const float TURN_RADIUS = 0f;
 }
 

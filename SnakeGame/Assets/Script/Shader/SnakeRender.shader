@@ -4,6 +4,9 @@ Shader "Transparent/SnakeRender"
     {
         _MainTex ("Main Body Texture", 2D) = "white" {}
         _SecondTex ("Side Texture", 2D) = "white" {}
+
+        _MainSize ("Size of center Body, Suggest to be 0.125", float) = 0.125
+        _SecondSize ("Size of edge Body, defaulted to 0.025", float) = 0.025
     }
     SubShader
     {
@@ -30,6 +33,8 @@ Shader "Transparent/SnakeRender"
                 float2 center : TEXCOORD1;
                 float3 next_pos_norm : TEXCOORD2;
                 float3 prev_pos_norm : TEXCOORD3;
+                float3 next_pos : TEXCOORD4;
+                float3 prev_pos : TEXCOORD5;
             };
 
             struct v2f
@@ -40,6 +45,8 @@ Shader "Transparent/SnakeRender"
                 float2 center : TEXCOORD1;
                 float2 next_pos_norm : TEXCOORD2;
                 float2 prev_pos_norm : TEXCOORD3;
+                float2 next_pos : TEXCOORD4;
+                float2 prev_pos : TEXCOORD5;
                 float radius : PSIZE;
             };
 
@@ -66,6 +73,9 @@ Shader "Transparent/SnakeRender"
             sampler2D _MainTex;
             sampler2D _SecondTex;
 
+            float _MainSize;
+            float _SecondSize;
+
             v2f vert (appdata v)
             {
                 v2f o;
@@ -73,6 +83,8 @@ Shader "Transparent/SnakeRender"
                 o.vertex = UnityObjectToClipPos(float4(v.vertex.xy, -1., v.vertex.w));
                 o.next_pos_norm = v.next_pos_norm;
                 o.prev_pos_norm = v.prev_pos_norm;
+                o.next_pos = v.next_pos;
+                o.prev_pos = v.prev_pos;
                 o.body_count = v.body_count;
                 o.center = v.center;
                 o.uv = v.uv;
@@ -120,19 +132,19 @@ Shader "Transparent/SnakeRender"
                 float dist = distance(tex.uv.x, 0.5);
                 float distUnclamped = tex.actUv.x - 0.5;
 
-                float mainTexClamp = 0.125;
-                float secondTexClamp = 0.15;
+                float mainTexClamp = _MainSize ;
+                float secondTexClamp = _MainSize + _SecondSize;
 
                 float tex1UvX = (1.0 - step(mainTexClamp, abs(dist))) * ((distUnclamped + mainTexClamp) / (2 * mainTexClamp));
                 float tex2UvX = isLeft * ((distUnclamped + secondTexClamp) / (2 * secondTexClamp - mainTexClamp)) +
                                 (1.0 - isLeft) * ((distUnclamped + mainTexClamp) / (2 * secondTexClamp - mainTexClamp) + 0.5);
 
-                float4 mainColor = tex2D(_MainTex, float2(tex1UvX, tex.uv.y));
-                float4 edgeColor = tex2D(_SecondTex, float2(tex2UvX, tex.uv.y));
+                float4 mainColor = tex2D(_MainTex, float2(tex1UvX, tex.actUv.y));
+                float4 edgeColor = tex2D(_SecondTex, float2(tex2UvX, tex.actUv.y));
                 
                 float4 o = lerp(mainColor, edgeColor, between(mainTexClamp, secondTexClamp, dist));
-                o.a *= (1.0 - step(secondTexClamp, abs(dist)));
-                o.a *= when_ge(tex.nextData.dClamp, tex.prevData.dClamp) + when_eq(tex.body_count, 1.);
+                // o.a *= (1.0 - step(secondTexClamp, abs(dist)));
+                // o.a *= when_ge(tex.nextData.dClamp, tex.prevData.dClamp) + when_eq(tex.body_count, 1.);
 
                 clip(((1.0 - step(secondTexClamp, abs(dist))) * (when_ge(tex.nextData.dClamp, tex.prevData.dClamp) + when_eq(tex.body_count, 1.))) - 0.1); 
 
@@ -171,6 +183,9 @@ Shader "Transparent/SnakeRender"
                 v = i.next_pos_norm;
                 sdfData nextData = getSdfData(u,v);
 
+                v = i.prev_pos;
+                sdfData prevDataUnnorm = getSdfData(u,v);
+
                 float boundary = 0.5;
                 float inBetween2Vec = and(when_ge(prevData.h, 0.), when_ge(nextData.h, 0.));
                 float minDistClamp = min(prevData.dClamp, nextData.dClamp);
@@ -201,8 +216,8 @@ Shader "Transparent/SnakeRender"
                 float outsideX = outsideIsLeft * (1.0 - (boundary - centerDist * boundary)) + (1.0 - outsideIsLeft) * (boundary - centerDist * boundary);
                 actTextureDistX = outsiteHRange * outsideX + (1.0 - outsiteHRange) * actTextureDistX;
     
-                float textureDistY = frac(prevData.hClamp);
-                float actY = prevData.h;
+                float textureDistY = prevData.hClamp;
+                float actY = frac(prevDataUnnorm.h);
 
                 texdata tex;
                 tex.uv = float2(textureDistX, textureDistY);

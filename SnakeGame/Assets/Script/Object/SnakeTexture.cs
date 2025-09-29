@@ -185,6 +185,24 @@ public class SnakeTexture : MonoBehaviour
 
   IEnumerator<object> getTextureAndSetMat(SkinDetail skin, Material? mat, bool isPrimary)
   {
+    if ((skin?.texture_name ?? "") == "")
+    {
+      Shader shader = Shader.Find(skin?.shader_name);
+      if (mat && Application.isPlaying)
+      {
+        Destroy(mat);
+      }
+
+      if (isPrimary)
+      {
+        primMat = new Material(shader);
+      }
+      else
+      {
+        secondMat = new Material(shader);
+      }
+      yield break;
+    }
     ResourceRequest request = Resources.LoadAsync<Texture2D>(skin?.texture_name ?? "");
 
     while (!request.isDone)
