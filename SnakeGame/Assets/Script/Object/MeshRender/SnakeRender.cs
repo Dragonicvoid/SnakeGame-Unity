@@ -174,8 +174,8 @@ public class SnakeRender : MonoBehaviour, ISnakeRenderable
                 Vector2 norm = new Vector2(x - SnakeBodies[i + 1].Position.x, y - SnakeBodies[i + 1].Position.y);
                 norm.Normalize();
 
-                prevXNorm = norm.x * 0.2f;
-                prevYNorm = norm.y * 0.2f;
+                prevXNorm = norm.x * 0.1f;
+                prevYNorm = norm.y * 0.1f;
 
                 unNormPrevXNorm = norm.x;
                 unNormPrevYNorm = norm.y;
@@ -185,8 +185,8 @@ public class SnakeRender : MonoBehaviour, ISnakeRenderable
                 Vector2 norm = new Vector2(x - SnakeBodies[i - 1].Position.x, y - SnakeBodies[i - 1].Position.y);
                 norm.Normalize();
 
-                nextXNorm = norm.x * 0.2f;
-                nextYNorm = norm.y * 0.2f;
+                nextXNorm = norm.x * 0.1f;
+                nextYNorm = norm.y * 0.1f;
 
                 unNormNextXNorm = norm.x;
                 unNormNextYNorm = norm.y;

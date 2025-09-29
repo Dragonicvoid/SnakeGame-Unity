@@ -338,7 +338,7 @@ MonoBehaviour:
   repeat: 1
   tiling: {x: 1, y: 1}
   offset: {x: 0, y: 0}
-  mat: {fileID: 2100000, guid: 0d6399c671ee26c478e3b14d800a700a, type: 2}
+  mat: {fileID: 2100000, guid: e4a8b3f738f453747a4878dada06bc69, type: 2}
 --- !u!4 &325958237
 Transform:
   m_ObjectHideFlags: 0

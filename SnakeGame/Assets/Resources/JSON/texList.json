@@ -5,6 +5,7 @@
       "name": "Transparent Skin",
       "shader_name": "Snake/TransparentWavy",
       "texture_name": "",
+      "normal_tex_name": "Image/wave-normal",
       "main_size": 0.125,
       "second_size": 0.025
     },
@@ -13,6 +14,7 @@
       "name": "Brick Skin",
       "shader_name": "Transparent/CustomSprite",
       "texture_name": "Image/test",
+      "normal_tex_name": "Image/wave-normal",
       "main_size": 0.125,
       "second_size": 0.025
     },
@@ -21,6 +23,7 @@
       "name": "Snake Skin Move",
       "shader_name": "Transparent/CustomSprite",
       "texture_name": "Image/test",
+      "normal_tex_name": "Image/wave-normal",
       "main_size": 0.125,
       "second_size": 0.025
     }

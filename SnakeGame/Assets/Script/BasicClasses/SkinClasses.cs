@@ -14,6 +14,7 @@ public class SkinDetail
     public string name;
     public string shader_name;
     public string texture_name;
+    public string normal_tex_name;
     public float main_size;
     public float second_size;
 }

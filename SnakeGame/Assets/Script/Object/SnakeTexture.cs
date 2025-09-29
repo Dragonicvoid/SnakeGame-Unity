@@ -185,9 +185,9 @@ public class SnakeTexture : MonoBehaviour
 
   IEnumerator<object> getTextureAndSetMat(SkinDetail skin, Material? mat, bool isPrimary)
   {
-    if ((skin?.texture_name ?? "") == "")
+    Shader shader = Shader.Find(skin?.shader_name);
+    if ((skin?.texture_name ?? "") == "" && (skin?.normal_tex_name ?? "") == "")
     {
-      Shader shader = Shader.Find(skin?.shader_name);
       if (mat && Application.isPlaying)
       {
         Destroy(mat);
@@ -203,36 +203,45 @@ public class SnakeTexture : MonoBehaviour
       }
       yield break;
     }
-    ResourceRequest request = Resources.LoadAsync<Texture2D>(skin?.texture_name ?? "");
 
-    while (!request.isDone)
+    ResourceRequest request = Resources.LoadAsync<Texture2D>(skin?.texture_name ?? "");
+    ResourceRequest requestNormTex = Resources.LoadAsync<Texture2D>(skin?.normal_tex_name ?? "");
+
+    while (!request.isDone || !requestNormTex.isDone)
     {
       yield return null;
     }
     Texture2D? loadedTexture = request.asset as Texture2D;
+    Texture2D? loadedNormalMap = requestNormTex.asset as Texture2D;
 
-    if (loadedTexture != null)
+    if (loadedTexture == null && skin?.texture_name == "")
     {
-      Shader shader = Shader.Find(skin?.shader_name);
-      if (mat && Application.isPlaying)
-      {
-        Destroy(mat);
-      }
+      Debug.LogError("Failed to load asset at path: " + skin?.texture_name);
+      loadedTexture = null;
+    }
 
-      if (isPrimary)
-      {
-        primMat = new Material(shader);
-        primMat.SetTexture("_MainTex", loadedTexture);
-      }
-      else
-      {
-        secondMat = new Material(shader);
-        secondMat.SetTexture("_MainTex", loadedTexture);
-      }
+    if (loadedNormalMap == null && skin?.normal_tex_name == "")
+    {
+      Debug.LogError("Failed to load asset at path: " + skin?.normal_tex_name);
+      loadedNormalMap = null;
+    }
+
+    if (mat && Application.isPlaying)
+    {
+      Destroy(mat);
+    }
+
+    if (isPrimary)
+    {
+      primMat = new Material(shader);
+      primMat.SetTexture("_MainTex", loadedTexture);
+      primMat.SetTexture("_NormalMap", loadedNormalMap);
     }
     else
     {
-      Debug.LogError("Failed to load asset at path: " + skin?.texture_name);
+      secondMat = new Material(shader);
+      secondMat.SetTexture("_MainTex", loadedTexture);
+      secondMat.SetTexture("_NormalMap", loadedNormalMap);
     }
   }
 

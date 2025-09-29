@@ -3,6 +3,7 @@ Shader "Snake/TransparentWavy"
     Properties
     {
         _MainTex ("Texture", 2D) = "white" {}
+        _NormalMap ("Texture For Normal Mapping", 2D) = "white" {}
     }
     SubShader
     {

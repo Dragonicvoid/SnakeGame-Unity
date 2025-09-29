@@ -43,6 +43,8 @@ public class SkinSelectItem : MonoBehaviour
 
   Texture2D? tex = null;
 
+  Texture2D? normalMap = null;
+
   RenderTexture? rendTex = null;
 
   Mesh? mesh = null;
@@ -97,38 +99,43 @@ public class SkinSelectItem : MonoBehaviour
 
   IEnumerator<object> getTextureAndLoadImage()
   {
-    if ((SkinData?.texture_name ?? "") == "")
+    if ((SkinData?.texture_name ?? "") == "" && (SkinData?.normal_tex_name ?? "") == "")
     {
-      setTexture(null);
-
+      setTexture(null, null);
       yield break;
     }
     ResourceRequest request = Resources.LoadAsync<Texture2D>(SkinData?.texture_name ?? "");
+    ResourceRequest requestNormMap = Resources.LoadAsync<Texture2D>(SkinData?.normal_tex_name ?? "");
 
-    while (!request.isDone)
+    while (!request.isDone || !requestNormMap.isDone)
     {
       yield return null;
     }
-    Texture2D? loadedTexture = request.asset as Texture2D;
 
-    if (loadedTexture != null)
-    {
-      setTexture(loadedTexture);
-    }
-    else
+    Texture2D? loadedTexture = request.asset as Texture2D;
+    Texture2D? loadedNormalMap = requestNormMap.asset as Texture2D;
+
+    if (loadedTexture == null && SkinData?.texture_name != "")
     {
       Debug.LogError("Failed to load asset at path: " + SkinData?.texture_name);
+      loadedTexture = null;
     }
+
+    if (loadedNormalMap == null && SkinData?.normal_tex_name != "")
+    {
+      Debug.LogError("Failed to load asset at path: " + SkinData?.texture_name);
+      loadedNormalMap = null;
+    }
+
+    setTexture(loadedTexture, loadedNormalMap);
   }
 
-  void setTexture(Texture2D? tex)
+  void setTexture(Texture2D? tex, Texture2D? normalMap)
   {
     if (!preview) return;
 
-    if (tex)
-    {
-      this.tex = tex;
-    }
+    this.tex = tex;
+    this.normalMap = normalMap;
 
     if (!rendTex)
     {
@@ -159,6 +166,11 @@ public class SkinSelectItem : MonoBehaviour
         if (tex)
         {
           mat.SetTexture("_MainTex", tex);
+        }
+
+        if (normalMap)
+        {
+          mat.SetTexture("_NormalMap", normalMap);
         }
       }
     }
