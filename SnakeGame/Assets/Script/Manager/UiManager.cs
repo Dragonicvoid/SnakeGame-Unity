@@ -1,8 +1,6 @@
 #nullable enable
-using System;
 using UnityEngine;
 using UnityEngine.UI;
-using UnityEngine.UIElements;
 
 public class UiManager : MonoBehaviour
 {
@@ -34,6 +32,7 @@ public class UiManager : MonoBehaviour
 
   public void EndGame()
   {
+    UiEvent.Instance.onGameEndAnimFinish -= onGameEndAnimFinish;
     UiEvent.Instance.onGameEndAnimFinish += onGameEndAnimFinish;
     background?.GoToMainMenuPos();
   }
@@ -58,9 +57,17 @@ public class UiManager : MonoBehaviour
 
   private void setListener()
   {
+    stopListener();
     GameplayMoveEvent.Instance.onGameUiStartTouch += onTouchStart;
     GameplayMoveEvent.Instance.onGameUiMoveTouch += onTouchMove;
     GameplayMoveEvent.Instance.onGameUiEndTouch += onTouchEnd;
+  }
+
+  void stopListener()
+  {
+    GameplayMoveEvent.Instance.onGameUiStartTouch -= onTouchStart;
+    GameplayMoveEvent.Instance.onGameUiMoveTouch -= onTouchMove;
+    GameplayMoveEvent.Instance.onGameUiEndTouch -= onTouchEnd;
   }
 
   private void onTouchStart(Vector2 pos)
@@ -132,8 +139,6 @@ public class UiManager : MonoBehaviour
 
   void OnDestroy()
   {
-    GameplayMoveEvent.Instance.onGameUiStartTouch -= onTouchStart;
-    GameplayMoveEvent.Instance.onGameUiMoveTouch -= onTouchMove;
-    GameplayMoveEvent.Instance.onGameUiEndTouch -= onTouchEnd;
+    stopListener();
   }
 }

@@ -56,6 +56,8 @@ public class SpikeVfx : MonoBehaviour
 
   RenderTexture? quadTex;
 
+  Coroutine renderCou;
+
   void Awake()
   {
     snakes = new List<SnakeConfig>();
@@ -64,8 +66,8 @@ public class SpikeVfx : MonoBehaviour
     quadTex = new RenderTexture(
       (int)ARENA_DEFAULT_SIZE.WIDTH,
       (int)ARENA_DEFAULT_SIZE.HEIGHT,
-      UnityEngine.Experimental.Rendering.GraphicsFormat.R8G8B8A8_UNorm,
-      UnityEngine.Experimental.Rendering.GraphicsFormat.S8_UInt
+      Util.GetGraphicFormat(),
+      Util.GetDepthFormat()
     );
 
     cmdBuffer = new CommandBuffer();
@@ -74,9 +76,9 @@ public class SpikeVfx : MonoBehaviour
     setQuadMesh();
   }
 
-  void OnEnable()
+  public void StartRendering()
   {
-    StartCoroutine(renderSpike());
+    renderCou = StartCoroutine(renderSpike());
   }
 
   public void SetSpikeData(List<ObstacleData> spikes)
@@ -423,6 +425,22 @@ public class SpikeVfx : MonoBehaviour
 
       Graphics.ExecuteCommandBuffer(cmdBuffer);
     }
+  }
+
+  public void ClearRender()
+  {
+    StopCoroutine(renderCou);
+    if (cmdBuffer == null || !quadTex) return;
+
+    cmdBuffer.Clear();
+    cmdBuffer.SetRenderTarget(quadTex);
+    cmdBuffer.ClearRenderTarget(true, true, Color.clear, 1f);
+
+    // Hack resize Web-view
+    cmdBuffer.SetRenderTarget(PersistentData.Instance.RenderTex);
+    cmdBuffer.ClearRenderTarget(false, false, Color.clear, 1f);
+
+    Graphics.ExecuteCommandBuffer(cmdBuffer);
   }
 
   float getSpikeHeightDist(Vector3 currPos)

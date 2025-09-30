@@ -76,11 +76,8 @@ public class SkinSelectItem : MonoBehaviour
   public void SetSkinData(SkinDetail data)
   {
     SkinData = data;
-    if (tex == null)
-    {
-      setName();
-      getImage();
-    }
+    setName();
+    getImage();
   }
 
   void setName()
@@ -102,6 +99,7 @@ public class SkinSelectItem : MonoBehaviour
     if ((SkinData?.texture_name ?? "") == "" && (SkinData?.normal_tex_name ?? "") == "")
     {
       setTexture(null, null);
+      yield return null;
       yield break;
     }
     ResourceRequest request = Resources.LoadAsync<Texture2D>(SkinData?.texture_name ?? "");
@@ -134,6 +132,18 @@ public class SkinSelectItem : MonoBehaviour
   {
     if (!preview) return;
 
+    if (this.tex)
+    {
+      if (!Application.isEditor) Destroy(this.tex);
+      this.tex = null;
+    }
+
+    if (this.normalMap)
+    {
+      if (!Application.isEditor) Destroy(this.normalMap);
+      this.normalMap = null;
+    }
+
     this.tex = tex;
     this.normalMap = normalMap;
 
@@ -142,8 +152,8 @@ public class SkinSelectItem : MonoBehaviour
       rendTex = new RenderTexture(
         (int)preview.rectTransform.rect.width,
         (int)preview.rectTransform.rect.height,
-        UnityEngine.Experimental.Rendering.GraphicsFormat.R8G8B8A8_UNorm,
-        UnityEngine.Experimental.Rendering.GraphicsFormat.S8_UInt
+        Util.GetGraphicFormat(),
+          Util.GetDepthFormat()
       );
     }
 
@@ -154,25 +164,27 @@ public class SkinSelectItem : MonoBehaviour
 
   void setMat()
   {
-    if (!preview || SkinData == null) return;
+    if (SkinData == null) return;
 
-    if (!mat)
+    if (mat)
     {
-      Shader shader = Shader.Find(SkinData.shader_name);
-      if (shader)
-      {
-        mat = new Material(shader);
+      if (!Application.isEditor) Destroy(mat);
+    }
 
-        if (tex)
-        {
-          mat.SetTexture("_MainTex", tex);
-        }
+    Shader shader = Shader.Find(SkinData.shader_name);
+    if (shader)
+    {
+      mat = new Material(shader);
+    }
 
-        if (normalMap)
-        {
-          mat.SetTexture("_NormalMap", normalMap);
-        }
-      }
+    if (tex)
+    {
+      mat?.SetTexture("_MainTex", tex);
+    }
+
+    if (normalMap)
+    {
+      mat?.SetTexture("_NormalMap", normalMap);
     }
   }
 
@@ -255,7 +267,8 @@ public class SkinSelectItem : MonoBehaviour
   {
     StartCoroutine(getTextureAndLoadImage());
     UiEvent.Instance.SkinSelected(
-      SkinData?.id ?? 0
+      SkinData?.id ?? 0,
+      true
     );
   }
 }

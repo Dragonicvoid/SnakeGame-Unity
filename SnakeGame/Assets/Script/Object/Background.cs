@@ -68,8 +68,8 @@ public class Background : MonoBehaviour
     blockRendTex = new RenderTexture(
       (int)QuadWidth,
       (int)QuadHeight,
-      UnityEngine.Experimental.Rendering.GraphicsFormat.R8G8B8A8_UNorm,
-      UnityEngine.Experimental.Rendering.GraphicsFormat.D32_SFloat_S8_UInt
+      Util.GetGraphicFormat(),
+      Util.GetDepthFormat()
     );
 
     setMaterial();
@@ -400,6 +400,20 @@ public class Background : MonoBehaviour
 
       Graphics.ExecuteCommandBuffer(cmdBuffer);
     }
+  }
+
+  public void ClearRender()
+  {
+    if (cmdBuffer == null || !blockRendTex) return;
+    cmdBuffer.Clear();
+    cmdBuffer.SetRenderTarget(blockRendTex);
+    cmdBuffer.ClearRenderTarget(true, true, color, 1f);
+
+    // Hack resize Web-view
+    cmdBuffer.SetRenderTarget(PersistentData.Instance.RenderTex);
+    cmdBuffer.ClearRenderTarget(false, false, Color.clear, 1f);
+
+    Graphics.ExecuteCommandBuffer(cmdBuffer);
   }
 
   public void GoToMainMenuPos()

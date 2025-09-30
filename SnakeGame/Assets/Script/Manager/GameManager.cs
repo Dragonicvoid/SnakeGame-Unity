@@ -19,8 +19,6 @@ public class GameManager : MonoBehaviour
 
   Coroutine? gameUpdateCorutine = null;
 
-  private DIFFICULTY diff = DIFFICULTY.MEDIUM;
-
   bool paused = true;
 
   void FixedUpdate()
@@ -32,6 +30,7 @@ public class GameManager : MonoBehaviour
 
   public void StartGame()
   {
+    UiEvent.Instance.onGameStartAnimFinish -= onGameStartAnimFinish;
     UiEvent.Instance.onGameStartAnimFinish += onGameStartAnimFinish;
     UiManager?.StartGame();
   }
@@ -89,18 +88,20 @@ public class GameManager : MonoBehaviour
     FoodManager?.I.RemoveAllFood();
     PlayerManager?.I.RemoveAllPlayers();
     FoodManager?.I.RemoveAllFood();
-    UiManager?.ShowStartUI();
+    ArenaManager?.I.ClearSpikeRender();
     UiManager?.ShowEndUI(null, false);
   }
 
   void setCollisionEvent()
   {
+    stopCollisionEvent();
     CollisionEvent.Instance.onHeadCollide += onHeadCollide;
     CollisionEvent.Instance.onFoodCollide += onFoodCollide;
   }
 
   void setGameEvent()
   {
+    stopGameEvent();
     GameEvent.Instance.onGameOver += onGameOver;
   }
 
@@ -119,7 +120,7 @@ public class GameManager : MonoBehaviour
   {
     GameOverData gameOverData = new GameOverData(
       Time.time,
-      diff,
+      PersistentData.Instance.Difficulty,
       false,
       PlayerManager?.I.GetMainPlayer(),
       PlayerManager?.I.GetEnemy()
@@ -238,13 +239,13 @@ public class GameManager : MonoBehaviour
 
     detectedPlayer = PlayerManager.I.FindNearestPlayerTowardPoint(
       snake,
-      BOT_CONFIG.TRIGGER_AREA_DST
+      BOT_CONFIG.GetConfig().TRIGGER_AREA_DST
     );
 
     detectedWall =
       ArenaManager.I.FindObsAnglesFromSnake(
         snake,
-        BOT_CONFIG.TRIGGER_AREA_DST
+        BOT_CONFIG.GetConfig().TRIGGER_AREA_DST
       ) ?? new List<float>();
 
     // need to updated to adjust botData
@@ -254,7 +255,7 @@ public class GameManager : MonoBehaviour
       detectedFood =
         ArenaManager.I.GetNearestDetectedFood(
           snake,
-          BOT_CONFIG.TRIGGER_AREA_DST
+          BOT_CONFIG.GetConfig().TRIGGER_AREA_DST
         ) ?? null;
     }
 

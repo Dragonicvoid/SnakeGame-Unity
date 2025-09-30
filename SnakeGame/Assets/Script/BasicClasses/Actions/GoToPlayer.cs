@@ -154,8 +154,8 @@ public class GoToPlayer : BaseAction
 
         if (firstTime)
         {
-            Cooldown = BOT_CONFIG.AGGRESSIVE_COOLDOWN;
-            aggresiveDuration = BOT_CONFIG.AGGRRESIVE_TIME;
+            Cooldown = BOT_CONFIG.GetConfig().AGGRESSIVE_COOLDOWN;
+            aggresiveDuration = BOT_CONFIG.GetConfig().AGGRRESIVE_TIME;
             firstTime = false;
             aggresiveEndsTStamp = Cooldown > 0 ? (Cooldown * -1) : 0;
         }

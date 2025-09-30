@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class SkinSelect : MonoBehaviour
 {
@@ -11,11 +12,23 @@ public class SkinSelect : MonoBehaviour
     public SkinSelectItem Item;
   }
 
+  struct TabSelectData
+  {
+    public SkinSelectItem? Item;
+    public bool IsPrimary;
+  }
+
   [SerializeField]
   GameObject? skinPref = null;
 
   [SerializeField]
   StartSnakePrev? snakePrev = null;
+
+  [SerializeField]
+  SkinSelectItem? primarySkinPrev = null;
+
+  [SerializeField]
+  SkinSelectItem? secondSkinPrev = null;
 
   [SerializeField]
   CustomScollRect? customScroll = null;
@@ -33,6 +46,7 @@ public class SkinSelect : MonoBehaviour
 
     if (Application.isPlaying)
     {
+      UiEvent.Instance.onPrevSkinDoneRender -= onPrevSkinDoneRender;
       UiEvent.Instance.onPrevSkinDoneRender += onPrevSkinDoneRender;
     }
     InitSkinSelect();
@@ -41,6 +55,23 @@ public class SkinSelect : MonoBehaviour
   void onPrevSkinDoneRender()
   {
     UiEvent.Instance.onPrevSkinDoneRender -= onPrevSkinDoneRender;
+  }
+
+  void onTabSkinSelect(int id)
+  {
+    if (!primarySkinPrev || !secondSkinPrev) return;
+    if (id == 0)
+    {
+      primarySkinPrev.IsSelected = true;
+      secondSkinPrev.IsSelected = false;
+      onItemSel(primarySkinPrev.SkinData.id, false);
+    }
+    else
+    {
+      primarySkinPrev.IsSelected = false;
+      secondSkinPrev.IsSelected = true;
+      onItemSel(secondSkinPrev.SkinData.id, false);
+    }
   }
 
   public void InitSkinSelect()
@@ -78,21 +109,32 @@ public class SkinSelect : MonoBehaviour
 
   private void setListener()
   {
+    turnOffListener();
+    UiEvent.Instance.onTabSkinSelect += onTabSkinSelect;
     UiEvent.Instance.onSkinSelected += onItemSel;
   }
 
   private void turnOffListener()
   {
+    UiEvent.Instance.onTabSkinSelect -= onTabSkinSelect;
     UiEvent.Instance.onSkinSelected -= onItemSel;
   }
 
   private void selectDefault()
   {
-    UiEvent.Instance.SkinSelected(2001);
+    UiEvent.Instance.TabSkinSelect(1);
+    UiEvent.Instance.SkinSelected(1001, true);
+
+    UiEvent.Instance.TabSkinSelect(0);
+    UiEvent.Instance.SkinSelected(1001, true);
   }
 
-  private void onItemSel(int id)
+  private void onItemSel(int id, bool updateData = true)
   {
+    TabSelectData? tabData = getSelectedTab();
+
+    if (tabData == null) return;
+
     SkinSelectItem? selectedSkin = null;
     foreach (SkinSelectItem item in ItemList)
     {
@@ -108,9 +150,10 @@ public class SkinSelect : MonoBehaviour
       }
     }
 
-    if (selectedSkin?.SkinData == null || !snakePrev) return;
+    if (selectedSkin?.SkinData == null || !snakePrev || !updateData) return;
 
-    snakePrev.SetSnakeSkin(selectedSkin.SkinData, true);
+    tabData.Value.Item?.SetSkinData(selectedSkin.SkinData);
+    snakePrev.SetSnakeSkin(selectedSkin.SkinData, tabData.Value.IsPrimary);
   }
 
   InstantiateData? createPref()
@@ -134,25 +177,38 @@ public class SkinSelect : MonoBehaviour
   {
     return new PlayerSkin
     {
-      Skin = snakePrev?.SkinData ?? new SkinDetail(),
+      SkinPrimary = snakePrev?.SkinDataPrim ?? new SkinDetail(),
+      SkinSecond = snakePrev?.SkinDataSecond ?? new SkinDetail(),
       Type = snakePrev?.SnakeType ?? SNAKE_TYPE.NORMAL
     };
   }
 
   public PlayerSkin GetEnemySkinData()
   {
-    SkinDetail? randomSkin = null;
-    SNAKE_TYPE snakeType = SNAKE_TYPE.NORMAL;
+    SkinDetail? randomPrimSkin = null;
 
     if (SkinList?.skins != null)
     {
       List<SkinDetail> skinArray = new List<SkinDetail>(SkinList?.skins);
       List<SkinDetail> skins = Util.Filter(new List<SkinDetail>(skinArray), (skin) =>
       {
-        return snakePrev?.SkinData?.id != null && skin.id != snakePrev?.SkinData?.id;
+        return snakePrev?.SkinDataPrim?.id != null && skin.id != snakePrev?.SkinDataPrim?.id;
       });
 
-      randomSkin = skins[Mathf.FloorToInt(UnityEngine.Random.Range(0, skins.Count))];
+      randomPrimSkin = skins[Mathf.FloorToInt(UnityEngine.Random.Range(0, skins.Count))];
+    }
+
+    SkinDetail? randomSecondSkin = null;
+
+    if (SkinList?.skins != null)
+    {
+      List<SkinDetail> skinArray = new List<SkinDetail>(SkinList?.skins);
+      List<SkinDetail> skins = Util.Filter(new List<SkinDetail>(skinArray), (skin) =>
+      {
+        return snakePrev?.SkinDataSecond?.id != null && skin.id != snakePrev?.SkinDataSecond?.id;
+      });
+
+      randomSecondSkin = skins[Mathf.FloorToInt(UnityEngine.Random.Range(0, skins.Count))];
     }
 
     Array enumVal = Enum.GetValues(typeof(SNAKE_TYPE));
@@ -161,9 +217,42 @@ public class SkinSelect : MonoBehaviour
 
     return new PlayerSkin
     {
-      Skin = randomSkin,
+      SkinPrimary = randomPrimSkin,
+      SkinSecond = randomSecondSkin,
       Type = randomType,
     };
+  }
+
+  TabSelectData? getSelectedTab()
+  {
+    if (primarySkinPrev?.IsSelected == true)
+    {
+      return new TabSelectData
+      {
+        Item = primarySkinPrev,
+        IsPrimary = true,
+      };
+    }
+    else if (secondSkinPrev?.IsSelected == true)
+    {
+      return new TabSelectData
+      {
+        Item = secondSkinPrev,
+        IsPrimary = false,
+      };
+    }
+
+    return null;
+  }
+
+  public void SelectTabPrimary()
+  {
+    UiEvent.Instance.TabSkinSelect(0);
+  }
+
+  public void SelectTabSecond()
+  {
+    UiEvent.Instance.TabSkinSelect(1);
   }
 
   void OnEnable()

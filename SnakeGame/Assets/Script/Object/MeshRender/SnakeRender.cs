@@ -43,16 +43,16 @@ public class SnakeRender : MonoBehaviour, ISnakeRenderable
     }
 
     [SerializeField]
-    private SnakeTexture? _snakeTexture = null;
+    private SnakeTexture? snakeTexture = null;
     public SnakeTexture? SnakeTexture
     {
         get
         {
-            return _snakeTexture;
+            return snakeTexture;
         }
         set
         {
-            _snakeTexture = value;
+            snakeTexture = value;
         }
     }
 
@@ -105,7 +105,6 @@ public class SnakeRender : MonoBehaviour, ISnakeRenderable
 
     void setBodyMeshData()
     {
-        if (SnakeBodies?.Count <= 0) return;
         if (!mesh)
         {
             mesh = new Mesh
@@ -113,6 +112,7 @@ public class SnakeRender : MonoBehaviour, ISnakeRenderable
                 name = gameObject.name
             };
         }
+        mesh.Clear();
 
         int descrCount = 8;
         NativeArray<VertexAttributeDescriptor> attr = new NativeArray<VertexAttributeDescriptor>(descrCount, Allocator.Temp, NativeArrayOptions.UninitializedMemory);
@@ -305,11 +305,11 @@ public class SnakeRender : MonoBehaviour, ISnakeRenderable
             cmdBuffer.SetRenderTarget(RendTex);
             cmdBuffer.ClearRenderTarget(true, true, Color.clear, 1f);
             cmdBuffer.DrawMesh(mesh, Matrix4x4.identity, _mat, 0, 0);
-
-            // Hack resize Web-view
-            cmdBuffer.SetRenderTarget(PersistentData.Instance.RenderTex);
-            cmdBuffer.ClearRenderTarget(false, false, Color.clear, 1f);
         }
+
+        // Hack resize Web-view
+        cmdBuffer.SetRenderTarget(PersistentData.Instance.RenderTex);
+        cmdBuffer.ClearRenderTarget(false, false, Color.clear, 1f);
 
         Graphics.ExecuteCommandBuffer(cmdBuffer);
     }
@@ -323,30 +323,12 @@ public class SnakeRender : MonoBehaviour, ISnakeRenderable
     {
         if (skin == null) return;
 
-        if (skin != null && Mat)
+        if (Mat)
         {
-            Mat.SetTexture(isPrimary ? "_MainTex" : "_SecondTex", isPrimary ? _snakeTexture?.PrimaryTex : _snakeTexture?.SecondTex);
+            Mat.SetTexture(isPrimary ? "_MainTex" : "_SecondTex", isPrimary ? snakeTexture?.PrimaryTex : snakeTexture?.SecondTex);
             Mat.SetFloat(isPrimary ? "_MainSize" : "_SecondSize", isPrimary ? skin.main_size : skin.second_size);
 
-            _snakeTexture?.SetSkin(skin, isPrimary);
-        }
-    }
-
-    private void updateMesh()
-    {
-        if (mesh)
-        {
-            mesh.Clear();
-        }
-
-        setBodyMeshData();
-    }
-
-    private void destroyMat()
-    {
-        if (_mat)
-        {
-            Destroy(_mat);
+            snakeTexture?.SetSkin(skin, isPrimary);
         }
     }
 }

@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Runtime.Serialization.Formatters.Binary;
 using UnityEngine;
+using UnityEngine.Experimental.Rendering;
 
 public static class Util
 {
@@ -243,5 +244,20 @@ public static class Util
     }
 
     return viewMatrix;
+  }
+
+  public static GraphicsFormat GetGraphicFormat()
+  {
+    if (SystemInfo.SupportsRenderTextureFormat(RenderTextureFormat.ARGBFloat))
+    {
+      return GraphicsFormat.R32G32B32A32_SFloat;
+    }
+
+    return GraphicsFormat.R8G8B8A8_UNorm;
+  }
+
+  public static GraphicsFormat GetDepthFormat()
+  {
+    return GraphicsFormat.D32_SFloat_S8_UInt;
   }
 }

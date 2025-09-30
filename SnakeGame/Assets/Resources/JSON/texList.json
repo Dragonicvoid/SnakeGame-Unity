@@ -2,30 +2,30 @@
   "skins": [
     {
       "id": 1001,
-      "name": "Transparent Skin",
+      "name": "Normal",
       "shader_name": "Snake/TransparentWavy",
       "texture_name": "",
-      "normal_tex_name": "Image/wave-normal",
+      "normal_tex_name": "",
       "main_size": 0.125,
       "second_size": 0.025
     },
     {
       "id": 1002,
-      "name": "Brick Skin",
-      "shader_name": "Transparent/CustomSprite",
-      "texture_name": "Image/test",
-      "normal_tex_name": "Image/wave-normal",
+      "name": "Withering Liquid",
+      "shader_name": "Snake/Wither",
+      "texture_name": "",
+      "normal_tex_name": "Image/slime-normal",
       "main_size": 0.125,
-      "second_size": 0.025
+      "second_size": 0.125
     },
     {
       "id": 2001,
-      "name": "Snake Skin Move",
-      "shader_name": "Transparent/CustomSprite",
-      "texture_name": "Image/test",
-      "normal_tex_name": "Image/wave-normal",
+      "name": "Rainbow Bubble",
+      "shader_name": "Snake/RainbowBubble",
+      "texture_name": "Image/bubble",
+      "normal_tex_name": "",
       "main_size": 0.125,
-      "second_size": 0.025
+      "second_size": 0.075
     }
   ]
 }

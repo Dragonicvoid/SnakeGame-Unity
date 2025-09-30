@@ -10,11 +10,18 @@ public class UiEvent : MonoBehaviour
         Instance = this;
     }
 
-    public event Action<int> onSkinSelected;
-    public void SkinSelected(int skinId)
+    public event Action<int, bool> onSkinSelected;
+    public void SkinSelected(int skinId, bool updateData)
     {
         if (onSkinSelected != null)
-            onSkinSelected(skinId);
+            onSkinSelected(skinId, updateData);
+    }
+
+    public event Action<int> onTabSkinSelect;
+    public void TabSkinSelect(int tabId)
+    {
+        if (onTabSkinSelect != null)
+            onTabSkinSelect(tabId);
     }
 
     public event Action onPrevSkinDoneRender;

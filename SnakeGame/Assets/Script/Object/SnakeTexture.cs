@@ -1,5 +1,4 @@
 #nullable enable
-using System.Collections;
 using System.Collections.Generic;
 using Unity.Collections;
 using Unity.Mathematics;
@@ -16,7 +15,7 @@ public class SnakeTexture : MonoBehaviour
     public half2 uv;
   }
   [SerializeField]
-  float rtSize = 100f;
+  float rtSize = 128f;
 
   SkinDetail? skinPrimary = null;
 
@@ -39,17 +38,17 @@ public class SnakeTexture : MonoBehaviour
   void Awake()
   {
     PrimaryTex = new RenderTexture(
-      (int)rtSize,
-      (int)rtSize,
-      UnityEngine.Experimental.Rendering.GraphicsFormat.R8G8B8A8_UNorm,
-      UnityEngine.Experimental.Rendering.GraphicsFormat.S8_UInt
+        (int)rtSize,
+        (int)rtSize,
+        Util.GetGraphicFormat(),
+        Util.GetDepthFormat()
     );
 
     SecondTex = new RenderTexture(
-     (int)rtSize,
-     (int)rtSize,
-     UnityEngine.Experimental.Rendering.GraphicsFormat.R8G8B8A8_UNorm,
-     UnityEngine.Experimental.Rendering.GraphicsFormat.S8_UInt
+      (int)rtSize,
+      (int)rtSize,
+      Util.GetGraphicFormat(),
+      Util.GetDepthFormat()
    );
 
     cmdBuff = new CommandBuffer();
@@ -135,16 +134,6 @@ public class SnakeTexture : MonoBehaviour
       }
     });
 
-    if (Application.isPlaying)
-    {
-      MeshFilter filter = GetComponent<MeshFilter>();
-      if (!filter)
-      {
-        filter = gameObject.AddComponent<MeshFilter>();
-      }
-      filter.mesh = mesh;
-    }
-
     if (isPrimary)
     {
       primMesh = mesh;
@@ -160,47 +149,42 @@ public class SnakeTexture : MonoBehaviour
     Material? mat = isPrimary ? primMat : secondMat;
     SkinDetail? skin = isPrimary ? skinPrimary : skinSecond;
 
-    if (skin != null)
+    Shader shader = Shader.Find(skin?.shader_name);
+
+    if (mat)
     {
-      StartCoroutine(getTextureAndSetMat(skin, mat, isPrimary));
+      if (!Application.isEditor) Destroy(mat);
+    }
+
+    if (isPrimary)
+    {
+      primMat = new Material(shader);
+      mat = primMat;
     }
     else
     {
-      Shader shader = Shader.Find("Transparent/CustomSprite");
-      if (mat && Application.isPlaying)
-      {
-        Destroy(mat);
-      }
+      secondMat = new Material(shader);
+      mat = secondMat;
+    }
 
-      if (isPrimary)
-      {
-        primMat = new Material(shader);
-      }
-      else
-      {
-        secondMat = new Material(shader);
-      }
+    if (skin != null)
+    {
+      StartCoroutine(getTextureAndSetMat(skin, mat));
     }
   }
 
-  IEnumerator<object> getTextureAndSetMat(SkinDetail skin, Material? mat, bool isPrimary)
+  IEnumerator<object> getTextureAndSetMat(SkinDetail skin, Material? mat)
   {
-    Shader shader = Shader.Find(skin?.shader_name);
     if ((skin?.texture_name ?? "") == "" && (skin?.normal_tex_name ?? "") == "")
     {
-      if (mat && Application.isPlaying)
+      if (mat && !Application.isEditor)
       {
         Destroy(mat);
       }
 
-      if (isPrimary)
-      {
-        primMat = new Material(shader);
-      }
-      else
-      {
-        secondMat = new Material(shader);
-      }
+      mat?.SetTexture("_MainTex", null);
+      mat?.SetTexture("_NormalMap", null);
+      yield return null;
       yield break;
     }
 
@@ -214,35 +198,25 @@ public class SnakeTexture : MonoBehaviour
     Texture2D? loadedTexture = request.asset as Texture2D;
     Texture2D? loadedNormalMap = requestNormTex.asset as Texture2D;
 
-    if (loadedTexture == null && skin?.texture_name == "")
+    if (loadedTexture == null && skin?.texture_name != "")
     {
       Debug.LogError("Failed to load asset at path: " + skin?.texture_name);
       loadedTexture = null;
     }
 
-    if (loadedNormalMap == null && skin?.normal_tex_name == "")
+    if (loadedNormalMap == null && skin?.normal_tex_name != "")
     {
       Debug.LogError("Failed to load asset at path: " + skin?.normal_tex_name);
       loadedNormalMap = null;
     }
 
-    if (mat && Application.isPlaying)
+    if (mat && !Application.isEditor)
     {
       Destroy(mat);
     }
 
-    if (isPrimary)
-    {
-      primMat = new Material(shader);
-      primMat.SetTexture("_MainTex", loadedTexture);
-      primMat.SetTexture("_NormalMap", loadedNormalMap);
-    }
-    else
-    {
-      secondMat = new Material(shader);
-      secondMat.SetTexture("_MainTex", loadedTexture);
-      secondMat.SetTexture("_NormalMap", loadedNormalMap);
-    }
+    mat?.SetTexture("_MainTex", loadedTexture);
+    mat?.SetTexture("_NormalMap", loadedNormalMap);
   }
 
   IEnumerator<object> render(bool isPrimary)

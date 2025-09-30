@@ -68,6 +68,7 @@ public class ArenaManager : MonoBehaviour, IArenaManager
     if (obsManager != null)
     {
       spikeVfx?.SetSpikeData(obsManager.I.Spikes);
+      spikeVfx?.StartRendering();
     }
 
     aiDebugger?.SetMapToDebug(mapData);
@@ -323,5 +324,12 @@ public class ArenaManager : MonoBehaviour, IArenaManager
       return id != playerId;
     });
     mapData[coord.Y][coord.X].PlayerIDList = playerIds;
+  }
+
+  public void ClearSpikeRender()
+  {
+    if (!spikeVfx) return;
+
+    spikeVfx.ClearRender();
   }
 }

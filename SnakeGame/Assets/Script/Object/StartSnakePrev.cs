@@ -35,7 +35,9 @@ public class StartSnakePrev : MonoBehaviour
 
   float duration = 0.5f;
 
-  public SkinDetail? SkinData = null;
+  public SkinDetail? SkinDataPrim = null;
+
+  public SkinDetail? SkinDataSecond = null;
 
   public SNAKE_TYPE SnakeType = SNAKE_TYPE.NORMAL;
 
@@ -45,8 +47,8 @@ public class StartSnakePrev : MonoBehaviour
     renTex = new RenderTexture(
       (int)rect.rect.width,
       (int)rect.rect.height,
-      UnityEngine.Experimental.Rendering.GraphicsFormat.R8G8B8A8_UNorm,
-      UnityEngine.Experimental.Rendering.GraphicsFormat.S8_UInt
+      Util.GetGraphicFormat(),
+      Util.GetDepthFormat()
     );
     if (snakeRender != null && renTex != null)
     {
@@ -127,7 +129,17 @@ public class StartSnakePrev : MonoBehaviour
 
   public void SetSnakeSkin(SkinDetail skin, bool isPrimary)
   {
-    SkinData = skin;
+    if (SkinDataPrim == null || SkinDataSecond == null) return;
+
+    if (isPrimary)
+    {
+      SkinDataPrim = skin;
+    }
+    else
+    {
+      SkinDataSecond = skin;
+    }
+
     snakeRender?.SetSnakeSkin(skin, isPrimary);
   }
 }

@@ -1,5 +1,4 @@
 #nullable enable
-using System;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -50,6 +49,9 @@ public class PlayerManager : MonoBehaviour, IPlayerManager
   {
     PlayerList = new List<SnakeConfig>();
     eatAnim = new Dictionary<string, IEnumerator<object>>();
+
+    GameplayMoveEvent.Instance.onSnakeMoveCalculated -= onTouchMove;
+    GameEvent.Instance.onPlayerSizeIncrease -= onSizeIncrease;
     GameplayMoveEvent.Instance.onSnakeMoveCalculated += onTouchMove;
     GameEvent.Instance.onPlayerSizeIncrease += onSizeIncrease;
   }
@@ -157,15 +159,16 @@ public class PlayerManager : MonoBehaviour, IPlayerManager
       if (!enemyRender) return;
 
       enemyRender.SnakeType = skinData?.Type ?? SNAKE_TYPE.NORMAL;
-      enemyRender.SetSnakeSkin(skinData?.Skin, true);
+      enemyRender.SetSnakeSkin(skinData?.SkinPrimary, true);
+      enemyRender.SetSnakeSkin(skinData?.SkinSecond, false);
 
       if (!enemyRender.RendTex && enemyVfx)
       {
         enemyRender.RendTex = new RenderTexture(
           (int)ARENA_DEFAULT_SIZE.WIDTH,
           (int)ARENA_DEFAULT_SIZE.HEIGHT,
-          UnityEngine.Experimental.Rendering.GraphicsFormat.R8G8B8A8_UNorm,
-          UnityEngine.Experimental.Rendering.GraphicsFormat.S8_UInt
+          Util.GetGraphicFormat(),
+          Util.GetDepthFormat()
         );
         enemyVfx.SetSnakeTex(enemyRender.RendTex);
       }
@@ -176,14 +179,15 @@ public class PlayerManager : MonoBehaviour, IPlayerManager
       if (!playerRender) return;
 
       playerRender.SnakeType = skinData?.Type ?? SNAKE_TYPE.NORMAL;
-      playerRender.SetSnakeSkin(skinData?.Skin, true);
+      playerRender.SetSnakeSkin(skinData?.SkinPrimary, true);
+      playerRender.SetSnakeSkin(skinData?.SkinSecond, false);
       if (!playerRender.RendTex && playerVfx)
       {
         playerRender.RendTex = new RenderTexture(
           (int)ARENA_DEFAULT_SIZE.WIDTH,
           (int)ARENA_DEFAULT_SIZE.HEIGHT,
-          UnityEngine.Experimental.Rendering.GraphicsFormat.R8G8B8A8_UNorm,
-          UnityEngine.Experimental.Rendering.GraphicsFormat.S8_UInt
+          Util.GetGraphicFormat(),
+          Util.GetDepthFormat()
         );
         playerVfx.SetSnakeTex(playerRender.RendTex);
       }
@@ -218,6 +222,8 @@ public class PlayerManager : MonoBehaviour, IPlayerManager
     PlayerList = new List<SnakeConfig>();
     enemyRender?.SetSnakeBody(new List<SnakeBody>());
     playerRender?.SetSnakeBody(new List<SnakeBody>());
+    enemyVfx?.ClearRender();
+    playerVfx?.ClearRender();
 
     aiRenderer?.SetSnakeToDebug(null);
   }
@@ -305,7 +311,7 @@ public class PlayerManager : MonoBehaviour, IPlayerManager
     if (collider)
     {
       collider.gameObject.layer = (int)group;
-      collider.radius = ARENA_DEFAULT_SIZE.SNAKE / 2;
+      collider.radius = ARENA_DEFAULT_SIZE.SNAKE / 4;
     }
     if (collParent) bodyObj.transform.SetParent(this.collParent.transform);
 
@@ -374,7 +380,7 @@ public class PlayerManager : MonoBehaviour, IPlayerManager
         TurnRadiusModification(
           player,
           new Vector2(botNewDir.x, botNewDir.y),
-          BOT_CONFIG.TURN_RADIUS,
+          BOT_CONFIG.GetConfig().TURN_RADIUS,
           remaining,
           currDir
         ) ?? new Vector2(0, 0);

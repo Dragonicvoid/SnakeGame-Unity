@@ -27,14 +27,66 @@ public static class ACTION_SCORE
   public const float AGGRESIVE_ON_COOLDOWN = -360f;
 }
 
+public struct BotConfigData
+{
+  public float AGGRRESIVE_TIME;
+  public float AGGRESSIVE_CONE_RAD;
+  public float AGGRESSIVE_CONE_DIST;
+  public float AGGRESSIVE_COOLDOWN;
+  public float TRIGGER_AREA_DST;
+  public float TURN_RADIUS;
+  public float REACTION_TIME;
+}
+
 public static class BOT_CONFIG
 {
-  public const float AGGRRESIVE_TIME = 10f;
-  public const float AGGRESSIVE_CONE_RAD = 360f;
-  public const float AGGRESSIVE_CONE_DIST = 700f;
-  public const float AGGRESSIVE_COOLDOWN = 4f;
-  public const float TRIGGER_AREA_DST = 100f;
-  public const float TURN_RADIUS = 0f;
+  public static BotConfigData GetConfig()
+  {
+    DIFFICULTY diff = PersistentData.Instance.Difficulty;
+    return data[diff];
+  }
+  public static Dictionary<DIFFICULTY, BotConfigData> data = new Dictionary<DIFFICULTY, BotConfigData>
+    {
+      {
+      DIFFICULTY.EASY,
+      new BotConfigData
+        {
+          AGGRRESIVE_TIME = 0f,
+          AGGRESSIVE_CONE_RAD = 0f,
+          AGGRESSIVE_CONE_DIST = 0f,
+          AGGRESSIVE_COOLDOWN = 0f,
+          TRIGGER_AREA_DST = 180f,
+          TURN_RADIUS = 0f,
+          REACTION_TIME = 0.2f,
+        }
+      },
+      {
+      DIFFICULTY.MEDIUM,
+      new BotConfigData
+        {
+          AGGRRESIVE_TIME = 5f,
+          AGGRESSIVE_CONE_RAD = 360f,
+          AGGRESSIVE_CONE_DIST = 700f,
+          AGGRESSIVE_COOLDOWN = 10f,
+          TRIGGER_AREA_DST = 130f,
+          TURN_RADIUS = 1f,
+          REACTION_TIME = 0.1f,
+        }
+      },
+      {
+      DIFFICULTY.HARD,
+      new BotConfigData
+        {
+          AGGRRESIVE_TIME = 10f,
+          AGGRESSIVE_CONE_RAD = 360f,
+          AGGRESSIVE_CONE_DIST = 850f,
+          AGGRESSIVE_COOLDOWN = 3f,
+          TRIGGER_AREA_DST = 180f,
+          TURN_RADIUS = 2f,
+          REACTION_TIME = 0.0f,
+        }
+      }
+    };
 }
 
 public static class TIME_CONFIG

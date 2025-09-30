@@ -136,8 +136,8 @@ Shader "Transparent/SnakeRender"
                 float secondTexClamp = _MainSize + _SecondSize;
 
                 float tex1UvX = (1.0 - step(mainTexClamp, abs(dist))) * ((distUnclamped + mainTexClamp) / (2 * mainTexClamp));
-                float tex2UvX = isLeft * ((distUnclamped + secondTexClamp) / (2 * secondTexClamp - mainTexClamp)) +
-                                (1.0 - isLeft) * ((distUnclamped + mainTexClamp) / (2 * secondTexClamp - mainTexClamp) + 0.5);
+                float tex2UvX = isLeft * ((dist + secondTexClamp) / (2 * (secondTexClamp))) +
+                                (1.0 - isLeft) * ((dist + secondTexClamp) / (2 * (secondTexClamp)));
 
                 float4 mainColor = tex2D(_MainTex, float2(tex1UvX, tex.actUv.y));
                 float4 edgeColor = tex2D(_SecondTex, float2(tex2UvX, tex.actUv.y));
@@ -146,7 +146,11 @@ Shader "Transparent/SnakeRender"
                 // o.a *= (1.0 - step(secondTexClamp, abs(dist)));
                 // o.a *= when_ge(tex.nextData.dClamp, tex.prevData.dClamp) + when_eq(tex.body_count, 1.);
 
-                clip(((1.0 - step(secondTexClamp, abs(dist))) * (when_ge(tex.nextData.dClamp, tex.prevData.dClamp) + when_eq(tex.body_count, 1.))) - 0.1); 
+                clip(
+                    (1.0 - step(secondTexClamp, abs(dist))) * (when_ge(tex.nextData.dClamp, tex.prevData.dClamp) + 
+                    when_eq(tex.body_count, 1.)) - 0.1
+                ); 
+                clip(o.a - 0.1);
 
                 return o;
             }

@@ -24,6 +24,8 @@ public class PersistentData : MonoBehaviour
 
   public int SelectedMap = 0;
 
+  public DIFFICULTY Difficulty = DIFFICULTY.MEDIUM;
+
   private bool isLoading;
 
   List<AsyncOperation> scenesLoading = new List<AsyncOperation>();
