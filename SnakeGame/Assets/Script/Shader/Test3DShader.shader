@@ -1,27 +1,29 @@
-// This part of the code is from of Volume-Rendering Code
-// by github.com/mattatz
-// credit: https://github.com/mattatz/unity-volume-rendering
-Shader "Custom/SpikeVolumetric"
+Shader "Custom/Test3DShader"
 {
     Properties
     {
-        _MainTex ("Texture", 3D) = "" {}
-        _Color ("Color", Color) = (1., 1., 1., 1.)
+        _MainTex ("Texture", 2D) = "white" {}
+        _NormalMap ("Texture For Normal Mapping", 2D) = "white" {}
+        _WorldPos("Object Position", Vector) = (0., 0., 0.)
     }
     SubShader
     {
-      Tags { "Queue"="Transparent" "IgnoreProjector"="True" "RenderType"="Transparent" }
-      Blend SrcAlpha OneMinusSrcAlpha
-      LOD 200
+        Tags { "Queue"="Transparent" }
+        LOD 100
 
-      Pass
-      {
+        Blend SrcAlpha OneMinusSrcAlpha
+
+        Pass
+        {
           CGPROGRAM
           #pragma vertex vert
           #pragma fragment frag
 
           #include "UnityCG.cginc"
           #include "Assets/Script/Shader/Volume.cginc"
+          #include "Assets/Script/Shader/Snake/SnakeLib.cginc"
+
+          #define PI 3.14159265358979323846
 
           struct appdata
           {
@@ -41,6 +43,8 @@ Shader "Custom/SpikeVolumetric"
           float4 _MainTex_ST;
           float4 _Color;
 
+          float3 _WorldPos;
+
           float sample_volume(float3 uv, float3 p)
           {
             // Assuming it is RenderTexture 3D using Red Color
@@ -53,7 +57,7 @@ Shader "Custom/SpikeVolumetric"
           {
             v2f o;
             o.vertex = UnityObjectToClipPos(v.vertex);
-            o.uv = TRANSFORM_TEX(v.uv, _MainTex);
+            o.uv = v.uv;
 
             o.world = mul(unity_ObjectToWorld, v.vertex).xyz;
             o.local = v.vertex.xyz;
@@ -86,25 +90,36 @@ Shader "Custom/SpikeVolumetric"
             float4 dst = float4(0, 0, 0, 0);
             float3 p = start;
 
+            float offset = 0;
+            float distToCenterSphere = 0;
+            float3 uv = get_uv(p);
             [unroll]
             for (int iter = 0; iter < ITERATIONS; iter++)
             {
-              float3 uv = get_uv(p);
-              float v = sample_volume(uv, p);
-              float4 src = float4(v, v, v, v);
-              src.a *= 0.5;
-              src.rgb *= src.a;
+              uv = get_uv(p);
+              SphericalCoord sCoord = GetSphereCoord(uv);
+              float size = 10;
+              float distToCamera = distance(mul(unity_ObjectToWorld, ((uv - 0.5) * 2.)), _WorldSpaceCameraPos); 
+              float2 i = floor(float2((sCoord.omega / PI) * size, (sCoord.tetha / (2 * PI)) * size));
+              offset = sin(rand(float2(i.x, i.y)));
+              offset = offset / 2 + 0.5;
+              offset *= 0.2;
+              offset += distToCamera / 700;
+              distToCenterSphere = distance(uv, float3(0.0,0.0,0.0));
+              float src = (distToCenterSphere < (0.025 + offset)) * (distToCenterSphere >= (offset));
 
               // blend
-              dst = (1.0 - dst.a) * src + dst;
+              dst.a = src;
               p += ds;
 
-              if (dst.a > 0.95) break;
+              if (dst.a > 0.95) {
+                break;
+              };
             }
 
-            return saturate(dst) * _Color;
+            return float4((offset / 0.025),(offset / 0.025),(offset / 0.025),dst.a);
           }
-          ENDCG
-      }
+            ENDCG
+        }
     }
 }

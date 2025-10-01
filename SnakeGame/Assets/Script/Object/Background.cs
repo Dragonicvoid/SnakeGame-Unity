@@ -328,7 +328,7 @@ public class Background : MonoBehaviour
     // Right to left
     while (true)
     {
-      yield return new WaitForEndOfFrame();
+      yield return PersistentData.Instance.WaitForFrameEnd;
 
       float delta = Time.deltaTime;
 
@@ -354,7 +354,7 @@ public class Background : MonoBehaviour
   {
     while (true)
     {
-      yield return new WaitForEndOfFrame();
+      yield return PersistentData.Instance.WaitForFrameEnd;
       if (blockMesh)
       {
         blockMesh.Clear();

@@ -196,7 +196,7 @@ public class TrailVfx : MonoBehaviour
   {
     while (true)
     {
-      yield return new WaitForSeconds(0.2f);
+      yield return PersistentData.Instance.GetWaitSecond(0.2f);
       if (cmdBuffer != null && prevTex && alphaMat)
       {
         cmdBuffer.Clear();

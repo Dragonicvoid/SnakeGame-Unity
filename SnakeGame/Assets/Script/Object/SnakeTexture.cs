@@ -223,7 +223,7 @@ public class SnakeTexture : MonoBehaviour
   {
     while (true)
     {
-      yield return new WaitForEndOfFrame();
+      yield return PersistentData.Instance.WaitForFrameEnd;
       Material? mat = isPrimary ? primMat : secondMat;
       Mesh? mesh = isPrimary ? primMesh : secondMesh;
       RenderTexture? rendTex = isPrimary ? PrimaryTex : SecondTex;

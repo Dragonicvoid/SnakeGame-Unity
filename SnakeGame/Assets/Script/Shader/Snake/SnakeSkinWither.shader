@@ -103,8 +103,8 @@ Shader "Snake/Wither"
                 // Process Normal Map
                 float4 col = float4(1., 1., 1., 1.);
 
-                float4 normalMap = tex2D(_NormalMap, uv0Main);
-                float3 reflection = reflect(-lightDir, normalMap.rgb);
+                half3 normalMap = UnpackNormal(tex2D(_NormalMap, uv0Main));
+                float3 reflection = reflect(-lightDir, normalMap);
                 col.a *= mainBody;
                 col.rgb = ((reflection.r +reflection.g + reflection.b) / 3) * smoothstep(maxDist - 0.21, maxDist, distance(i.uv.x, 0.5)) * 0.075;
 

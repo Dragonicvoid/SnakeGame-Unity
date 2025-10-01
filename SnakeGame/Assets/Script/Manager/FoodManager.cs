@@ -59,7 +59,7 @@ public class FoodManager : MonoBehaviour, IFoodManager
     int retries = 0;
     while (true)
     {
-      yield return new WaitForSeconds(foodSpawnInterval);
+      yield return PersistentData.Instance.GetWaitSecond(foodSpawnInterval);
       if (!foodSpawner || retries >= maxRetries)
       {
         retries = 0;

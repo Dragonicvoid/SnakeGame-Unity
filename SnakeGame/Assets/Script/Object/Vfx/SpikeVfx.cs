@@ -381,7 +381,7 @@ public class SpikeVfx : MonoBehaviour
   {
     while (true)
     {
-      yield return new WaitForEndOfFrame();
+      yield return PersistentData.Instance.WaitForFrameEnd;
 
       if (!spikeMat || cmdBuffer == null || !spikeMesh) continue;
 

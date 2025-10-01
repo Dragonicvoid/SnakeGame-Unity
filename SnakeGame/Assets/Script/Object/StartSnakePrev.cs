@@ -80,7 +80,7 @@ public class StartSnakePrev : MonoBehaviour
   {
     while (true)
     {
-      yield return new WaitForSeconds(0.016f);
+      yield return PersistentData.Instance.GetWaitSecond(0.016f);
       snakeRender?.Render();
     }
   }
@@ -91,7 +91,7 @@ public class StartSnakePrev : MonoBehaviour
     {
       TweenData data = new TweenData((i % 2) == 0 ? 1 : -1, snakeShape[i]);
       animDance(data);
-      yield return new WaitForSeconds(0.25f);
+      yield return PersistentData.Instance.GetWaitSecond(0.25f);
     }
   }
 

@@ -68,7 +68,7 @@ public class SkinSelectItem : MonoBehaviour
   {
     while (true)
     {
-      yield return new WaitForEndOfFrame();
+      yield return PersistentData.Instance.WaitForFrameEnd;
       drawRenderTex();
     }
   }
