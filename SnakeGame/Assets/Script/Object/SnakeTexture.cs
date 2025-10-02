@@ -231,7 +231,7 @@ public class SnakeTexture : MonoBehaviour
       if (!mat || !mesh || cmdBuff == null || !rendTex) continue;
 
       cmdBuff.Clear();
-      var lookMatrix = Camera.main.worldToCameraMatrix;
+      var lookMatrix = Util.CreateViewMatrix(new Vector3(0, 0, -10), Quaternion.identity, Vector3.one).inverse;
       var orthoMatrix = Matrix4x4.Ortho(-rtSize / 2, rtSize / 2, -rtSize / 2, rtSize / 2, 0.3f, 1000f);
       cmdBuff.SetViewProjectionMatrices(lookMatrix, orthoMatrix);
 

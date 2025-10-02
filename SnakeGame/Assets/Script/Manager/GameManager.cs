@@ -9,6 +9,7 @@ public class GameManager : MonoBehaviour
   public IRef<IGridManager>? GridManager = null;
   public IRef<IPlayerManager>? PlayerManager = null;
   public IRef<IFoodManager>? FoodManager = null;
+  public TutorialManager? tutorialManager = null;
   public UiManager? UiManager = null;
   public ArenaInput? ArenaInput = null;
   public BotPlanner? Planner = null;
@@ -17,7 +18,9 @@ public class GameManager : MonoBehaviour
 
   private float gameStartTime = 0;
 
-  Coroutine? gameUpdateCorutine = null;
+  Coroutine? gameUpdateCoroutine = null;
+
+  Coroutine? enemySpawnCoroutine = null;
 
   bool paused = true;
 
@@ -47,30 +50,34 @@ public class GameManager : MonoBehaviour
     PlayerManager?.I.UpdateCoordinate(deltaTime);
   }
 
-  private void CreatePlayer()
+  private void SpawnMainPlayer(Vector2 dir)
   {
-    Vector2 centerPos = ArenaManager?.I.CenterPos ?? new Vector2(0, 0);
-
-    float rand = UnityEngine.Random.Range(0, 100) / 100;
     Vector2 playerPos =
-      ArenaManager?.I.SpawnPos[rand > 0.5 ? 0 : 1] ?? new Vector2(0, 0);
-    Vector2 playerDir = new Vector2(1, 0);
-    if (playerPos.x > centerPos.x)
-    {
-      playerDir.Set(-1, 0);
-    }
-    PlayerManager?.I.CreatePlayer(playerPos, playerDir);
+      ArenaManager?.I.SpawnPos[0] ?? new Vector2(0, 0);
 
-    Vector2 enemyPos =
-      ArenaManager?.I.SpawnPos[rand > 0.5 ? 1 : 0] ?? new Vector2(0, 0);
-    Vector2 enemyDir = new Vector2(1, 0);
-    if (enemyPos.x > centerPos.x)
-    {
-      enemyDir.Set(-1, 0);
-    }
-    PlayerManager?.I.CreatePlayer(enemyPos, enemyDir, true);
+    PlayerManager?.I.CreatePlayer(playerPos, dir.normalized);
 
     FoodManager?.I.StartSpawningFood();
+    GameplayMoveEvent.Instance.onGameUiMoveTouch -= SpawnMainPlayer;
+
+
+    enemySpawnCoroutine = StartCoroutine(SpawnEnemy());
+  }
+
+  IEnumerator<object> SpawnEnemy()
+  {
+    yield return PersistentData.Instance.GetWaitSecond(GENERAL_CONFIG.enemySpawnTime);
+
+    Vector2 enemyPos =
+      ArenaManager?.I.SpawnPos[1] ?? new Vector2(1, 1);
+
+    if (enemyPos.x == 0 && enemyPos.y == 0)
+    {
+      enemyPos = new Vector2(1, 1);
+    }
+
+    Vector2 dir = new Vector2(-enemyPos.x, -enemyPos.y);
+    PlayerManager?.I.CreatePlayer(enemyPos, dir.normalized, true);
   }
 
   void stopGame()
@@ -78,6 +85,7 @@ public class GameManager : MonoBehaviour
     FoodManager?.I.StopSpawningFood();
     ArenaInput?.StopInputListener();
     paused = true;
+    StopCoroutine(enemySpawnCoroutine);
     stopCollisionEvent();
     stopGameEvent();
   }
@@ -102,6 +110,7 @@ public class GameManager : MonoBehaviour
   void setGameEvent()
   {
     stopGameEvent();
+    GameplayMoveEvent.Instance.onGameUiMoveTouch += SpawnMainPlayer;
     GameEvent.Instance.onGameOver += onGameOver;
   }
 
@@ -113,6 +122,7 @@ public class GameManager : MonoBehaviour
 
   void stopGameEvent()
   {
+    GameplayMoveEvent.Instance.onGameUiMoveTouch -= SpawnMainPlayer;
     GameEvent.Instance.onGameOver -= onGameOver;
   }
 
@@ -211,8 +221,8 @@ public class GameManager : MonoBehaviour
     UiEvent.Instance.onGameStartAnimFinish -= onGameStartAnimFinish;
     gameStartTime = Time.fixedTime;
     ArenaInput?.StartInputListener();
+    tutorialManager?.StartTutorial();
 
-    CreatePlayer();
     setCollisionEvent();
     setGameEvent();
 

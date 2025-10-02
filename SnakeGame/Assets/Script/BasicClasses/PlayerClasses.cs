@@ -165,6 +165,7 @@ public class SnakeConfig
   public SnakeState State { get; set; }
   public bool IsBot { get; set; }
   public bool IsAlive { get; set; }
+  public int FoodInStomach { get; set; }
   public ISnakeRenderable? Render { get; set; }
   public Dictionary<BOT_ACTION, IBaseAction>? PossibleActions { get; set; }
   public IBaseAction? Action { get; set; }
@@ -183,6 +184,7 @@ public class SnakeConfig
     this.State = State;
     this.IsBot = IsBot;
     this.IsAlive = IsAlive;
+    FoodInStomach = 0;
 
     if (Render != null)
     {

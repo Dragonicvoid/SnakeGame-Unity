@@ -45,15 +45,26 @@ public class PlayerManager : MonoBehaviour, IPlayerManager
 
   Dictionary<string, IEnumerator<object>> eatAnim;
 
+  float intervalToFire = 0.25f;
+
+  float lastTouchStart = 0f;
+
   void Awake()
   {
     PlayerList = new List<SnakeConfig>();
     eatAnim = new Dictionary<string, IEnumerator<object>>();
 
     GameplayMoveEvent.Instance.onSnakeMoveCalculated -= onTouchMove;
+    GameplayMoveEvent.Instance.onGameUiStartTouch -= onTouchStart;
     GameEvent.Instance.onPlayerSizeIncrease -= onSizeIncrease;
+    GameEvent.Instance.onSnakeFire -= onSnakeFire;
+
+
     GameplayMoveEvent.Instance.onSnakeMoveCalculated += onTouchMove;
+    GameplayMoveEvent.Instance.onGameUiStartTouch += onTouchStart;
     GameEvent.Instance.onPlayerSizeIncrease += onSizeIncrease;
+    GameEvent.Instance.onSnakeFire += onSnakeFire;
+
   }
 
   void FixedUpdate()
@@ -598,6 +609,7 @@ public class PlayerManager : MonoBehaviour, IPlayerManager
       false,
       new Vector2(pos.x, pos.y)
     );
+    snake.FoodInStomach++;
 
     if (newBody == null) return;
 
@@ -647,6 +659,24 @@ public class PlayerManager : MonoBehaviour, IPlayerManager
     eatAnim.TryAdd(snake.Id, anim);
 
     StartCoroutine(anim);
+  }
+
+  void onTouchStart(Vector2 _)
+  {
+    float delta = Time.fixedTime - lastTouchStart;
+    lastTouchStart = Time.fixedTime;
+    if (delta <= intervalToFire)
+    {
+      GameEvent.Instance.SnakeFire(GetMainPlayer());
+    }
+  }
+
+  void onSnakeFire(SnakeConfig snake)
+  {
+    if (snake.FoodInStomach < GENERAL_CONFIG.FOOD_TO_FIRE) return;
+
+    snake.FoodInStomach = 0;
+    Debug.Log("TODO: Snake" + snake.Id + " is Firing");
   }
 
   Vector2 getFoodGrabberPosition(SnakeBody head)

@@ -200,7 +200,7 @@ public class TrailVfx : MonoBehaviour
       if (cmdBuffer != null && prevTex && alphaMat)
       {
         cmdBuffer.Clear();
-        var lookMatrix = Camera.main.worldToCameraMatrix;
+        var lookMatrix = Util.CreateViewMatrix(new Vector3(0, 0, -10), Quaternion.identity, Vector3.one).inverse;
         var orthoMatrix = Matrix4x4.Ortho(-rtSize / 2, rtSize / 2, -rtSize / 2, rtSize / 2, 0.3f, 1000f);
         cmdBuffer.SetViewProjectionMatrices(lookMatrix, orthoMatrix);
 

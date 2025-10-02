@@ -1,4 +1,5 @@
 #nullable enable
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using Unity.Collections;
@@ -215,7 +216,7 @@ public class SpikeVfx : MonoBehaviour
     attr.Dispose();
     float currHeight = ARENA_DEFAULT_SIZE.TILE / 2f;
     float currWidth = ARENA_DEFAULT_SIZE.TILE / 2f;
-    float currDepth = 1f;
+    float currDepth = 0.25f;
 
     NativeArray<VertexSpikeType> vertex = new NativeArray<VertexSpikeType>(vertexCount, Allocator.Temp, NativeArrayOptions.UninitializedMemory);
     for (int i = 0; i < spikes.Count; i++)
@@ -390,10 +391,11 @@ public class SpikeVfx : MonoBehaviour
 
       if (snakes != null)
       {
+        // Prevent Shader out of bound and activated before playing
         List<Vector4> snakesPos = new List<Vector4>()
         {
-          new Vector4(ARENA_DEFAULT_SIZE.WIDTH / 2, ARENA_DEFAULT_SIZE.HEIGHT / 2, 0, 0),
-          new Vector4(ARENA_DEFAULT_SIZE.WIDTH / 2, ARENA_DEFAULT_SIZE.HEIGHT / 2, 0, 0)
+          new Vector4(ARENA_DEFAULT_SIZE.WIDTH + 999, ARENA_DEFAULT_SIZE.HEIGHT + 999, 0, 0),
+          new Vector4(ARENA_DEFAULT_SIZE.WIDTH + 999, ARENA_DEFAULT_SIZE.HEIGHT + 999, 0, 0)
         };
         for (int i = 0; i < 2 && i < snakes.Count; i++)
         {

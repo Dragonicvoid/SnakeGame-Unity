@@ -3,6 +3,9 @@ using System.Collections.Generic;
 public static class GENERAL_CONFIG
 {
   public const float SPEED = 10f;
+  public const int FOOD_TO_FIRE = 5;
+
+  public const float enemySpawnTime = 2f;
 }
 
 public static class ARENA_DEFAULT_SIZE

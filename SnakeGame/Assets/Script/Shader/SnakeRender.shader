@@ -150,7 +150,7 @@ Shader "Transparent/SnakeRender"
                     (1.0 - step(secondTexClamp, abs(dist))) * (when_ge(tex.nextData.dClamp, tex.prevData.dClamp) + 
                     when_eq(tex.body_count, 1.)) - 0.1
                 ); 
-                clip(o.a - 0.1);
+                clip(between(mainTexClamp, secondTexClamp, dist) * (o.a - 0.1));
 
                 return o;
             }
@@ -193,11 +193,8 @@ Shader "Transparent/SnakeRender"
                 float boundary = 0.5;
                 float inBetween2Vec = and(when_ge(prevData.h, 0.), when_ge(nextData.h, 0.));
                 float minDistClamp = min(prevData.dClamp, nextData.dClamp);
-                float minDist = when_ge(prevData.h, 0.) * when_ge(prevData.h, nextData.h) * prevData.d 
-                        + when_ge(nextData.h, 0.) * when_lt(prevData.h, nextData.h) * nextData.d;
-                minDist = inBetween2Vec * min(prevData.d, nextData.d) +
-                        when_ge(prevData.h, 0.) * (1.0 - inBetween2Vec) * prevData.d +
-                        when_ge(nextData.h, 0.) * (1.0 - inBetween2Vec) * nextData.d;
+                float minDist = when_ge(prevData.h, nextData.h) * prevData.d 
+                        + when_lt(prevData.h, nextData.h) * nextData.d;
 
                 float2 vectorUse = when_lt(prevData.dClamp, nextData.dClamp) * prevData.projClamp + when_ge(prevData.dClamp, nextData.dClamp) * nextData.projClamp;
                 float isLeft = when_lt(cross(float3(uv0.x, uv0.y, 0.), float3(vectorUse.x, vectorUse.y, 0.)).z, 0.);
@@ -206,7 +203,9 @@ Shader "Transparent/SnakeRender"
 
                 vectorUse = when_lt(prevData.dClamp, nextData.dClamp) * prevData.proj + when_ge(prevData.dClamp, nextData.dClamp) * nextData.proj;
                 isLeft = when_lt(cross(float3(uv0.x, uv0.y, 0.), float3(vectorUse.x, vectorUse.y, 0.)).z, 0.);
-                float actTextureDistX = minDist;
+                float actTextureDistX = inBetween2Vec * min(prevData.d, nextData.d) +
+                        when_ge(prevData.h, 0.) * (1.0 - inBetween2Vec) * prevData.d +
+                        when_ge(nextData.h, 0.) * (1.0 - inBetween2Vec) * nextData.d;
                 actTextureDistX = isLeft * (boundary - minDist * boundary) + (1.0 - isLeft) * min((minDist * boundary) + boundary, 1.);
 
                 // Edge Case the tail Part

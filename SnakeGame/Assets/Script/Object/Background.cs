@@ -88,7 +88,7 @@ public class Background : MonoBehaviour
     {
       blocks.Add(new BlockData
       {
-        pos = new Vector3(UnityEngine.Random.Range(posBound.x, posBound.y), QuadHeight / totalBlock * i - QuadHeight / 2f, -10f),
+        pos = new Vector3(UnityEngine.Random.Range(posBound.x, posBound.y), QuadHeight / totalBlock * i - QuadHeight / 2f, UnityEngine.Random.Range(-100, 100)),
         speed = UnityEngine.Random.Range(SpeedBound.x, SpeedBound.y),
         length = UnityEngine.Random.Range(LengthBound.x, LengthBound.y),
       });
@@ -341,7 +341,7 @@ public class Background : MonoBehaviour
         {
           nextX = posBound.y;
           block.speed = UnityEngine.Random.Range(SpeedBound.x, SpeedBound.y);
-          nextZ = UnityEngine.Random.Range(-25, -6);
+          nextZ = UnityEngine.Random.Range(-100, 100);
           block.length = UnityEngine.Random.Range(LengthBound.x, LengthBound.y);
         }
         block.pos = new Vector3(nextX, block.pos.y, nextZ);
@@ -469,7 +469,7 @@ public class Background : MonoBehaviour
       (dist, cam) =>
       {
         float easeDist = Util.EaseOut(dist, 3);
-        Vector3 distDelta = (target - currPos) * easeDist;
+        Vector3 distDelta = (target - currPos) * dist;
         Vector3 distEuler = (targetEuler - currEuler) * easeDist;
 
         camForMatrix.transform.position = new Vector3(distDelta.x + currPos.x, distDelta.y + currPos.y, distDelta.z + currPos.z);

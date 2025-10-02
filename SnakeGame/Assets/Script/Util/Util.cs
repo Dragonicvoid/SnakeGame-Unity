@@ -260,4 +260,22 @@ public static class Util
   {
     return GraphicsFormat.D32_SFloat_S8_UInt;
   }
+
+  // Dist is 0-1
+  // return -1 if array count is not positive integer
+  public static int GetArrayIdxByDist(float dist, int arrayCount)
+  {
+    if (arrayCount <= 0)
+    {
+      return -1;
+    }
+
+    if (dist >= 1)
+    {
+      return arrayCount - 1;
+    }
+
+    float perArray = 1f / arrayCount;
+    return Mathf.FloorToInt(dist / perArray);
+  }
 }
