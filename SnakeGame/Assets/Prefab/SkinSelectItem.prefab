@@ -64,12 +64,14 @@ MonoBehaviour:
   preview: {fileID: 3559014428317327320}
   labelName: {fileID: 1753421363895729138}
   selectSprite: {fileID: 3790950203017064581}
-  sprite: {fileID: 0}
   SkinData:
     id: 0
     name: 
     shader_name: 
     texture_name: 
+    normal_tex_name: 
+    main_size: 0
+    second_size: 0
 --- !u!114 &7304564074499024109
 MonoBehaviour:
   m_ObjectHideFlags: 0

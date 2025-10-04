@@ -5,6 +5,7 @@ using System.Linq;
 using System.Runtime.Serialization.Formatters.Binary;
 using UnityEngine;
 using UnityEngine.Experimental.Rendering;
+using UnityEngine.Rendering;
 
 public static class Util
 {
@@ -277,5 +278,18 @@ public static class Util
 
     float perArray = 1f / arrayCount;
     return Mathf.FloorToInt(dist / perArray);
+  }
+
+  public static void ClearDepthRT(RenderTexture rt, CommandBuffer cmdBuffer, bool run = false)
+  {
+    if (run) cmdBuffer.Clear();
+    cmdBuffer.SetRenderTarget(rt);
+    cmdBuffer.ClearRenderTarget(true, true, Color.clear, 1f);
+
+    // Hack resize Web-view
+    cmdBuffer.SetRenderTarget(PersistentData.Instance.RenderTex);
+    cmdBuffer.ClearRenderTarget(false, false, Color.clear, 1f);
+
+    if (run) Graphics.ExecuteCommandBuffer(cmdBuffer);
   }
 }

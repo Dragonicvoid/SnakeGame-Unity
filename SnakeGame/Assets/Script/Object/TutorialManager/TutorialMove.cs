@@ -23,6 +23,7 @@ public class TutorialMove : BaseTutorial
 
   void onTouchMove(Vector2 _)
   {
+    GameplayMoveEvent.Instance.onGameUiMoveTouch -= onTouchMove;
     Next();
   }
 

@@ -11,14 +11,8 @@ public class TutorialMoveAnim : MonoBehaviour
   [SerializeField] SpriteRenderer? mouse;
   [SerializeField] Sprite[] sprites;
   Coroutine? currAnimCour;
-  Vector3 startPosStage1 = new Vector3(-200, -200, 0f);
-  Vector3 endPosStage2 = new Vector3(100, 50, 0f);
-  int animatorHash = 0;
-
-  void Awake()
-  {
-    animatorHash = Animator.StringToHash("Base Layer.Finish State");
-  }
+  Vector3 startPosStage1 = new Vector3(-125, -125, 0f);
+  Vector3 endPosStage2 = new Vector3(75, 35, 0f);
 
   void OnEnable()
   {

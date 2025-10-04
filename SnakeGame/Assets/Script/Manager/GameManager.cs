@@ -9,7 +9,7 @@ public class GameManager : MonoBehaviour
   public IRef<IGridManager>? GridManager = null;
   public IRef<IPlayerManager>? PlayerManager = null;
   public IRef<IFoodManager>? FoodManager = null;
-  public TutorialManager? tutorialManager = null;
+  public TutorialManager? TutorialManager = null;
   public UiManager? UiManager = null;
   public ArenaInput? ArenaInput = null;
   public BotPlanner? Planner = null;
@@ -35,6 +35,7 @@ public class GameManager : MonoBehaviour
   {
     UiEvent.Instance.onGameStartAnimFinish -= onGameStartAnimFinish;
     UiEvent.Instance.onGameStartAnimFinish += onGameStartAnimFinish;
+
     UiManager?.StartGame();
   }
 
@@ -50,6 +51,13 @@ public class GameManager : MonoBehaviour
     PlayerManager?.I.UpdateCoordinate(deltaTime);
   }
 
+  private void onTutorialFinish()
+  {
+    GameEvent.Instance.onTutorialFinish -= onTutorialFinish;
+    FoodManager?.I.StartSpawningFood();
+    enemySpawnCoroutine = StartCoroutine(SpawnEnemy());
+  }
+
   private void SpawnMainPlayer(Vector2 dir)
   {
     Vector2 playerPos =
@@ -57,11 +65,7 @@ public class GameManager : MonoBehaviour
 
     PlayerManager?.I.CreatePlayer(playerPos, dir.normalized);
 
-    FoodManager?.I.StartSpawningFood();
     GameplayMoveEvent.Instance.onGameUiMoveTouch -= SpawnMainPlayer;
-
-
-    enemySpawnCoroutine = StartCoroutine(SpawnEnemy());
   }
 
   IEnumerator<object> SpawnEnemy()
@@ -83,9 +87,13 @@ public class GameManager : MonoBehaviour
   void stopGame()
   {
     FoodManager?.I.StopSpawningFood();
+    TutorialManager?.StopTutorial();
     ArenaInput?.StopInputListener();
     paused = true;
-    StopCoroutine(enemySpawnCoroutine);
+    if (enemySpawnCoroutine != null)
+    {
+      StopCoroutine(enemySpawnCoroutine);
+    }
     stopCollisionEvent();
     stopGameEvent();
   }
@@ -112,6 +120,7 @@ public class GameManager : MonoBehaviour
     stopGameEvent();
     GameplayMoveEvent.Instance.onGameUiMoveTouch += SpawnMainPlayer;
     GameEvent.Instance.onGameOver += onGameOver;
+    GameEvent.Instance.onTutorialFinish += onTutorialFinish;
   }
 
   void stopCollisionEvent()
@@ -124,6 +133,7 @@ public class GameManager : MonoBehaviour
   {
     GameplayMoveEvent.Instance.onGameUiMoveTouch -= SpawnMainPlayer;
     GameEvent.Instance.onGameOver -= onGameOver;
+    GameEvent.Instance.onTutorialFinish -= onTutorialFinish;
   }
 
   void onHeadCollide(HeadCollideData data)
@@ -221,7 +231,7 @@ public class GameManager : MonoBehaviour
     UiEvent.Instance.onGameStartAnimFinish -= onGameStartAnimFinish;
     gameStartTime = Time.fixedTime;
     ArenaInput?.StartInputListener();
-    tutorialManager?.StartTutorial();
+    TutorialManager?.StartTutorial();
 
     setCollisionEvent();
     setGameEvent();

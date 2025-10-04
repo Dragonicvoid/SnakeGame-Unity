@@ -15,7 +15,6 @@ public class PersistentData : MonoBehaviour
 
   void Start()
   {
-    SceneManager.LoadScene(1, LoadSceneMode.Single);
     RenderTex = RenderTexture.active;
     Application.targetFrameRate = 120;
   }

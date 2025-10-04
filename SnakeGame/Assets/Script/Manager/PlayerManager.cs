@@ -1,6 +1,7 @@
 #nullable enable
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Rendering;
 
 public class PlayerManager : MonoBehaviour, IPlayerManager
 {
@@ -181,7 +182,8 @@ public class PlayerManager : MonoBehaviour, IPlayerManager
           Util.GetGraphicFormat(),
           Util.GetDepthFormat()
         );
-        enemyVfx.SetSnakeTex(enemyRender.RendTex);
+        Util.ClearDepthRT(enemyRender.RendTex, new CommandBuffer(), true);
+        enemyVfx.SetRendTex(enemyRender.RendTex);
       }
       enemyRender?.SetSnakeBody(bodies);
     }
@@ -200,7 +202,8 @@ public class PlayerManager : MonoBehaviour, IPlayerManager
           Util.GetGraphicFormat(),
           Util.GetDepthFormat()
         );
-        playerVfx.SetSnakeTex(playerRender.RendTex);
+        Util.ClearDepthRT(playerRender.RendTex, new CommandBuffer(), true);
+        playerVfx.SetRendTex(playerRender.RendTex);
       }
       playerRender?.SetSnakeBody(bodies);
     }

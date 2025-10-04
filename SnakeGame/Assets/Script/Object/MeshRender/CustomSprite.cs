@@ -35,7 +35,7 @@ public class CustomSprite : MonoBehaviour
     set
     {
       _width = value;
-      updateMesh();
+      setMeshData();
     }
   }
 
@@ -47,7 +47,7 @@ public class CustomSprite : MonoBehaviour
     set
     {
       _height = value;
-      updateMesh();
+      setMeshData();
     }
   }
 
@@ -59,7 +59,7 @@ public class CustomSprite : MonoBehaviour
     set
     {
       _color = value;
-      updateMesh();
+      setMeshData();
     }
   }
 
@@ -82,21 +82,21 @@ public class CustomSprite : MonoBehaviour
   {
     setMaterial();
     setTexture();
-    updateMesh();
+    setMeshData();
   }
 
   void OnValidate()
   {
     setMaterial();
     setTexture();
-    updateMesh();
+    setMeshData();
   }
 
   public void Render()
   {
     setMaterial();
     setTexture();
-    updateMesh();
+    setMeshData();
   }
 
   void setMaterial()
@@ -145,6 +145,7 @@ public class CustomSprite : MonoBehaviour
         name = gameObject.name
       };
     }
+    mesh.Clear();
     NativeArray<VertexAttributeDescriptor> attr = new NativeArray<VertexAttributeDescriptor>(3, Allocator.Temp, NativeArrayOptions.UninitializedMemory);
     attr[0] = new VertexAttributeDescriptor(VertexAttribute.Position, VertexAttributeFormat.Float32, 3);
     attr[1] = new VertexAttributeDescriptor(VertexAttribute.Color, VertexAttributeFormat.Float32, 4);
@@ -199,16 +200,6 @@ public class CustomSprite : MonoBehaviour
       }
       filter.mesh = mesh;
     }
-  }
-
-  private void updateMesh()
-  {
-    if (mesh)
-    {
-      mesh.Clear();
-    }
-
-    setMeshData();
   }
 
   private void destroyMat()

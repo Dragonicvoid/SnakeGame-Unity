@@ -71,6 +71,7 @@ public class Background : MonoBehaviour
       Util.GetGraphicFormat(),
       Util.GetDepthFormat()
     );
+    Util.ClearDepthRT(blockRendTex, cmdBuffer, true);
 
     setMaterial();
     setTexture();

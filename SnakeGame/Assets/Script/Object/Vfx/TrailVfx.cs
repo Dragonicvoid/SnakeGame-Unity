@@ -21,10 +21,12 @@ public class TrailVfx : MonoBehaviour
   int rtSize = (int)Mathf.Max(ARENA_DEFAULT_SIZE.WIDTH, ARENA_DEFAULT_SIZE.HEIGHT);
   [SerializeField]
   float alphaReduce = 0.01f;
+  [SerializeField]
+  float trailReduceInterval = 0.2f;
 
   bool hasFirstDrawn = false;
 
-  RenderTexture? snakeTex;
+  RenderTexture? rendTex;
 
   RenderTexture? prevTex;
 
@@ -67,6 +69,7 @@ public class TrailVfx : MonoBehaviour
         Util.GetDepthFormat()
       );
     }
+    Util.ClearDepthRT(prevTex, new CommandBuffer(), true);
 
     if (!quadTex)
     {
@@ -77,6 +80,7 @@ public class TrailVfx : MonoBehaviour
         Util.GetDepthFormat()
       );
     }
+    Util.ClearDepthRT(quadTex, new CommandBuffer(), true);
 
     renderCoroutine = StartCoroutine(render());
   }
@@ -94,7 +98,7 @@ public class TrailVfx : MonoBehaviour
       Shader shader = Shader.Find("Transparent/AlphaReducer");
       alphaMat = new Material(shader);
     }
-    alphaMat.SetFloat("_Reducer", alphaReduce);
+    alphaMat.SetFloat("_Reduce", alphaReduce);
 
     if (!trailMat)
     {
@@ -121,7 +125,7 @@ public class TrailVfx : MonoBehaviour
       meshRend.material = quadMat;
     }
 
-    trailMat.SetTexture("_MainTex", snakeTex);
+    trailMat.SetTexture("_MainTex", rendTex);
     trailMat.SetTexture("_PrevTex", prevTex);
     trailMat.SetColor("_TrailCol", trailColor);
 
@@ -196,7 +200,7 @@ public class TrailVfx : MonoBehaviour
   {
     while (true)
     {
-      yield return PersistentData.Instance.GetWaitSecond(0.2f);
+      yield return PersistentData.Instance.GetWaitSecond(trailReduceInterval);
       if (cmdBuffer != null && prevTex && alphaMat)
       {
         cmdBuffer.Clear();
@@ -237,11 +241,11 @@ public class TrailVfx : MonoBehaviour
           cmdBuffer.SetRenderTarget(quadTex);
           cmdBuffer.ClearRenderTarget(true, true, Color.clear, 1f);
 
-          cmdBuffer.Blit(snakeTex, temp1, trailMat, 0, 0);
+          cmdBuffer.Blit(rendTex, temp1, trailMat, 0, 0);
           cmdBuffer.Blit(temp1, temp2, alphaMat, 0, 0);
           cmdBuffer.Blit(temp2, prevTex, quadMat, 0, 0);
 
-          cmdBuffer.Blit(snakeTex, temp1, trailMat, 0, 0);
+          cmdBuffer.Blit(rendTex, temp1, trailMat, 0, 0);
           cmdBuffer.Blit(temp1, quadTex, quadMat, 0, 0);
         }
 
@@ -276,9 +280,9 @@ public class TrailVfx : MonoBehaviour
   }
 
 
-  public void SetSnakeTex(RenderTexture snakeTex)
+  public void SetRendTex(RenderTexture rendTex)
   {
-    this.snakeTex = snakeTex;
+    this.rendTex = rendTex;
     hasFirstDrawn = false;
     setTexture();
     setMaterial();

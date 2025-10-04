@@ -26,12 +26,13 @@ public class TutorialManager : MonoBehaviour
 
   void setListener()
   {
+    TutorialEvent.Instance.onNextTutorial -= onNextTutorial;
     TutorialEvent.Instance.onNextTutorial += onNextTutorial;
   }
 
   void onNextTutorial()
   {
-    if (idx >= tutorials.Count) return;
+    if (idx >= tutorials.Count || idx < 0) return;
 
     tutorials[idx].OnChange();
     idx += 1;
@@ -39,6 +40,18 @@ public class TutorialManager : MonoBehaviour
     {
       tutorials[idx].Init();
     }
+    else
+    {
+      GameEvent.Instance.FinishTutorial();
+    }
+  }
+
+  public void StopTutorial()
+  {
+    if (idx >= tutorials.Count) return;
+
+    tutorials[idx].OnChange();
+    idx = -1;
   }
 
   void OnDisable()

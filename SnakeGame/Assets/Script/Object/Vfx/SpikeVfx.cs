@@ -63,6 +63,7 @@ public class SpikeVfx : MonoBehaviour
   {
     snakes = new List<SnakeConfig>();
     spikes = new List<ObstacleData>();
+    cmdBuffer = new CommandBuffer();
 
     quadTex = new RenderTexture(
       (int)ARENA_DEFAULT_SIZE.WIDTH,
@@ -71,7 +72,7 @@ public class SpikeVfx : MonoBehaviour
       Util.GetDepthFormat()
     );
 
-    cmdBuffer = new CommandBuffer();
+    Util.ClearDepthRT(quadTex, cmdBuffer, true);
 
     setMaterial();
     setQuadMesh();

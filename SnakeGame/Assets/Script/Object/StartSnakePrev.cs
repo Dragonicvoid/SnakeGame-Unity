@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using Unity.VisualScripting;
 using UnityEngine;
+using UnityEngine.Rendering;
 using UnityEngine.UI;
 
 
@@ -50,6 +51,7 @@ public class StartSnakePrev : MonoBehaviour
       Util.GetGraphicFormat(),
       Util.GetDepthFormat()
     );
+    Util.ClearDepthRT(renTex, new CommandBuffer(), true);
     if (snakeRender != null && renTex != null)
     {
       snakeShape = new List<SnakeBody>();

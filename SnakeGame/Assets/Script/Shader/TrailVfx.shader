@@ -51,7 +51,7 @@ Shader "Transparent/TrailVfx"
                 float4 mainTex = tex2D(_MainTex, i.uv);
                 float4 secondTex = tex2D(_PrevTex, i.uv);
                 fixed4 col = float4(_TrailCol.r, _TrailCol.g, _TrailCol.b, max(mainTex.a, secondTex.a));
-                clip(col.a - 0.18);
+                clip(col.a - 0.3);
                 return col;
             }
             ENDCG

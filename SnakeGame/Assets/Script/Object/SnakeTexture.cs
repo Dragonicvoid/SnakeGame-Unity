@@ -37,12 +37,15 @@ public class SnakeTexture : MonoBehaviour
 
   void Awake()
   {
+    cmdBuff = new CommandBuffer();
+
     PrimaryTex = new RenderTexture(
         (int)rtSize,
         (int)rtSize,
         Util.GetGraphicFormat(),
         Util.GetDepthFormat()
     );
+    Util.ClearDepthRT(PrimaryTex, cmdBuff, true);
 
     SecondTex = new RenderTexture(
       (int)rtSize,
@@ -50,8 +53,7 @@ public class SnakeTexture : MonoBehaviour
       Util.GetGraphicFormat(),
       Util.GetDepthFormat()
    );
-
-    cmdBuff = new CommandBuffer();
+    Util.ClearDepthRT(SecondTex, cmdBuff, true);
 
     setupMesh(false);
     setupMesh(true);
@@ -175,12 +177,9 @@ public class SnakeTexture : MonoBehaviour
 
   IEnumerator<object> getTextureAndSetMat(SkinDetail skin, Material? mat)
   {
-    if ((skin?.texture_name ?? "") == "" && (skin?.normal_tex_name ?? "") == "")
+    if ((skin?.texture_name == null || skin?.texture_name == "")
+        && (skin?.normal_tex_name == null || skin?.normal_tex_name == ""))
     {
-      if (mat && !Application.isEditor)
-      {
-        Destroy(mat);
-      }
 
       mat?.SetTexture("_MainTex", null);
       mat?.SetTexture("_NormalMap", null);
@@ -188,31 +187,25 @@ public class SnakeTexture : MonoBehaviour
       yield break;
     }
 
-    ResourceRequest request = Resources.LoadAsync<Texture2D>(skin?.texture_name ?? "");
-    ResourceRequest requestNormTex = Resources.LoadAsync<Texture2D>(skin?.normal_tex_name ?? "");
+    Texture2D? loadedTexture = null;
+    Texture2D? loadedNormalMap = null;
 
-    while (!request.isDone || !requestNormTex.isDone)
+    if (skin != null)
     {
-      yield return null;
+      AssetManager.Instance.assetsTexture.TryGetValue(skin.texture_name, out loadedTexture);
+      AssetManager.Instance.assetsTexture.TryGetValue(skin.normal_tex_name, out loadedNormalMap);
     }
-    Texture2D? loadedTexture = request.asset as Texture2D;
-    Texture2D? loadedNormalMap = requestNormTex.asset as Texture2D;
 
-    if (loadedTexture == null && skin?.texture_name != "")
+    if (loadedTexture == null && skin != null && skin.texture_name != "")
     {
-      Debug.LogError("Failed to load asset at path: " + skin?.texture_name);
+      Debug.LogError("Failed to load Texture for: " + skin?.name);
       loadedTexture = null;
     }
 
-    if (loadedNormalMap == null && skin?.normal_tex_name != "")
+    if (loadedNormalMap == null && skin != null && skin.normal_tex_name != "")
     {
-      Debug.LogError("Failed to load asset at path: " + skin?.normal_tex_name);
+      Debug.LogError("Failed to load Normal Map for: " + skin?.name);
       loadedNormalMap = null;
-    }
-
-    if (mat && !Application.isEditor)
-    {
-      Destroy(mat);
     }
 
     mat?.SetTexture("_MainTex", loadedTexture);

@@ -10,6 +10,13 @@ public class GameEvent : MonoBehaviour
     Instance = this;
   }
 
+  public event Action onTutorialFinish;
+  public void FinishTutorial()
+  {
+    if (onTutorialFinish != null)
+      onTutorialFinish();
+  }
+
   public event Action<SnakeConfig> onPlayerSizeIncrease;
   public void PlayerSizeIncrease(SnakeConfig snake)
   {

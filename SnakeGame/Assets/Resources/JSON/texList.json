@@ -14,7 +14,7 @@
       "name": "Withering Liquid",
       "shader_name": "Snake/Wither",
       "texture_name": "",
-      "normal_tex_name": "Image/slime-normal",
+      "normal_tex_name": "SKIN_WITHER_NORMAL",
       "main_size": 0.125,
       "second_size": 0.125
     },
@@ -22,7 +22,7 @@
       "id": 2001,
       "name": "Rainbow Bubble",
       "shader_name": "Snake/RainbowBubble",
-      "texture_name": "Image/bubble",
+      "texture_name": "SKIN_BUBBLE_MAIN",
       "normal_tex_name": "",
       "main_size": 0.125,
       "second_size": 0.075

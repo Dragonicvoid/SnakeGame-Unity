@@ -96,32 +96,32 @@ public class SkinSelectItem : MonoBehaviour
 
   IEnumerator<object> getTextureAndLoadImage()
   {
-    if ((SkinData?.texture_name ?? "") == "" && (SkinData?.normal_tex_name ?? "") == "")
+    if ((SkinData?.texture_name == null || SkinData?.texture_name == "")
+        && (SkinData?.normal_tex_name == null || SkinData?.normal_tex_name == ""))
     {
       setTexture(null, null);
       yield return null;
       yield break;
     }
-    ResourceRequest request = Resources.LoadAsync<Texture2D>(SkinData?.texture_name ?? "");
-    ResourceRequest requestNormMap = Resources.LoadAsync<Texture2D>(SkinData?.normal_tex_name ?? "");
 
-    while (!request.isDone || !requestNormMap.isDone)
+    Texture2D? loadedTexture = null;
+    Texture2D? loadedNormalMap = null;
+
+    if (SkinData != null)
     {
-      yield return null;
+      AssetManager.Instance.assetsTexture.TryGetValue(SkinData.texture_name, out loadedTexture);
+      AssetManager.Instance.assetsTexture.TryGetValue(SkinData.normal_tex_name, out loadedNormalMap);
     }
 
-    Texture2D? loadedTexture = request.asset as Texture2D;
-    Texture2D? loadedNormalMap = requestNormMap.asset as Texture2D;
-
-    if (loadedTexture == null && SkinData?.texture_name != "")
+    if (loadedTexture == null && SkinData != null && SkinData.texture_name != "")
     {
-      Debug.LogError("Failed to load asset at path: " + SkinData?.texture_name);
+      Debug.LogError("Failed to load Texture for: " + SkinData?.name);
       loadedTexture = null;
     }
 
-    if (loadedNormalMap == null && SkinData?.normal_tex_name != "")
+    if (loadedNormalMap == null && SkinData != null && SkinData.normal_tex_name != "")
     {
-      Debug.LogError("Failed to load asset at path: " + SkinData?.texture_name);
+      Debug.LogError("Failed to load Normal Map for: " + SkinData?.name);
       loadedNormalMap = null;
     }
 
@@ -134,13 +134,11 @@ public class SkinSelectItem : MonoBehaviour
 
     if (this.tex)
     {
-      if (!Application.isEditor) Destroy(this.tex);
       this.tex = null;
     }
 
     if (this.normalMap)
     {
-      if (!Application.isEditor) Destroy(this.normalMap);
       this.normalMap = null;
     }
 
@@ -153,10 +151,10 @@ public class SkinSelectItem : MonoBehaviour
         (int)preview.rectTransform.rect.width,
         (int)preview.rectTransform.rect.height,
         Util.GetGraphicFormat(),
-          Util.GetDepthFormat()
+        Util.GetDepthFormat()
       );
     }
-
+    Util.ClearDepthRT(rendTex, cmdBuffer, true);
     preview.texture = rendTex;
     SetMesh();
     setMat();
@@ -209,10 +207,10 @@ public class SkinSelectItem : MonoBehaviour
 
     half h0 = new half(0f), h1 = new half(1f);
 
-    vertex[0] = new VertexType { pos = new Vector3(-currWidth, -currHeight, 10), color = Color.white, uv = new half2(h0, h0) };
-    vertex[1] = new VertexType { pos = new Vector3(currWidth, -currHeight, 10), color = Color.white, uv = new half2(h1, h0) };
-    vertex[2] = new VertexType { pos = new Vector3(-currWidth, currHeight, 10), color = Color.white, uv = new half2(h0, h1) };
-    vertex[3] = new VertexType { pos = new Vector3(currWidth, currHeight, 10), color = Color.white, uv = new half2(h1, h1) };
+    vertex[0] = new VertexType { pos = new Vector3(-currWidth, -currHeight), color = Color.white, uv = new half2(h0, h0) };
+    vertex[1] = new VertexType { pos = new Vector3(currWidth, -currHeight), color = Color.white, uv = new half2(h1, h0) };
+    vertex[2] = new VertexType { pos = new Vector3(-currWidth, currHeight), color = Color.white, uv = new half2(h0, h1) };
+    vertex[3] = new VertexType { pos = new Vector3(currWidth, currHeight), color = Color.white, uv = new half2(h1, h1) };
 
     mesh.SetVertexBufferData(vertex, 0, 0, 4);
     vertex.Dispose();
@@ -245,9 +243,15 @@ public class SkinSelectItem : MonoBehaviour
     var orthoMatrix = Matrix4x4.Ortho(-rendTex.width / 2, rendTex.width / 2, -rendTex.height / 2, rendTex.height / 2, 0.3f, 1000f);
     cmdBuffer.SetViewProjectionMatrices(lookMatrix, orthoMatrix);
 
-    cmdBuffer.SetRenderTarget(rendTex);
+    int temp1 = Shader.PropertyToID("_Temp1");
+    cmdBuffer.GetTemporaryRT(temp1, rendTex.width, rendTex.height, 0, FilterMode.Bilinear, RenderTextureFormat.ARGBFloat);
+
+    cmdBuffer.SetRenderTarget(temp1);
     cmdBuffer.ClearRenderTarget(true, true, Color.clear, 1f);
     cmdBuffer.DrawMesh(mesh, Matrix4x4.identity, mat, 0, 0);
+    cmdBuffer.Blit(temp1, rendTex);
+
+    cmdBuffer.ReleaseTemporaryRT(temp1);
 
     // Hack resize Web-view
     cmdBuffer.SetRenderTarget(PersistentData.Instance.RenderTex);
