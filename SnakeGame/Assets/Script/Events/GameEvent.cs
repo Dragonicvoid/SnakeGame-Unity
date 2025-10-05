@@ -24,6 +24,13 @@ public class GameEvent : MonoBehaviour
       onPlayerSizeIncrease(snake);
   }
 
+  public event Action<float> onMainPlayerEat;
+  public void MainPlayerEat(float dist)
+  {
+    if (onMainPlayerEat != null)
+      onMainPlayerEat(dist);
+  }
+
   public event Action<GameOverData> onGameOver;
   public void GameOver(GameOverData data)
   {
@@ -36,5 +43,12 @@ public class GameEvent : MonoBehaviour
   {
     if (onSnakeFire != null)
       onSnakeFire(snake);
+  }
+
+  public event Action<float> onMainPlayerFire;
+  public void MainPlayerFire(float dist)
+  {
+    if (onMainPlayerFire != null)
+      onMainPlayerFire(dist);
   }
 }

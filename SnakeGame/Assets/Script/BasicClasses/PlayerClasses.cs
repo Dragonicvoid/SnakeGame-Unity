@@ -162,11 +162,13 @@ public class SnakeState
 public class SnakeConfig
 {
   public string Id { get; set; }
+  public float LastReactTime { get; set; }
   public SnakeState State { get; set; }
   public bool IsBot { get; set; }
   public bool IsAlive { get; set; }
   public int FoodInStomach { get; set; }
-  public ISnakeRenderable? Render { get; set; }
+  public ISnakeRenderable? Render
+  { get; set; }
   public Dictionary<BOT_ACTION, IBaseAction>? PossibleActions { get; set; }
   public IBaseAction? Action { get; set; }
 
@@ -185,6 +187,7 @@ public class SnakeConfig
     this.IsBot = IsBot;
     this.IsAlive = IsAlive;
     FoodInStomach = 0;
+    LastReactTime = Time.fixedTime;
 
     if (Render != null)
     {

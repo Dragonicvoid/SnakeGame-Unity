@@ -5,7 +5,7 @@ public static class GENERAL_CONFIG
   public const float SPEED = 10f;
   public const int FOOD_TO_FIRE = 5;
 
-  public const float enemySpawnTime = 2f;
+  public const float ENEMY_SPAWN_TIME = 2f;
 }
 
 public static class ARENA_DEFAULT_SIZE
@@ -60,7 +60,7 @@ public static class BOT_CONFIG
           AGGRESSIVE_COOLDOWN = 0f,
           TRIGGER_AREA_DST = 180f,
           TURN_RADIUS = 0f,
-          REACTION_TIME = 0.2f,
+          REACTION_TIME = 0.5f,
         }
       },
       {
@@ -73,7 +73,7 @@ public static class BOT_CONFIG
           AGGRESSIVE_COOLDOWN = 10f,
           TRIGGER_AREA_DST = 130f,
           TURN_RADIUS = 1f,
-          REACTION_TIME = 0.1f,
+          REACTION_TIME = 0.5f,
         }
       },
       {
@@ -86,7 +86,7 @@ public static class BOT_CONFIG
           AGGRESSIVE_COOLDOWN = 3f,
           TRIGGER_AREA_DST = 180f,
           TURN_RADIUS = 2f,
-          REACTION_TIME = 0.0f,
+          REACTION_TIME = 0.2f,
         }
       }
     };
@@ -96,7 +96,7 @@ public static class TIME_CONFIG
 {
   public const float FOOD_EXPIRED = 3;
 
-  public const float TURNING_FRAME = 0.05f;
+  public const float TURNING_FRAME = 0.1f;
 }
 
 public static class MAP

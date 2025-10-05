@@ -2,7 +2,7 @@ Shader "Transparent/BackgroundBlock"
 {
     Properties 
     {
-        _Color ("Color", Color) = (1., 1., 1., 1.)
+        _Color ("Block Color", Color) = (1., 1., 1., 1.)
     }
     SubShader
     {

@@ -37,9 +37,13 @@ public class Background : MonoBehaviour
   [SerializeField] public float QuadWidth = 700f;
   [SerializeField] public float QuadHeight = 700f;
   [SerializeField] Color color = Color.white;
+  [SerializeField] Color fillColor = Color.white;
+  [SerializeField] Color blockColor = Color.black;
   [SerializeField] int totalBlock = 7;
   [SerializeField] Camera camForMatrix;
   [Range(0, 10)][SerializeField] int blurIteration = 0;
+
+  float currDist = 0f;
 
   Vector2 posBound = new Vector2();
 
@@ -50,12 +54,14 @@ public class Background : MonoBehaviour
   Material? blurMat;
 
   Mesh? quadMeshes;
-
   Mesh? blockMesh;
 
   RenderTexture? blockRendTex;
 
   CommandBuffer? cmdBuffer;
+
+  Coroutine? shakeCour;
+  Coroutine? distChangedCour;
 
   void Awake()
   {
@@ -75,6 +81,15 @@ public class Background : MonoBehaviour
 
     setMaterial();
     setTexture();
+
+    GameEvent.Instance.onMainPlayerEat -= onMainPlayerEat;
+    GameEvent.Instance.onMainPlayerEat += onMainPlayerEat;
+
+    GameEvent.Instance.onGameOver -= onGameOver;
+    GameEvent.Instance.onGameOver += onGameOver;
+
+    GameEvent.Instance.onMainPlayerFire -= onMainPlayerFire;
+    GameEvent.Instance.onMainPlayerFire += onMainPlayerFire;
   }
 
   void OnEnable()
@@ -106,7 +121,7 @@ public class Background : MonoBehaviour
 
     if (!quadMat)
     {
-      Shader shader = Shader.Find("Transparent/CustomSprite");
+      Shader shader = Shader.Find("Transparent/Background");
       quadMat = new Material(shader);
     }
 
@@ -135,9 +150,13 @@ public class Background : MonoBehaviour
       meshRender.material = quadMat;
     }
 
-    blockMat.SetColor("_Color", Color.black);
+    blockMat.SetColor("_Color", blockColor);
 
-    quadMat.SetFloat("_Intensity", 1f);
+    blurMat.SetFloat("_Intensity", 1f);
+
+    quadMat.SetFloat("_Dist", 0f);
+    quadMat.SetColor("_EmptyColor", color);
+    quadMat.SetColor("_FillColor", fillColor);
   }
 
   void setTexture()
@@ -366,14 +385,17 @@ public class Background : MonoBehaviour
       if (!blockMesh || cmdBuffer == null || !blockRendTex) continue;
 
       Vector3 camPos = camForMatrix.transform.position;
+
+      camPos.Set(camPos.x, camPos.y, camPos.z);
+
       blockMat?.SetVector("_CameraPos", new Vector4(camPos.x, camPos.y, camPos.z, camForMatrix.farClipPlane));
       cmdBuffer.Clear();
-      var lookMatrix = camForMatrix.worldToCameraMatrix;
-      var orthoMatrix = Matrix4x4.Perspective(60f, QuadWidth / QuadHeight, 0.03f, 700f);
+      Matrix4x4 lookMatrix = Util.CreateViewMatrix(camPos, camForMatrix.transform.rotation, camForMatrix.transform.localScale);
+      Matrix4x4 orthoMatrix = Matrix4x4.Perspective(60f, QuadWidth / QuadHeight, 0.03f, 700f);
       cmdBuffer.SetViewProjectionMatrices(lookMatrix, orthoMatrix);
 
       cmdBuffer.SetRenderTarget(blockRendTex);
-      cmdBuffer.ClearRenderTarget(true, true, color, 1f);
+      cmdBuffer.ClearRenderTarget(true, true, Color.clear, 1f);
       cmdBuffer.DrawMesh(blockMesh, Matrix4x4.identity, blockMat, 0, 0);
 
       int blur1 = Shader.PropertyToID("_Temp1");
@@ -511,11 +533,79 @@ public class Background : MonoBehaviour
     StartCoroutine(tween);
   }
 
+  void onMainPlayerEat(float dist)
+  {
+    changeDist(dist);
+  }
+
+  void onMainPlayerFire(float dist)
+  {
+    changeDist(dist, false);
+  }
+
+  void onGameOver(GameOverData _)
+  {
+    changeDist(0, false);
+  }
+
+  void changeDist(float bgDist, bool shouldFlash = true)
+  {
+    if (PersistentData.Instance.isPaused) bgDist = 0;
+
+    if (distChangedCour != null)
+    {
+      StopCoroutine(distChangedCour);
+    }
+
+    float startDist = currDist;
+    BaseTween<object> tweenData = new BaseTween<object>(
+      1f,
+      null,
+      (dist, obj) =>
+      {
+        currDist = startDist;
+        if (quadMat)
+        {
+          quadMat.SetFloat("_Dist", currDist);
+          quadMat.SetFloat("_EatRatio", 0);
+        }
+      },
+      (dist, obj) =>
+      {
+        float easeOutDist = Util.EaseOut(dist, 3);
+        float eatRatio = -4 * Mathf.Pow(easeOutDist - 0.5f, 2) + 1;
+
+        currDist = startDist + (bgDist - startDist) * easeOutDist;
+        if (quadMat)
+        {
+          quadMat.SetFloat("_Dist", currDist);
+          if (shouldFlash) quadMat.SetFloat("_EatRatio", eatRatio);
+        }
+      },
+      (dist, obj) =>
+      {
+        currDist = bgDist;
+        if (quadMat)
+        {
+          quadMat.SetFloat("_Dist", currDist);
+          quadMat.SetFloat("_EatRatio", 0);
+        }
+      }
+    );
+    IEnumerator<object> tween = Tween.Create(tweenData);
+
+    distChangedCour = StartCoroutine(tween);
+  }
+
   void OnDestroy()
   {
     if (quadMat)
     {
       Destroy(quadMat);
     }
+
+    GameEvent.Instance.onGameOver -= onGameOver;
+    GameEvent.Instance.onMainPlayerEat -= onMainPlayerEat;
+    GameEvent.Instance.onMainPlayerFire -= onMainPlayerFire;
   }
 }

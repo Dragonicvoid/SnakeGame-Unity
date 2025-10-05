@@ -19,7 +19,7 @@ MonoBehaviour:
     width: 2560
     height: 1349
   m_ShowMode: 4
-  m_Title: Hierarchy
+  m_Title: Project
   m_RootView: {fileID: 2}
   m_MinSize: {x: 875, y: 300}
   m_MaxSize: {x: 10000, y: 10000}
@@ -119,7 +119,7 @@ MonoBehaviour:
   m_MinSize: {x: 300, y: 100}
   m_MaxSize: {x: 24288, y: 16192}
   vertical: 0
-  controlID: 40
+  controlID: 83
   draggingID: 0
 --- !u!114 &6
 MonoBehaviour:
@@ -145,7 +145,7 @@ MonoBehaviour:
   m_MinSize: {x: 200, y: 100}
   m_MaxSize: {x: 16192, y: 16192}
   vertical: 1
-  controlID: 41
+  controlID: 38
   draggingID: 0
 --- !u!114 &7
 MonoBehaviour:
@@ -171,7 +171,7 @@ MonoBehaviour:
   m_MinSize: {x: 200, y: 50}
   m_MaxSize: {x: 16192, y: 8096}
   vertical: 0
-  controlID: 42
+  controlID: 39
   draggingID: 0
 --- !u!114 &8
 MonoBehaviour:
@@ -236,7 +236,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 1
   m_Script: {fileID: 12006, guid: 0000000000000000e000000000000000, type: 0}
-  m_Name: ConsoleWindow
+  m_Name: ProjectBrowser
   m_EditorClassIdentifier: 
   m_Children: []
   m_Position:
@@ -245,14 +245,14 @@ MonoBehaviour:
     y: 924
     width: 1989
     height: 369
-  m_MinSize: {x: 51, y: 76}
-  m_MaxSize: {x: 4001, y: 4026}
-  m_ActualView: {fileID: 16}
+  m_MinSize: {x: 231, y: 276}
+  m_MaxSize: {x: 10001, y: 10026}
+  m_ActualView: {fileID: 15}
   m_Panes:
   - {fileID: 15}
   - {fileID: 16}
-  m_Selected: 1
-  m_LastSelected: 0
+  m_Selected: 0
+  m_LastSelected: 1
 --- !u!114 &11
 MonoBehaviour:
   m_ObjectHideFlags: 52
@@ -423,7 +423,7 @@ MonoBehaviour:
       scrollPos: {x: 0, y: 0}
       m_SelectedIDs: 
       m_LastClickedID: 0
-      m_ExpandedIDs: 22f8fbff9ef9fbff82fcfbffa6fcfbff0e05fcffb60efcff4010fcff2813fcff4c13fcff6a1ffcff3627fcffc028fcff782bfcff9c2bfcff8434fcff0036fcffe838fcff0c39fcffc245fcff3e47fcff224afcff464afcff0452fcffae58fcff2c61fcff3e68fcff546ffcff4671fcff827afcff5c7dfcff4e7ffcffa284fcff148dfcffaa9afcffca9afcffea9afcff0c9bfcff849cfcffdca5fcff1ea7fcff0aaafcff1caafcfff4bbfcff80c4fcff5eccfcffaecdfcff66d0fcff78d0fcffbad8fcff0adafcfff2dcfcff04ddfcffe0eafcff22ecfcff16effcff34effcff2cf9fcff1c03fdff7204fdff5807fdff6a07fdff904cfdffa867fdff0068fdff007efdffc480fdffc29afdff1c9bfdffb89cfdff1ac7fdff3ec8fdff50dbfdffe4f2fdfffef3fdff96fafdff78fdfdff8e12feffce2bfeffe62cfeff8242feff4e48feff6a73feffca73feff3092feff8892feffa2b1feff60b3feff62c8feff92ddfeffb8f3feff10f4feff620affff8e1fffffde34ffff204bffffde60ffffc677ffffba8dffffb097ffff2ca8ffff84a8ffff6eacffffcab3ffffa4c0ffff56c7ffff90d9ffff20fbfffff4ffffff76a8000002a90000bec0000072c20000d4ca0000dacb000000d1000074d1000006d200008ed20000b6d20000d0e3000064e4000086e500004ee8000004ea00003aea0000aeea00004ceb0000dceb0000f0eb0000c8f000003cf10000faf100007ef2000012f3000086f3000044f40000c8f40000fef40000b4f600004afb0000d2060100100a010092130100bc18010050190100721a0100f21c0100861d0100a81e0100041f0100c01f010004200100ba200100582b0100ec2b01000e2d0100442d0100944e01007a50010098500100ac500100e65001008e510100d4510100
+      m_ExpandedIDs: f893feff7495feff5c98feff8098feff009dfefff8a6feff74a8feff5cabfeff80abfeff5cb8feffd8b9feffc6bcfefff0bcfeffaac4feffb6cdfeff5ed5feffdad6feffbed9feffe2d9feff52e4feff64e7feff7cfcfefffc0ffffff811ffff9619ffff121bfffff41dffff181effff9442ffffe44bffff604dffff4450ffff6850ffff725afffffa66ffff7c68ffff6a6bffff946bffffce71ffffa474ffff7a7fffff5282ffff4884ffff0e8effff8a8fffff7292ffff9692ffff969effffeaa7ffff66a9ffff4eacffff72acffff42b9ffffc0baffffa8bdffffcebdffff40ccffffbccdffffa4d0ffffc8d0ffff86ddffff02dfffffeae1ffff0ee2ffffd0eeffff4cf0ffff42f3ffff70f3ffff20fbffffdacc0000f8cc00000ccd000046cd0000eecd000034ce0000d6cf0000f4cf000008d0000042d00000ead0000030d10000a6e20000e6e7000020e800002ce8000080ef0000baef0000c6ef00006cf000005afc000094fc0000a0fc000046fd0000
       m_RenameOverlay:
         m_UserAcceptedRename: 0
         m_Name: 
@@ -943,9 +943,9 @@ MonoBehaviour:
   m_AudioPlay: 0
   m_DebugDrawModesUseInteractiveLightBakingData: 0
   m_Position:
-    m_Target: {x: 468.45242, y: 398.02277, z: -11.36731}
+    m_Target: {x: 424.88065, y: 507.00504, z: -11.000497}
     speed: 2
-    m_Value: {x: 468.45242, y: 398.02277, z: -11.36731}
+    m_Value: {x: 424.88065, y: 507.00504, z: -11.000497}
   m_RenderMode: 0
   m_CameraMode:
     drawMode: 2
@@ -995,9 +995,9 @@ MonoBehaviour:
     speed: 2
     m_Value: {x: 0, y: 0, z: 0, w: 1}
   m_Size:
-    m_Target: 148.8569
+    m_Target: 112.17524
     speed: 2
-    m_Value: 148.8569
+    m_Value: 112.17524
   m_Ortho:
     m_Target: 1
     speed: 2
@@ -1050,7 +1050,7 @@ MonoBehaviour:
   m_Pos:
     serializedVersion: 2
     x: 0
-    y: 1003
+    y: 948
     width: 1988
     height: 343
   m_SerializedDataModeController:
@@ -1075,7 +1075,7 @@ MonoBehaviour:
     m_SkipHidden: 0
     m_SearchArea: 1
     m_Folders:
-    - Assets/Script/Util
+    - Assets/Scenes
     m_Globs: []
     m_ProductIds: 
     m_AnyWithAssetOrigin: 0
@@ -1085,16 +1085,16 @@ MonoBehaviour:
   m_ViewMode: 1
   m_StartGridSize: 64
   m_LastFolders:
-  - Assets/Script/Util
+  - Assets/Scenes
   m_LastFoldersGridSize: -1
   m_LastProjectPath: H:\valdo 7d\github.com\Dragonicvoid\SnakeGame-Unity\SnakeGame
   m_LockTracker:
     m_IsLocked: 0
   m_FolderTreeState:
-    scrollPos: {x: 0, y: 120}
-    m_SelectedIDs: 38ad0000
-    m_LastClickedID: 44344
-    m_ExpandedIDs: 0000000018a900001aa900001ca900001ea9000020a9000022a9000024a9000026a9000028a90000
+    scrollPos: {x: 0, y: 0}
+    m_SelectedIDs: 6ebf0000
+    m_LastClickedID: 49006
+    m_ExpandedIDs: 00000000eaac0000ecac0000eeac0000f0ac0000f2ac0000f4ac0000f6ac0000f8ac0000faac0000
     m_RenameOverlay:
       m_UserAcceptedRename: 0
       m_Name: 
@@ -1123,7 +1123,7 @@ MonoBehaviour:
     scrollPos: {x: 0, y: 0}
     m_SelectedIDs: 
     m_LastClickedID: 0
-    m_ExpandedIDs: 0000000018a900001aa900001ca900001ea9000020a9000022a9000024a9000026a9000028a90000
+    m_ExpandedIDs: 00000000eaac0000ecac0000eeac0000f0ac0000f2ac0000f4ac0000f6ac0000f8ac0000faac0000
     m_RenameOverlay:
       m_UserAcceptedRename: 0
       m_Name: 
@@ -1203,7 +1203,7 @@ MonoBehaviour:
   m_Pos:
     serializedVersion: 2
     x: 0
-    y: 948
+    y: 1003
     width: 1988
     height: 343
   m_SerializedDataModeController:

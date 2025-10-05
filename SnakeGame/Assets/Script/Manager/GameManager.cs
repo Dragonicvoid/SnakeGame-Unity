@@ -22,11 +22,9 @@ public class GameManager : MonoBehaviour
 
   Coroutine? enemySpawnCoroutine = null;
 
-  bool paused = true;
-
   void FixedUpdate()
   {
-    if (paused) return;
+    if (PersistentData.Instance.isPaused) return;
 
     gameUpdate();
   }
@@ -70,7 +68,7 @@ public class GameManager : MonoBehaviour
 
   IEnumerator<object> SpawnEnemy()
   {
-    yield return PersistentData.Instance.GetWaitSecond(GENERAL_CONFIG.enemySpawnTime);
+    yield return PersistentData.Instance.GetWaitSecond(GENERAL_CONFIG.ENEMY_SPAWN_TIME);
 
     Vector2 enemyPos =
       ArenaManager?.I.SpawnPos[1] ?? new Vector2(1, 1);
@@ -89,7 +87,7 @@ public class GameManager : MonoBehaviour
     FoodManager?.I.StopSpawningFood();
     TutorialManager?.StopTutorial();
     ArenaInput?.StopInputListener();
-    paused = true;
+    PersistentData.Instance.isPaused = true;
     if (enemySpawnCoroutine != null)
     {
       StopCoroutine(enemySpawnCoroutine);
@@ -236,12 +234,15 @@ public class GameManager : MonoBehaviour
     setCollisionEvent();
     setGameEvent();
 
-    paused = false;
+    PersistentData.Instance.isPaused = false;
   }
 
   void handleBotLogic(SnakeConfig snake)
   {
     if (!snake.IsBot) return;
+
+    float deltaTime = Time.time - snake.LastReactTime;
+    if (deltaTime < BOT_CONFIG.GetConfig().REACTION_TIME) return;
 
     if (
       PlayerManager == null ||
@@ -362,5 +363,7 @@ public class GameManager : MonoBehaviour
       snake.Action?.PrevPathfindingData,
       possibleActions
       );
+
+    snake.LastReactTime = Time.fixedTime;
   }
 }

@@ -45,5 +45,7 @@ public class PersistentData : MonoBehaviour
 
   private bool isLoading;
 
+  public bool isPaused = true;
+
   List<AsyncOperation> scenesLoading = new List<AsyncOperation>();
 }

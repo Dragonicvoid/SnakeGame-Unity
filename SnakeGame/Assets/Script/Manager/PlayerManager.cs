@@ -661,6 +661,11 @@ public class PlayerManager : MonoBehaviour, IPlayerManager
     anim = Tween.Create(data);
     eatAnim.TryAdd(snake.Id, anim);
 
+    if (snake.Id == PLAYER_ID)
+    {
+      GameEvent.Instance.MainPlayerEat(Mathf.Min((float)snake.FoodInStomach / GENERAL_CONFIG.FOOD_TO_FIRE, 1));
+    }
+
     StartCoroutine(anim);
   }
 
@@ -679,6 +684,9 @@ public class PlayerManager : MonoBehaviour, IPlayerManager
     if (snake.FoodInStomach < GENERAL_CONFIG.FOOD_TO_FIRE) return;
 
     snake.FoodInStomach = 0;
+
+    if (snake.Id == PLAYER_ID) GameEvent.Instance.MainPlayerFire(0);
+
     Debug.Log("TODO: Snake" + snake.Id + " is Firing");
   }
 
