@@ -230,7 +230,7 @@ public class SnakeTexture : MonoBehaviour
 
       cmdBuff.SetRenderTarget(rendTex);
       cmdBuff.ClearRenderTarget(true, true, Color.clear, 1f);
-      cmdBuff.DrawMesh(mesh, Matrix4x4.identity, mat, 0, 0);
+      cmdBuff.DrawMesh(mesh, Matrix4x4.identity, mat, 0, isPrimary ? (int)SNAKE_RENDER_PASS.MAIN_BODY : (int)SNAKE_RENDER_PASS.SECOND_BODY);
 
       // Hack resize Web-view
       cmdBuff.SetRenderTarget(PersistentData.Instance.RenderTex);

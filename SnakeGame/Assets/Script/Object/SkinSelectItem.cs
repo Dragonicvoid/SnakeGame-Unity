@@ -248,7 +248,7 @@ public class SkinSelectItem : MonoBehaviour
 
     cmdBuffer.SetRenderTarget(temp1);
     cmdBuffer.ClearRenderTarget(true, true, Color.clear, 1f);
-    cmdBuffer.DrawMesh(mesh, Matrix4x4.identity, mat, 0, 0);
+    cmdBuffer.DrawMesh(mesh, Matrix4x4.identity, mat, 0, (int)SNAKE_RENDER_PASS.PREVIEW);
     cmdBuffer.Blit(temp1, rendTex);
 
     cmdBuffer.ReleaseTemporaryRT(temp1);

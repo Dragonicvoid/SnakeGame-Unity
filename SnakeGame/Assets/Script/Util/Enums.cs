@@ -46,3 +46,10 @@ public enum LAYER
     PHYSICS_PLAYER_BODIES = 19,
     PHYSICS_ENEMY_BODIES = 20,
 }
+
+public enum SNAKE_RENDER_PASS
+{
+    MAIN_BODY = 0,
+    SECOND_BODY = 1,
+    PREVIEW = 2,
+}
