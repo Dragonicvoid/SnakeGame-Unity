@@ -64,7 +64,7 @@ public class UpAndDown : MonoBehaviour
         target = start + (delta * dist);
         sprite.transform.localPosition = new Vector3(
           initPos.Value.x,
-          Mathf.Floor(initPos.Value.y + Mathf.Floor(target / 2) * 2)
+          Mathf.Floor(initPos.Value.y + target)
         );
       },
       (dist, data) =>

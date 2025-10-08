@@ -29,7 +29,7 @@ public class FoodSpawner : MonoBehaviour
         if (!food) return null;
 
         if (parent) food.transform.SetParent(parent.transform);
-        food.transform.localPosition = pos;
+        food.transform.localPosition = new Vector3(pos.x, pos.y, -0.5f);
         food.SetActive(true);
 
         return food;

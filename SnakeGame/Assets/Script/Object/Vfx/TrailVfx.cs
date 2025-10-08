@@ -16,6 +16,10 @@ public class TrailVfx : MonoBehaviour
   }
 
   [SerializeField]
+  RenderTexture? rendTex;
+  [SerializeField]
+  RenderTexture? targetTex;
+  [SerializeField]
   Color trailColor = Color.white;
   [SerializeField]
   int rtSize = (int)Mathf.Max(ARENA_DEFAULT_SIZE.WIDTH, ARENA_DEFAULT_SIZE.HEIGHT);
@@ -23,10 +27,10 @@ public class TrailVfx : MonoBehaviour
   float alphaReduce = 0.01f;
   [SerializeField]
   float trailReduceInterval = 0.2f;
+  [SerializeField]
+  bool drawMesh = true;
 
   bool hasFirstDrawn = false;
-
-  RenderTexture? rendTex;
 
   RenderTexture? prevTex;
 
@@ -36,10 +40,8 @@ public class TrailVfx : MonoBehaviour
 
   MeshRenderer? meshRend;
 
-  [SerializeField]
   Material? trailMat;
 
-  [SerializeField]
   Material? alphaMat;
 
   Material? quadMat;
@@ -51,6 +53,14 @@ public class TrailVfx : MonoBehaviour
   void Awake()
   {
     cmdBuffer = new CommandBuffer();
+
+    if (rendTex)
+    {
+      hasFirstDrawn = false;
+      setTexture();
+      setMaterial();
+      setMesh();
+    }
   }
 
   void OnValidate()
@@ -60,11 +70,23 @@ public class TrailVfx : MonoBehaviour
 
   void setTexture()
   {
+    if (!rendTex)
+    {
+      rendTex = new RenderTexture(
+        (int)ARENA_DEFAULT_SIZE.WIDTH,
+        (int)ARENA_DEFAULT_SIZE.HEIGHT,
+        Util.GetGraphicFormat(),
+        Util.GetDepthFormat()
+      );
+    }
+
+    Util.ClearDepthRT(prevTex, new CommandBuffer(), true);
+
     if (!prevTex)
     {
       prevTex = new RenderTexture(
-        (int)ARENA_DEFAULT_SIZE.WIDTH,
-        (int)ARENA_DEFAULT_SIZE.HEIGHT,
+        rendTex.width,
+        rendTex.height,
         Util.GetGraphicFormat(),
         Util.GetDepthFormat()
       );
@@ -74,8 +96,8 @@ public class TrailVfx : MonoBehaviour
     if (!quadTex)
     {
       quadTex = new RenderTexture(
-        (int)ARENA_DEFAULT_SIZE.WIDTH,
-        (int)ARENA_DEFAULT_SIZE.HEIGHT,
+        rendTex.width,
+        rendTex.height,
         Util.GetGraphicFormat(),
         Util.GetDepthFormat()
       );
@@ -134,6 +156,7 @@ public class TrailVfx : MonoBehaviour
 
   void setMesh()
   {
+    if (!drawMesh) return;
     if (!mesh)
     {
       mesh = new Mesh
@@ -247,6 +270,13 @@ public class TrailVfx : MonoBehaviour
 
           cmdBuffer.Blit(rendTex, temp1, trailMat, 0, 0);
           cmdBuffer.Blit(temp1, quadTex, quadMat, 0, 0);
+        }
+
+        if (targetTex)
+        {
+          cmdBuffer.SetRenderTarget(targetTex);
+          cmdBuffer.ClearRenderTarget(true, true, Color.clear, 1f);
+          cmdBuffer.Blit(quadTex, targetTex, quadMat, 0, 0);
         }
 
         cmdBuffer.ReleaseTemporaryRT(temp1);

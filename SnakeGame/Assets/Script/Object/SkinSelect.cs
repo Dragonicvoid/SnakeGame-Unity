@@ -34,7 +34,17 @@ public class SkinSelect : MonoBehaviour
   CustomScollRect? customScroll = null;
 
   [SerializeField]
+  RectTransform? selectTab = null;
+
+  [SerializeField]
+  RectTransform? selectItem = null;
+
+  [SerializeField]
   TextAsset? JsonTex = null;
+
+  Coroutine? selectTabAnimCour = null;
+
+  Coroutine? selectItemAnimCour = null;
 
   public SkinList? SkinList = null;
 
@@ -64,14 +74,21 @@ public class SkinSelect : MonoBehaviour
     {
       primarySkinPrev.IsSelected = true;
       secondSkinPrev.IsSelected = false;
-      onItemSel(primarySkinPrev.SkinData.id, false);
+      if (primarySkinPrev.SkinData != null) onItemSel(primarySkinPrev.SkinData.id, false);
+
+      RectTransform rect = primarySkinPrev.GetComponent<RectTransform>();
+      animateSelectTab(rect.anchoredPosition);
     }
     else
     {
       primarySkinPrev.IsSelected = false;
       secondSkinPrev.IsSelected = true;
-      onItemSel(secondSkinPrev.SkinData.id, false);
+      if (secondSkinPrev.SkinData != null) onItemSel(secondSkinPrev.SkinData.id, false);
+
+      RectTransform rect = secondSkinPrev.GetComponent<RectTransform>();
+      animateSelectTab(rect.anchoredPosition);
     }
+
   }
 
   public void InitSkinSelect()
@@ -148,6 +165,12 @@ public class SkinSelect : MonoBehaviour
         item.IsSelected = true;
         selectedSkin = item;
       }
+    }
+
+    if (selectedSkin)
+    {
+      RectTransform rect = selectedSkin.GetComponent<RectTransform>();
+      animateSelectItem(rect.anchoredPosition);
     }
 
     if (selectedSkin?.SkinData == null || !snakePrev || !updateData) return;
@@ -243,6 +266,74 @@ public class SkinSelect : MonoBehaviour
     }
 
     return null;
+  }
+
+  void animateSelectTab(Vector2 target)
+  {
+    if (!selectTab) return;
+
+    if (selectTabAnimCour != null)
+    {
+      StopCoroutine(selectTabAnimCour);
+    }
+
+    Vector2 startPos = new Vector2(selectTab.anchoredPosition.x, selectTab.anchoredPosition.y);
+    target.Set(startPos.x, target.y);
+
+    BaseTween<object> tweenData = new BaseTween<object>(
+      0.3f,
+      null,
+      (dist, _) =>
+      {
+        selectTab.anchoredPosition = startPos;
+      },
+      (dist, _) =>
+      {
+        float outDist = Util.EaseOut(dist, 3);
+        Vector2 delta = (target - startPos) * outDist;
+        selectTab.anchoredPosition = startPos + delta;
+      },
+      (dist, _) =>
+      {
+        selectTab.anchoredPosition = target;
+      }
+    );
+
+    IEnumerator<object> tween = Tween.Create(tweenData);
+    selectTabAnimCour = StartCoroutine(tween);
+  }
+
+  void animateSelectItem(Vector2 target)
+  {
+    if (!selectItem) return;
+    if (selectItemAnimCour != null)
+    {
+      StopCoroutine(selectItemAnimCour);
+    }
+
+    Vector2 startPos = new Vector2(selectItem.anchoredPosition.x, selectItem.anchoredPosition.y);
+
+    BaseTween<object> tweenData = new BaseTween<object>(
+      0.3f,
+      null,
+      (dist, _) =>
+      {
+        selectItem.anchoredPosition = startPos;
+      },
+      (dist, _) =>
+      {
+        float outDist = Util.EaseOut(dist, 3);
+        Vector2 delta = (target - startPos) * outDist;
+        selectItem.anchoredPosition = startPos + delta;
+      },
+      (dist, _) =>
+      {
+        selectItem.anchoredPosition = target;
+      }
+    );
+
+    IEnumerator<object> tween = Tween.Create(tweenData);
+    selectItemAnimCour = StartCoroutine(tween);
   }
 
   public void SelectTabPrimary()

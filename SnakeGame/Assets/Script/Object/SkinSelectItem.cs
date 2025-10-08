@@ -20,26 +20,11 @@ public class SkinSelectItem : MonoBehaviour
   [SerializeField]
   Text? labelName = null;
 
-  [SerializeField]
-  GameObject? selectSprite = null;
-
   Material? mat = null;
 
   public SkinDetail? SkinData = null;
 
-  bool _isSelected = false;
-  public bool IsSelected
-  {
-    get
-    {
-      return _isSelected;
-    }
-    set
-    {
-      _isSelected = value;
-      setBackground();
-    }
-  }
+  public bool IsSelected = false;
 
   Texture2D? tex = null;
 
@@ -258,13 +243,6 @@ public class SkinSelectItem : MonoBehaviour
     cmdBuffer.ClearRenderTarget(false, false, Color.clear, 1f);
 
     Graphics.ExecuteCommandBuffer(cmdBuffer);
-  }
-
-  void setBackground()
-  {
-    if (!selectSprite) return;
-
-    selectSprite.SetActive(_isSelected);
   }
 
   public void Select()
