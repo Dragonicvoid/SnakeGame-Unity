@@ -1,5 +1,4 @@
-#nullable enable
-using System.Collections;
+
 using System.Collections.Generic;
 using Unity.Collections;
 using Unity.Mathematics;
@@ -16,7 +15,7 @@ public class SnakeTexture : MonoBehaviour
     public half2 uv;
   }
   [SerializeField]
-  float rtSize = 100f;
+  float rtSize = 128f;
 
   SkinDetail? skinPrimary = null;
 
@@ -38,21 +37,23 @@ public class SnakeTexture : MonoBehaviour
 
   void Awake()
   {
+    cmdBuff = new CommandBuffer();
+
     PrimaryTex = new RenderTexture(
-      (int)rtSize,
-      (int)rtSize,
-      UnityEngine.Experimental.Rendering.GraphicsFormat.R8G8B8A8_UNorm,
-      UnityEngine.Experimental.Rendering.GraphicsFormat.D32_SFloat_S8_UInt
+        (int)rtSize,
+        (int)rtSize,
+        Util.GetGraphicFormat(),
+        Util.GetDepthFormat()
     );
+    Util.ClearDepthRT(PrimaryTex, cmdBuff, true);
 
     SecondTex = new RenderTexture(
-     (int)rtSize,
-     (int)rtSize,
-     UnityEngine.Experimental.Rendering.GraphicsFormat.R8G8B8A8_UNorm,
-     UnityEngine.Experimental.Rendering.GraphicsFormat.D32_SFloat_S8_UInt
+      (int)rtSize,
+      (int)rtSize,
+      Util.GetGraphicFormat(),
+      Util.GetDepthFormat()
    );
-
-    cmdBuff = new CommandBuffer();
+    Util.ClearDepthRT(SecondTex, cmdBuff, true);
 
     setupMesh(false);
     setupMesh(true);
@@ -135,16 +136,6 @@ public class SnakeTexture : MonoBehaviour
       }
     });
 
-    if (Application.isPlaying)
-    {
-      MeshFilter filter = GetComponent<MeshFilter>();
-      if (!filter)
-      {
-        filter = gameObject.AddComponent<MeshFilter>();
-      }
-      filter.mesh = mesh;
-    }
-
     if (isPrimary)
     {
       primMesh = mesh;
@@ -160,69 +151,72 @@ public class SnakeTexture : MonoBehaviour
     Material? mat = isPrimary ? primMat : secondMat;
     SkinDetail? skin = isPrimary ? skinPrimary : skinSecond;
 
-    if (skin != null)
+    Shader shader = Shader.Find(skin?.shader_name);
+
+    if (mat)
     {
-      StartCoroutine(getTextureAndSetMat(skin, mat, isPrimary));
+      if (!Application.isEditor) Destroy(mat);
+    }
+
+    if (isPrimary)
+    {
+      primMat = new Material(shader);
+      mat = primMat;
     }
     else
     {
-      Shader shader = Shader.Find("Transparent/CustomSprite");
-      if (mat && Application.isPlaying)
-      {
-        Destroy(mat);
-      }
+      secondMat = new Material(shader);
+      mat = secondMat;
+    }
 
-      if (isPrimary)
-      {
-        primMat = new Material(shader);
-      }
-      else
-      {
-        secondMat = new Material(shader);
-      }
+    if (skin != null)
+    {
+      StartCoroutine(getTextureAndSetMat(skin, mat));
     }
   }
 
-  IEnumerator<object> getTextureAndSetMat(SkinDetail skin, Material? mat, bool isPrimary)
+  IEnumerator<object> getTextureAndSetMat(SkinDetail skin, Material? mat)
   {
-    ResourceRequest request = Resources.LoadAsync<Texture2D>(skin?.texture_name ?? "");
-
-    while (!request.isDone)
+    if ((skin?.texture_name == null || skin?.texture_name == "")
+        && (skin?.normal_tex_name == null || skin?.normal_tex_name == ""))
     {
+
+      mat?.SetTexture("_MainTex", null);
+      mat?.SetTexture("_NormalMap", null);
       yield return null;
+      yield break;
     }
-    Texture2D? loadedTexture = request.asset as Texture2D;
 
-    if (loadedTexture != null)
-    {
-      Shader shader = Shader.Find(skin?.shader_name);
-      if (mat && Application.isPlaying)
-      {
-        Destroy(mat);
-      }
+    Texture2D? loadedTexture = null;
+    Texture2D? loadedNormalMap = null;
 
-      if (isPrimary)
-      {
-        primMat = new Material(shader);
-        primMat.SetTexture("_MainTex", loadedTexture);
-      }
-      else
-      {
-        secondMat = new Material(shader);
-        secondMat.SetTexture("_MainTex", loadedTexture);
-      }
-    }
-    else
+    if (skin != null)
     {
-      Debug.LogError("Failed to load asset at path: " + skin?.texture_name);
+      AssetManager.Instance.assetsTexture.TryGetValue(skin.texture_name, out loadedTexture);
+      AssetManager.Instance.assetsTexture.TryGetValue(skin.normal_tex_name, out loadedNormalMap);
     }
+
+    if (loadedTexture == null && skin != null && skin.texture_name != "")
+    {
+      Debug.LogError("Failed to load Texture for: " + skin?.name);
+      loadedTexture = null;
+    }
+
+    if (loadedNormalMap == null && skin != null && skin.normal_tex_name != "")
+    {
+      Debug.LogError("Failed to load Normal Map for: " + skin?.name);
+      loadedNormalMap = null;
+    }
+
+    mat?.SetTexture("_MainTex", loadedTexture);
+    mat?.SetTexture("_NormalMap", loadedNormalMap);
   }
 
   IEnumerator<object> render(bool isPrimary)
   {
     while (true)
     {
-      yield return new WaitForEndOfFrame();
+      yield return PersistentData.Instance.WaitForFrameEnd;
       Material? mat = isPrimary ? primMat : secondMat;
       Mesh? mesh = isPrimary ? primMesh : secondMesh;
       RenderTexture? rendTex = isPrimary ? PrimaryTex : SecondTex;
@@ -230,13 +224,13 @@ public class SnakeTexture : MonoBehaviour
       if (!mat || !mesh || cmdBuff == null || !rendTex) continue;
 
       cmdBuff.Clear();
-      var lookMatrix = Camera.main.worldToCameraMatrix;
+      var lookMatrix = Util.CreateViewMatrix(new Vector3(0, 0, -10), Quaternion.identity, Vector3.one).inverse;
       var orthoMatrix = Matrix4x4.Ortho(-rtSize / 2, rtSize / 2, -rtSize / 2, rtSize / 2, 0.3f, 1000f);
       cmdBuff.SetViewProjectionMatrices(lookMatrix, orthoMatrix);
 
       cmdBuff.SetRenderTarget(rendTex);
       cmdBuff.ClearRenderTarget(true, true, Color.clear, 1f);
-      cmdBuff.DrawMesh(mesh, Matrix4x4.identity, mat, 0, 0);
+      cmdBuff.DrawMesh(mesh, Matrix4x4.identity, mat, 0, isPrimary ? (int)SNAKE_RENDER_PASS.MAIN_BODY : (int)SNAKE_RENDER_PASS.SECOND_BODY);
 
       // Hack resize Web-view
       cmdBuff.SetRenderTarget(PersistentData.Instance.RenderTex);

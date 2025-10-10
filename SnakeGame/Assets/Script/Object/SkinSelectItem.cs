@@ -1,4 +1,4 @@
-#nullable enable
+
 using System.Collections.Generic;
 using Unity.Collections;
 using Unity.Mathematics;
@@ -20,28 +20,15 @@ public class SkinSelectItem : MonoBehaviour
   [SerializeField]
   Text? labelName = null;
 
-  [SerializeField]
-  GameObject? selectSprite = null;
-
   Material? mat = null;
 
   public SkinDetail? SkinData = null;
 
-  bool _isSelected = false;
-  public bool IsSelected
-  {
-    get
-    {
-      return _isSelected;
-    }
-    set
-    {
-      _isSelected = value;
-      setBackground();
-    }
-  }
+  public bool IsSelected = false;
 
   Texture2D? tex = null;
+
+  Texture2D? normalMap = null;
 
   RenderTexture? rendTex = null;
 
@@ -66,7 +53,7 @@ public class SkinSelectItem : MonoBehaviour
   {
     while (true)
     {
-      yield return new WaitForEndOfFrame();
+      yield return PersistentData.Instance.WaitForFrameEnd;
       drawRenderTex();
     }
   }
@@ -74,11 +61,8 @@ public class SkinSelectItem : MonoBehaviour
   public void SetSkinData(SkinDetail data)
   {
     SkinData = data;
-    if (tex == null)
-    {
-      setName();
-      getImage();
-    }
+    setName();
+    getImage();
   }
 
   void setName()
@@ -97,39 +81,65 @@ public class SkinSelectItem : MonoBehaviour
 
   IEnumerator<object> getTextureAndLoadImage()
   {
-    ResourceRequest request = Resources.LoadAsync<Texture2D>(SkinData?.texture_name ?? "");
-
-    while (!request.isDone)
+    if ((SkinData?.texture_name == null || SkinData?.texture_name == "")
+        && (SkinData?.normal_tex_name == null || SkinData?.normal_tex_name == ""))
     {
+      setTexture(null, null);
       yield return null;
+      yield break;
     }
-    Texture2D? loadedTexture = request.asset as Texture2D;
 
-    if (loadedTexture != null)
+    Texture2D? loadedTexture = null;
+    Texture2D? loadedNormalMap = null;
+
+    if (SkinData != null)
     {
-      setTexture(loadedTexture);
+      AssetManager.Instance.assetsTexture.TryGetValue(SkinData.texture_name, out loadedTexture);
+      AssetManager.Instance.assetsTexture.TryGetValue(SkinData.normal_tex_name, out loadedNormalMap);
     }
-    else
+
+    if (loadedTexture == null && SkinData != null && SkinData.texture_name != "")
     {
-      Debug.LogError("Failed to load asset at path: " + SkinData?.texture_name);
+      Debug.LogError("Failed to load Texture for: " + SkinData?.name);
+      loadedTexture = null;
     }
+
+    if (loadedNormalMap == null && SkinData != null && SkinData.normal_tex_name != "")
+    {
+      Debug.LogError("Failed to load Normal Map for: " + SkinData?.name);
+      loadedNormalMap = null;
+    }
+
+    setTexture(loadedTexture, loadedNormalMap);
   }
 
-  void setTexture(Texture2D tex)
+  void setTexture(Texture2D? tex, Texture2D? normalMap)
   {
     if (!preview) return;
 
-    if (tex)
+    if (this.tex)
     {
-      this.tex = tex;
-      rendTex = new RenderTexture(
-      (int)preview.rectTransform.rect.width,
-      (int)preview.rectTransform.rect.height,
-      UnityEngine.Experimental.Rendering.GraphicsFormat.R8G8B8A8_UNorm,
-      UnityEngine.Experimental.Rendering.GraphicsFormat.D32_SFloat_S8_UInt
-    );
+      this.tex = null;
     }
 
+    if (this.normalMap)
+    {
+      this.normalMap = null;
+    }
+
+    this.tex = tex;
+    this.normalMap = normalMap;
+
+    if (!rendTex)
+    {
+      rendTex = new RenderTexture(
+        (int)preview.rectTransform.rect.width,
+        (int)preview.rectTransform.rect.height,
+        Util.GetGraphicFormat(),
+        Util.GetDepthFormat()
+      );
+    }
+    Util.ClearDepthRT(rendTex, cmdBuffer, true);
     preview.texture = rendTex;
     SetMesh();
     setMat();
@@ -137,23 +147,32 @@ public class SkinSelectItem : MonoBehaviour
 
   void setMat()
   {
-    if (!preview || SkinData == null) return;
+    if (SkinData == null) return;
 
-    if (!mat)
+    if (mat)
     {
-      Shader shader = Shader.Find(SkinData.shader_name);
-      if (shader)
-      {
-        mat = new Material(shader);
-        mat.SetTexture("_MainTex", tex);
-      }
+      if (!Application.isEditor) Destroy(mat);
+    }
+
+    Shader shader = Shader.Find(SkinData.shader_name);
+    if (shader)
+    {
+      mat = new Material(shader);
+    }
+
+    if (tex)
+    {
+      mat?.SetTexture("_MainTex", tex);
+    }
+
+    if (normalMap)
+    {
+      mat?.SetTexture("_NormalMap", normalMap);
     }
   }
 
   void SetMesh()
   {
-    if (!tex) return;
-
     if (!mesh)
     {
       mesh = new Mesh { name = SkinData.name + "_Mesh" };
@@ -173,10 +192,10 @@ public class SkinSelectItem : MonoBehaviour
 
     half h0 = new half(0f), h1 = new half(1f);
 
-    vertex[0] = new VertexType { pos = new Vector3(-currWidth, -currHeight, 10), color = Color.white, uv = new half2(h0, h0) };
-    vertex[1] = new VertexType { pos = new Vector3(currWidth, -currHeight, 10), color = Color.white, uv = new half2(h1, h0) };
-    vertex[2] = new VertexType { pos = new Vector3(-currWidth, currHeight, 10), color = Color.white, uv = new half2(h0, h1) };
-    vertex[3] = new VertexType { pos = new Vector3(currWidth, currHeight, 10), color = Color.white, uv = new half2(h1, h1) };
+    vertex[0] = new VertexType { pos = new Vector3(-currWidth, -currHeight), color = Color.white, uv = new half2(h0, h0) };
+    vertex[1] = new VertexType { pos = new Vector3(currWidth, -currHeight), color = Color.white, uv = new half2(h1, h0) };
+    vertex[2] = new VertexType { pos = new Vector3(-currWidth, currHeight), color = Color.white, uv = new half2(h0, h1) };
+    vertex[3] = new VertexType { pos = new Vector3(currWidth, currHeight), color = Color.white, uv = new half2(h1, h1) };
 
     mesh.SetVertexBufferData(vertex, 0, 0, 4);
     vertex.Dispose();
@@ -202,16 +221,22 @@ public class SkinSelectItem : MonoBehaviour
 
   void drawRenderTex()
   {
-    if (cmdBuffer == null || rendTex == null || mat == null) return;
+    if (cmdBuffer == null || rendTex == null || mat == null || mesh == null) return;
 
     cmdBuffer.Clear();
-    var lookMatrix = Camera.main.worldToCameraMatrix;
+    var lookMatrix = Util.CreateViewMatrix(new Vector3(0, 0, -10), Quaternion.identity, Vector3.one).inverse;
     var orthoMatrix = Matrix4x4.Ortho(-rendTex.width / 2, rendTex.width / 2, -rendTex.height / 2, rendTex.height / 2, 0.3f, 1000f);
     cmdBuffer.SetViewProjectionMatrices(lookMatrix, orthoMatrix);
 
-    cmdBuffer.SetRenderTarget(rendTex);
+    int temp1 = Shader.PropertyToID("_Temp1");
+    cmdBuffer.GetTemporaryRT(temp1, rendTex.width, rendTex.height, 0, FilterMode.Bilinear, RenderTextureFormat.ARGBFloat);
+
+    cmdBuffer.SetRenderTarget(temp1);
     cmdBuffer.ClearRenderTarget(true, true, Color.clear, 1f);
-    cmdBuffer.DrawMesh(mesh, Matrix4x4.identity, mat, 0, 0);
+    cmdBuffer.DrawMesh(mesh, Matrix4x4.identity, mat, 0, (int)SNAKE_RENDER_PASS.PREVIEW);
+    cmdBuffer.Blit(temp1, rendTex);
+
+    cmdBuffer.ReleaseTemporaryRT(temp1);
 
     // Hack resize Web-view
     cmdBuffer.SetRenderTarget(PersistentData.Instance.RenderTex);
@@ -220,18 +245,12 @@ public class SkinSelectItem : MonoBehaviour
     Graphics.ExecuteCommandBuffer(cmdBuffer);
   }
 
-  void setBackground()
-  {
-    if (!selectSprite) return;
-
-    selectSprite.SetActive(_isSelected);
-  }
-
   public void Select()
   {
     StartCoroutine(getTextureAndLoadImage());
     UiEvent.Instance.SkinSelected(
-      SkinData?.id ?? 0
+      SkinData?.id ?? 0,
+      true
     );
   }
 }

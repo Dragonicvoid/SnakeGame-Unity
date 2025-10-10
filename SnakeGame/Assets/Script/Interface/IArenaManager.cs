@@ -18,4 +18,5 @@ public interface IArenaManager
   public void SetMapBody(Vector2 pos, string playerId);
   public void RemovePlayerMapBody(SnakeConfig player);
   public void RemoveMapBody(Vector2 pos, string playerId);
+  public void ClearSpikeRender();
 }

@@ -4,6 +4,8 @@ using System.IO;
 using System.Linq;
 using System.Runtime.Serialization.Formatters.Binary;
 using UnityEngine;
+using UnityEngine.Experimental.Rendering;
+using UnityEngine.Rendering;
 
 public static class Util
 {
@@ -223,5 +225,71 @@ public static class Util
     tex.ReadPixels(new Rect(0, 0, rTex.width, rTex.height), 0, 0);
     tex.Apply();
     return tex;
+  }
+
+  public static float EaseOut(float x, float pow)
+  {
+    return 1 - Mathf.Pow(1 - x, pow);
+  }
+
+  // credit: https://discussions.unity.com/t/how-do-i-calculate-a-view-matrix-using-matrix4x4-lookat/246263/2
+  public static Matrix4x4 CreateViewMatrix(Vector3 pos, Quaternion rot, Vector3 scale)
+  {
+    Matrix4x4 viewMatrix = Matrix4x4.TRS(pos, rot, scale).inverse;
+    if (SystemInfo.usesReversedZBuffer)
+    {
+      viewMatrix.m20 = -viewMatrix.m20;
+      viewMatrix.m21 = -viewMatrix.m21;
+      viewMatrix.m22 = -viewMatrix.m22;
+      viewMatrix.m23 = -viewMatrix.m23;
+    }
+
+    return viewMatrix;
+  }
+
+  public static GraphicsFormat GetGraphicFormat()
+  {
+    if (SystemInfo.SupportsRenderTextureFormat(RenderTextureFormat.ARGBFloat))
+    {
+      return GraphicsFormat.R32G32B32A32_SFloat;
+    }
+
+    return GraphicsFormat.R8G8B8A8_UNorm;
+  }
+
+  public static GraphicsFormat GetDepthFormat()
+  {
+    return GraphicsFormat.D32_SFloat_S8_UInt;
+  }
+
+  // Dist is 0-1
+  // return -1 if array count is not positive integer
+  public static int GetArrayIdxByDist(float dist, int arrayCount)
+  {
+    if (arrayCount <= 0)
+    {
+      return -1;
+    }
+
+    if (dist >= 1)
+    {
+      return arrayCount - 1;
+    }
+
+    float perArray = 1f / arrayCount;
+    return Mathf.FloorToInt(dist / perArray);
+  }
+
+  public static void ClearDepthRT(RenderTexture rt, CommandBuffer cmdBuffer, bool run = false)
+  {
+    if (run) cmdBuffer.Clear();
+    cmdBuffer.SetRenderTarget(rt);
+    cmdBuffer.ClearRenderTarget(true, true, Color.clear, 1f);
+
+    // Hack resize Web-view
+    cmdBuffer.SetRenderTarget(PersistentData.Instance.RenderTex);
+    cmdBuffer.ClearRenderTarget(false, false, Color.clear, 1f);
+
+    if (run) Graphics.ExecuteCommandBuffer(cmdBuffer);
   }
 }

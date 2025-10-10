@@ -1,4 +1,4 @@
-#nullable enable
+
 using System;
 using System.Collections.Generic;
 using UnityEngine;
@@ -6,26 +6,39 @@ using UnityEngine;
 [Serializable]
 public class ArenaManager : MonoBehaviour, IArenaManager
 {
-  [SerializeField]
-  IRef<IGridManager>? gridManager;
-  [SerializeField]
-  IRef<IObstacleManager>? obsManager;
-  [SerializeField]
-  AiRenderer? aiDebugger;
+  [SerializeField] IRef<IGridManager>? gridManager;
+  [SerializeField] IRef<IObstacleManager>? obsManager;
+  [SerializeField] AiRenderer? aiDebugger;
+  [SerializeField] SpikeVfx? spikeVfx;
+  [SerializeField] Vortex? playerVortex = null;
+  [SerializeField] Vortex? enemyVortex = null;
 
   private List<List<TileMapData>> mapData = new List<List<TileMapData>>();
-
   private List<Vector2> spawnPos = new List<Vector2>();
-
   private Vector2 centerPos = new Vector2();
-
   public List<List<TileMapData>> MapData { get { return mapData; } set { mapData = value; } }
   public List<Vector2> SpawnPos { get { return spawnPos; } set { spawnPos = value; } }
   public Vector2 CenterPos { get { return centerPos; } set { centerPos = value; } }
 
   void Awake()
   {
-    InitializedMap();
+    GameEvent.Instance.onGameOver -= onGameOver;
+    GameEvent.Instance.onGameOver += onGameOver;
+
+    GameEvent.Instance.onTutorialFinish -= onTutorialFinish;
+    GameEvent.Instance.onTutorialFinish += onTutorialFinish;
+
+    GameEvent.Instance.onEnemySpawn -= onEnemySpawn;
+    GameEvent.Instance.onEnemySpawn += onEnemySpawn;
+
+    GameEvent.Instance.onMainPlayerspawn -= onMainPlayerSpawn;
+    GameEvent.Instance.onMainPlayerspawn += onMainPlayerSpawn;
+
+    UiEvent.Instance.onVortexComplete -= onVortexSpawn;
+    UiEvent.Instance.onVortexComplete += onVortexSpawn;
+
+    UiEvent.Instance.onSpikeAnimationComplete -= onSpikeAnimationComplete;
+    UiEvent.Instance.onSpikeAnimationComplete += onSpikeAnimationComplete;
   }
 
   public void InitializedMap()
@@ -65,6 +78,12 @@ public class ArenaManager : MonoBehaviour, IArenaManager
       }
     }
 
+    if (obsManager != null)
+    {
+      spikeVfx?.SetSpikeData(obsManager.I.Spikes);
+      spikeVfx?.StartRendering();
+    }
+
     aiDebugger?.SetMapToDebug(mapData);
   }
 
@@ -91,6 +110,84 @@ public class ArenaManager : MonoBehaviour, IArenaManager
         break;
     }
     UpdateTileType(coor, type);
+  }
+
+  private void onTutorialFinish()
+  {
+    spawnEnemyVortex(true);
+  }
+
+  private void onGameOver(GameOverData data)
+  {
+    if (playerVortex)
+    {
+      playerVortex.gameObject.SetActive(false);
+    }
+
+    if (enemyVortex)
+    {
+      enemyVortex.gameObject.SetActive(false);
+    }
+  }
+
+  private void onSpikeAnimationComplete()
+  {
+    spawnEnemyVortex(false);
+  }
+
+  void spawnEnemyVortex(bool isEnemy)
+  {
+    Vortex? vortex = isEnemy ? enemyVortex : playerVortex;
+    if (!vortex) return;
+
+    Vector2 pos = isEnemy ? SpawnPos[1] : SpawnPos[0];
+
+    vortex.transform.localPosition = new Vector3(pos.x, pos.y);
+
+    // Just in case if it already spawn in field
+    vortex.gameObject.SetActive(false);
+    vortex.gameObject.SetActive(true);
+  }
+
+  void onVortexSpawn(Vortex vortex)
+  {
+    if (vortex == playerVortex)
+    {
+      UiEvent.Instance.MainPlayerVortexSpawn();
+    }
+    else if (vortex == enemyVortex)
+    {
+      UiEvent.Instance.EnemyVortexSpawn();
+    }
+  }
+
+  void onMainPlayerSpawn()
+  {
+    hideVortex(false);
+  }
+
+  void onEnemySpawn()
+  {
+    hideVortex(true);
+  }
+
+  void hideVortex(bool isBot)
+  {
+    Vortex vortex = isBot ? enemyVortex : playerVortex;
+
+    if (!vortex) return;
+
+    StartCoroutine(hideVortexWithDelay(vortex, 1.5f));
+  }
+
+  IEnumerator<object> hideVortexWithDelay(Vortex vortex, float delay)
+  {
+    yield return new WaitForSeconds(delay);
+
+    if (vortex.gameObject.activeInHierarchy)
+    {
+      vortex.PlayHideAnim();
+    }
   }
 
   public void UpdateTileType(Coordinate coord, ARENA_OBJECT_TYPE type)
@@ -285,6 +382,7 @@ public class ArenaManager : MonoBehaviour, IArenaManager
     return result;
   }
 
+
   public void SetMapBody(Vector2 pos, string playerId)
   {
     if (mapData == null) return;
@@ -318,5 +416,12 @@ public class ArenaManager : MonoBehaviour, IArenaManager
       return id != playerId;
     });
     mapData[coord.Y][coord.X].PlayerIDList = playerIds;
+  }
+
+  public void ClearSpikeRender()
+  {
+    if (!spikeVfx) return;
+
+    spikeVfx.ClearRender();
   }
 }

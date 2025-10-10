@@ -1,4 +1,4 @@
-#nullable enable
+
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
@@ -87,6 +87,6 @@ public class CustomScollRect : MonoBehaviour
     size += padding;
 
     RectTransform content = scrollRect.content;
-    content.sizeDelta = new Vector2(content.rect.width, size);
+    content.sizeDelta = new Vector2(0, size);
   }
 }

@@ -1,5 +1,11 @@
 {
   "dependencies": {
+    "com.unity.2d.sprite": {
+      "version": "1.0.0",
+      "depth": 0,
+      "source": "builtin",
+      "dependencies": {}
+    },
     "com.unity.ai.navigation": {
       "version": "2.0.5",
       "depth": 0,
@@ -37,6 +43,13 @@
         "com.unity.test-framework.performance": "3.0.3"
       },
       "url": "https://packages.unity.com"
+    },
+    "com.unity.demoteam.mesh-to-sdf": {
+      "version": "https://github.com/Unity-Technologies/com.unity.demoteam.mesh-to-sdf.git",
+      "depth": 0,
+      "source": "git",
+      "dependencies": {},
+      "hash": "1f8ee658aabe2b588aae7d0b635a9941266a52ef"
     },
     "com.unity.ext.nunit": {
       "version": "2.0.5",

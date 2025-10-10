@@ -1,7 +1,7 @@
-#nullable enable
-using System;
+
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Rendering;
 
 public class PlayerManager : MonoBehaviour, IPlayerManager
 {
@@ -15,10 +15,10 @@ public class PlayerManager : MonoBehaviour, IPlayerManager
   SnakeRender? enemyRender = null;
 
   [SerializeField]
-  CustomSprite? playerDisplay = null;
+  TrailVfx? playerVfx = null;
 
   [SerializeField]
-  CustomSprite? enemyDisplay = null;
+  TrailVfx? enemyVfx = null;
 
   [SerializeField]
   SkinSelect? skinSelect = null;
@@ -35,6 +35,12 @@ public class PlayerManager : MonoBehaviour, IPlayerManager
   [SerializeField]
   AiRenderer? aiRenderer = null;
 
+  [SerializeField]
+  SpikeVfx? spikeVfx = null;
+
+  [SerializeField]
+  FireSpawner? fireSpawner = null;
+
   public List<SnakeConfig> PlayerList { set; get; }
 
   string PLAYER_ID = "MAIN_PLAYER";
@@ -43,12 +49,24 @@ public class PlayerManager : MonoBehaviour, IPlayerManager
 
   Dictionary<string, IEnumerator<object>> eatAnim;
 
+  float intervalToFire = 0.25f;
+
+  float lastTouchStart = 0f;
+
   void Awake()
   {
     PlayerList = new List<SnakeConfig>();
     eatAnim = new Dictionary<string, IEnumerator<object>>();
+
+    GameplayMoveEvent.Instance.onSnakeMoveCalculated -= onTouchMove;
+    GameplayMoveEvent.Instance.onGameUiStartTouch -= onTouchStart;
+    GameEvent.Instance.onPlayerSizeIncrease -= onSizeIncrease;
+    GameEvent.Instance.onSnakeFire -= onSnakeFire;
+
     GameplayMoveEvent.Instance.onSnakeMoveCalculated += onTouchMove;
+    GameplayMoveEvent.Instance.onGameUiStartTouch += onTouchStart;
     GameEvent.Instance.onPlayerSizeIncrease += onSizeIncrease;
+    GameEvent.Instance.onSnakeFire += onSnakeFire;
   }
 
   void FixedUpdate()
@@ -119,7 +137,7 @@ public class PlayerManager : MonoBehaviour, IPlayerManager
         bodies,
         moveDir,
         new Vector2(),
-        10f,
+        GENERAL_CONFIG.SPEED,
         "",
         false,
         null,
@@ -147,23 +165,26 @@ public class PlayerManager : MonoBehaviour, IPlayerManager
     );
 
     PlayerList.Add(player);
+    spikeVfx?.SetSnakes(PlayerList);
 
     if (isBot)
     {
       if (!enemyRender) return;
 
       enemyRender.SnakeType = skinData?.Type ?? SNAKE_TYPE.NORMAL;
-      enemyRender.SetSnakeSkin(skinData?.Skin, true);
+      enemyRender.SetSnakeSkin(skinData?.SkinPrimary, true);
+      enemyRender.SetSnakeSkin(skinData?.SkinSecond, false);
 
-      if (!enemyRender.RendTex && enemyDisplay)
+      if (!enemyRender.RendTex && enemyVfx)
       {
         enemyRender.RendTex = new RenderTexture(
           (int)ARENA_DEFAULT_SIZE.WIDTH,
           (int)ARENA_DEFAULT_SIZE.HEIGHT,
-          UnityEngine.Experimental.Rendering.GraphicsFormat.R8G8B8A8_UNorm,
-          UnityEngine.Experimental.Rendering.GraphicsFormat.D32_SFloat_S8_UInt
+          Util.GetGraphicFormat(),
+          Util.GetDepthFormat()
         );
-        enemyDisplay.Texture = enemyRender.RendTex;
+        Util.ClearDepthRT(enemyRender.RendTex, new CommandBuffer(), true);
+        enemyVfx.SetRendTex(enemyRender.RendTex);
       }
       enemyRender?.SetSnakeBody(bodies);
     }
@@ -172,16 +193,18 @@ public class PlayerManager : MonoBehaviour, IPlayerManager
       if (!playerRender) return;
 
       playerRender.SnakeType = skinData?.Type ?? SNAKE_TYPE.NORMAL;
-      playerRender.SetSnakeSkin(skinData?.Skin, true);
-      if (!playerRender.RendTex && playerDisplay)
+      playerRender.SetSnakeSkin(skinData?.SkinPrimary, true);
+      playerRender.SetSnakeSkin(skinData?.SkinSecond, false);
+      if (!playerRender.RendTex && playerVfx)
       {
         playerRender.RendTex = new RenderTexture(
           (int)ARENA_DEFAULT_SIZE.WIDTH,
           (int)ARENA_DEFAULT_SIZE.HEIGHT,
-          UnityEngine.Experimental.Rendering.GraphicsFormat.R8G8B8A8_UNorm,
-          UnityEngine.Experimental.Rendering.GraphicsFormat.D32_SFloat_S8_UInt
+          Util.GetGraphicFormat(),
+          Util.GetDepthFormat()
         );
-        playerDisplay.Texture = playerRender.RendTex;
+        Util.ClearDepthRT(playerRender.RendTex, new CommandBuffer(), true);
+        playerVfx.SetRendTex(playerRender.RendTex);
       }
       playerRender?.SetSnakeBody(bodies);
     }
@@ -197,6 +220,8 @@ public class PlayerManager : MonoBehaviour, IPlayerManager
     {
       aiRenderer?.SetSnakeToDebug(player);
     }
+
+    GameEvent.Instance.SnakeSpawn(isBot);
   }
 
   public void RemoveAllPlayers()
@@ -208,12 +233,20 @@ public class PlayerManager : MonoBehaviour, IPlayerManager
       {
         Destroy(b.Obj);
       }
+      foreach (FireBody b in player.FireState.Body)
+      {
+        fireSpawner.RemoveFire(b.Fire);
+      }
+
+      player.FireState.Body = new List<FireBody>();
       player.State.Body = new List<SnakeBody>();
     }
 
     PlayerList = new List<SnakeConfig>();
     enemyRender?.SetSnakeBody(new List<SnakeBody>());
     playerRender?.SetSnakeBody(new List<SnakeBody>());
+    enemyVfx?.ClearRender();
+    playerVfx?.ClearRender();
 
     aiRenderer?.SetSnakeToDebug(null);
   }
@@ -301,7 +334,7 @@ public class PlayerManager : MonoBehaviour, IPlayerManager
     if (collider)
     {
       collider.gameObject.layer = (int)group;
-      collider.radius = ARENA_DEFAULT_SIZE.SNAKE / 2;
+      collider.radius = ARENA_DEFAULT_SIZE.SNAKE / 4;
     }
     if (collParent) bodyObj.transform.SetParent(this.collParent.transform);
 
@@ -370,7 +403,7 @@ public class PlayerManager : MonoBehaviour, IPlayerManager
         TurnRadiusModification(
           player,
           new Vector2(botNewDir.x, botNewDir.y),
-          BOT_CONFIG.TURN_RADIUS,
+          BOT_CONFIG.GetConfig().TURN_RADIUS,
           remaining,
           currDir
         ) ?? new Vector2(0, 0);
@@ -571,6 +604,68 @@ public class PlayerManager : MonoBehaviour, IPlayerManager
     playerRender?.Render();
   }
 
+  public void UpdateFire(float delta = 0.016f)
+  {
+    float TILE = ARENA_DEFAULT_SIZE.TILE;
+    for (int i = 0; i < PlayerList.Count; i++)
+    {
+      SnakeConfig snake = PlayerList[i];
+      FireState state = snake.FireState;
+
+      List<FireBody> nonExpiredFire = new List<FireBody>();
+
+      for (int ii = 0; ii < state.Body.Count; ii++)
+      {
+        FireBody bodyState = state.Body[ii];
+        Vector2 prevPos = new Vector2(bodyState.Position.x, bodyState.Position.y);
+
+        if (Time.time - bodyState.SpawnTime > GENERAL_CONFIG.FIRE_ALIVE_TIME)
+        {
+          fireSpawner.RemoveFire(bodyState.Fire);
+          for (int y = -1; y <= 1; y++)
+          {
+            for (int x = -1; x <= 1; x++)
+            {
+              arenaManager?.I.RemoveMapBody(new Vector2(prevPos.x + TILE * x, prevPos.y + TILE * y), snake.Id);
+            }
+          }
+          continue;
+        }
+        else
+        {
+          nonExpiredFire.Add(bodyState);
+        }
+
+        Vector2 dir = bodyState.Dir;
+        Vector2 newDir = dir * new Vector2(TILE * delta * bodyState.Speed, TILE * delta * bodyState.Speed);
+        Vector2 finalPos = new Vector2(prevPos.x + newDir.x, prevPos.y + newDir.y);
+
+        if (bodyState.Fire) bodyState.Fire.transform.localPosition = new Vector3(
+          finalPos.x,
+          finalPos.y
+        );
+
+        bodyState.Position = new Vector2(
+          finalPos.x,
+          finalPos.y
+        );
+        for (int y = -1; y <= 1; y++)
+        {
+          for (int x = -1; x <= 1; x++)
+          {
+            arenaManager?.I.RemoveMapBody(new Vector2(prevPos.x + TILE * x, prevPos.y + TILE * y), snake.Id);
+            arenaManager?.I.SetMapBody(
+                new Vector2(finalPos.x + TILE * x, finalPos.y + TILE * y),
+                snake.Id
+            );
+          }
+        }
+      }
+
+      state.Body = nonExpiredFire;
+    }
+  }
+
   void onTouchMove(Vector2 delta)
   {
     SnakeConfig? player = GetMainPlayer();
@@ -588,6 +683,7 @@ public class PlayerManager : MonoBehaviour, IPlayerManager
       false,
       new Vector2(pos.x, pos.y)
     );
+    snake.FoodInStomach++;
 
     if (newBody == null) return;
 
@@ -636,7 +732,46 @@ public class PlayerManager : MonoBehaviour, IPlayerManager
     anim = Tween.Create(data);
     eatAnim.TryAdd(snake.Id, anim);
 
+    if (snake.Id == PLAYER_ID)
+    {
+      GameEvent.Instance.MainPlayerEat(Mathf.Min((float)snake.FoodInStomach / GENERAL_CONFIG.FOOD_TO_FIRE, 1));
+    }
+
     StartCoroutine(anim);
+  }
+
+  void onTouchStart(Vector2 _)
+  {
+    float delta = Time.time - lastTouchStart;
+    lastTouchStart = Time.time;
+    if (delta <= intervalToFire)
+    {
+      GameEvent.Instance.SnakeFire(GetMainPlayer());
+    }
+  }
+
+  void onSnakeFire(SnakeConfig snake)
+  {
+    if (snake.FoodInStomach < GENERAL_CONFIG.FOOD_TO_FIRE) return;
+
+    snake.FoodInStomach = 0;
+    bool isMainPlayer = snake.Id == PLAYER_ID;
+
+    if (isMainPlayer) GameEvent.Instance.MainPlayerFire(0);
+
+    if (snake.State.Body.Count <= 0) return;
+
+    SnakeBody head = snake.State.Body[0];
+    Vector2 headPos = head.Position;
+    List<FireBody> bodies = new List<FireBody>();
+    for (int i = 0; i < GENERAL_CONFIG.FIRE_PER_SHOT; i++)
+    {
+      Fire fire = fireSpawner.Spawn(headPos, isMainPlayer);
+      FireBody body = new FireBody(headPos, head.Velocity, fire, (i + 1) * snake.State.Speed + 1, Time.time);
+      bodies.Add(body);
+    }
+
+    snake.FireState.Body = bodies;
   }
 
   Vector2 getFoodGrabberPosition(SnakeBody head)

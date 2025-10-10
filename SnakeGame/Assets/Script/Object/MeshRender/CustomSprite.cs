@@ -1,11 +1,10 @@
-#nullable enable
+
 using Unity.Collections;
 using UnityEngine;
 using UnityEngine.Rendering;
 using Unity.Mathematics;
 using System.Linq;
 
-[ExecuteInEditMode]
 public class CustomSprite : MonoBehaviour
 {
   [System.Runtime.InteropServices.StructLayout(System.Runtime.InteropServices.LayoutKind.Sequential)]
@@ -36,7 +35,7 @@ public class CustomSprite : MonoBehaviour
     set
     {
       _width = value;
-      updateMesh();
+      setMeshData();
     }
   }
 
@@ -48,7 +47,7 @@ public class CustomSprite : MonoBehaviour
     set
     {
       _height = value;
-      updateMesh();
+      setMeshData();
     }
   }
 
@@ -60,7 +59,7 @@ public class CustomSprite : MonoBehaviour
     set
     {
       _color = value;
-      updateMesh();
+      setMeshData();
     }
   }
 
@@ -72,8 +71,8 @@ public class CustomSprite : MonoBehaviour
 
   [SerializeField]
   Vector2 offset = new Vector2(0f, 0f);
-
-  Material? _mat;
+  [SerializeField]
+  Material? mat;
 
   Mesh? mesh;
 
@@ -83,21 +82,21 @@ public class CustomSprite : MonoBehaviour
   {
     setMaterial();
     setTexture();
-    updateMesh();
+    setMeshData();
   }
 
   void OnValidate()
   {
     setMaterial();
     setTexture();
-    updateMesh();
+    setMeshData();
   }
 
   public void Render()
   {
     setMaterial();
     setTexture();
-    updateMesh();
+    setMeshData();
   }
 
   void setMaterial()
@@ -108,37 +107,33 @@ public class CustomSprite : MonoBehaviour
       meshRend = gameObject.AddComponent<MeshRenderer>();
     }
 
-    if (Application.isPlaying && meshRend.materials.Length > 0)
-    {
-      _mat = meshRend.materials[0];
-    }
-
-    if (!_mat)
+    if (!mat)
     {
       Shader shader = Shader.Find("Transparent/CustomSprite");
-      _mat = new Material(shader);
-
-      if (Application.isPlaying)
-      {
-        if (meshRend.materials.Length > 0)
-        {
-          meshRend.materials[0] = _mat;
-        }
-        else
-        {
-          meshRend.materials.Append(_mat);
-        }
-      }
+      mat = new Material(shader);
     }
-    _mat.SetTextureOffset("_MainTex", offset);
-    _mat.SetTextureScale("_MainTex", tiling);
-    _mat.SetInt("_Repeat", repeat);
+
+    if (Application.isPlaying)
+    {
+      if (meshRend.materials.Length > 0)
+      {
+        meshRend.materials[0] = mat;
+      }
+      else
+      {
+        meshRend.materials.Append(mat);
+      }
+      meshRend.material = mat;
+    }
+    mat.SetTextureOffset("_MainTex", offset);
+    mat.SetTextureScale("_MainTex", tiling);
+    mat.SetInt("_Repeat", repeat);
   }
 
   void setTexture()
   {
-    if (_mat && _texture)
-      _mat.SetTexture("_MainTex", _texture);
+    if (mat && _texture)
+      mat.SetTexture("_MainTex", _texture);
   }
 
   void setMeshData()
@@ -150,6 +145,7 @@ public class CustomSprite : MonoBehaviour
         name = gameObject.name
       };
     }
+    mesh.Clear();
     NativeArray<VertexAttributeDescriptor> attr = new NativeArray<VertexAttributeDescriptor>(3, Allocator.Temp, NativeArrayOptions.UninitializedMemory);
     attr[0] = new VertexAttributeDescriptor(VertexAttribute.Position, VertexAttributeFormat.Float32, 3);
     attr[1] = new VertexAttributeDescriptor(VertexAttribute.Color, VertexAttributeFormat.Float32, 4);
@@ -206,21 +202,11 @@ public class CustomSprite : MonoBehaviour
     }
   }
 
-  private void updateMesh()
-  {
-    if (mesh)
-    {
-      mesh.Clear();
-    }
-
-    setMeshData();
-  }
-
   private void destroyMat()
   {
-    if (_mat)
+    if (mat)
     {
-      Destroy(_mat);
+      Destroy(mat);
     }
   }
 }

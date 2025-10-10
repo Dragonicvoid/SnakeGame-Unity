@@ -1,14 +1,25 @@
 using System.Collections.Generic;
 
+public static class GENERAL_CONFIG
+{
+  public const float SPEED = 10f;
+  public const int FOOD_TO_FIRE = 1;
+  public const float ENEMY_SPAWN_TIME = 2f;
+  public const float FIRE_ALIVE_TIME = 5f;
+
+  public const int FIRE_PER_SHOT = 3;
+}
+
 public static class ARENA_DEFAULT_SIZE
 {
-  public const float SNAKE = 20f;
+  public const float SNAKE = 40f;
+  public const float FIRE = 20f;
   public const float TILE = 20f;
   public const float WIDTH = 700f;
   public const float HEIGHT = 700f;
   public const float GRID_WIDTH = 200f;
   public const float GRID_HEIGHT = 200f;
-  public const float FOOD_GRABBER = 100f;
+  public const float FOOD_GRABBER = 150f;
 }
 
 public static class ACTION_SCORE
@@ -17,26 +28,79 @@ public static class ACTION_SCORE
   public const float OBSTACLE_DETECTED = 9000f;
   public const float FOUND_FOOD_NEARBY = 200f;
   public const float SMALL_BODY = 50f;
+  public const float READY_TO_FIRE = 840f;
   public const float GO_TO_PLAYER_DEFAULT = -40f;
   public const float BECOME_AGGRESIVE = 440f;
   public const float AGGRESIVE_ON_COOLDOWN = -360f;
 }
 
+public struct BotConfigData
+{
+  public float AGGRRESIVE_TIME;
+  public float AGGRESSIVE_CONE_RAD;
+  public float AGGRESSIVE_CONE_DIST;
+  public float AGGRESSIVE_COOLDOWN;
+  public float TRIGGER_AREA_DST;
+  public float TURN_RADIUS;
+  public float REACTION_TIME;
+}
+
 public static class BOT_CONFIG
 {
-  public const float AGGRRESIVE_TIME = 10f;
-  public const float AGGRESSIVE_CONE_RAD = 360f;
-  public const float AGGRESSIVE_CONE_DIST = 700f;
-  public const float AGGRESSIVE_COOLDOWN = 4f;
-  public const float TRIGGER_AREA_DST = 60f;
-  public const float TURN_RADIUS = 0f;
+  public static BotConfigData GetConfig()
+  {
+    DIFFICULTY diff = PersistentData.Instance.Difficulty;
+    return data[diff];
+  }
+  public static Dictionary<DIFFICULTY, BotConfigData> data = new Dictionary<DIFFICULTY, BotConfigData>
+    {
+      {
+      DIFFICULTY.EASY,
+      new BotConfigData
+        {
+          AGGRRESIVE_TIME = 0f,
+          AGGRESSIVE_CONE_RAD = 0f,
+          AGGRESSIVE_CONE_DIST = 0f,
+          AGGRESSIVE_COOLDOWN = 0f,
+          TRIGGER_AREA_DST = 180f,
+          TURN_RADIUS = 0f,
+          REACTION_TIME = 0.5f,
+        }
+      },
+      {
+      DIFFICULTY.MEDIUM,
+      new BotConfigData
+        {
+          AGGRRESIVE_TIME = 5f,
+          AGGRESSIVE_CONE_RAD = 360f,
+          AGGRESSIVE_CONE_DIST = 700f,
+          AGGRESSIVE_COOLDOWN = 10f,
+          TRIGGER_AREA_DST = 130f,
+          TURN_RADIUS = 1f,
+          REACTION_TIME = 0.5f,
+        }
+      },
+      {
+      DIFFICULTY.HARD,
+      new BotConfigData
+        {
+          AGGRRESIVE_TIME = 10f,
+          AGGRESSIVE_CONE_RAD = 360f,
+          AGGRESSIVE_CONE_DIST = 850f,
+          AGGRESSIVE_COOLDOWN = 3f,
+          TRIGGER_AREA_DST = 180f,
+          TURN_RADIUS = 2f,
+          REACTION_TIME = 0.2f,
+        }
+      }
+    };
 }
 
 public static class TIME_CONFIG
 {
   public const float FOOD_EXPIRED = 3;
 
-  public const float TURNING_FRAME = 0.05f;
+  public const float TURNING_FRAME = 0.1f;
 }
 
 public static class MAP

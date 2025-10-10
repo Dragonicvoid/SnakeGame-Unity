@@ -1,4 +1,4 @@
-#nullable enable
+
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -54,15 +54,52 @@ public class FoodManager : MonoBehaviour, IFoodManager
     }
   }
 
+  public FoodConfig? SpawnFood(Vector2 pos, bool animated = true)
+  {
+    Coordinate coord = ArenaConverter.ConvertPosToCoord(pos.x, pos.y);
+    bool isSafe = obsManager?.I.IsPosSafeForSpawn(coord) ?? false;
+
+    if (!isSafe)
+    {
+      return null;
+    }
+
+    GameObject? obj = foodSpawner?.Spawn(pos);
+
+    if (!obj)
+    {
+      return null;
+    }
+
+    FoodConfig food = new FoodConfig(foodCounter.ToString(), new FoodState(pos, false), 0, obj);
+    gridManager?.I.AddFood(food);
+    FoodList.Add(food);
+
+    UpAndDown upAndDown = obj.GetComponent<UpAndDown>();
+    if (animated)
+    {
+      upAndDown.StartAnimating();
+    }
+    else
+    {
+      upAndDown.StopAnimating();
+    }
+
+    foodCounter++;
+
+    return food;
+  }
+
   IEnumerator<object> spawnRandomFood()
   {
     int retries = 0;
     while (true)
     {
-      yield return new WaitForSeconds(foodSpawnInterval);
+      yield return null;
       if (!foodSpawner || retries >= maxRetries)
       {
         retries = 0;
+        yield return PersistentData.Instance.GetWaitSecond(foodSpawnInterval);
         continue;
       }
 
@@ -73,27 +110,16 @@ public class FoodManager : MonoBehaviour, IFoodManager
         Random.Range(0f, ARENA_DEFAULT_SIZE.HEIGHT) -
           ARENA_DEFAULT_SIZE.HEIGHT / 2
       );
-      Coordinate coord = ArenaConverter.ConvertPosToCoord(pos.x, pos.y);
-      bool isSafe = obsManager?.I.IsPosSafeForSpawn(coord) ?? false;
 
-      if (!isSafe)
+      FoodConfig? food = SpawnFood(pos);
+
+      if (food == null)
       {
         retries++;
         continue;
       }
 
-      GameObject? obj = foodSpawner?.Spawn(pos);
-
-      if (!obj)
-      {
-        continue;
-      }
-
-      FoodConfig food = new FoodConfig(foodCounter.ToString(), new FoodState(pos, false), 0, obj);
-      gridManager?.I.AddFood(food);
-      FoodList.Add(food);
-
-      foodCounter++;
+      yield return PersistentData.Instance.GetWaitSecond(foodSpawnInterval);
     }
   }
 

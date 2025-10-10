@@ -4,6 +4,7 @@ using UnityEngine;
 public interface IFoodManager
 {
     public List<FoodConfig> FoodList { get; set; }
+    public FoodConfig? SpawnFood(Vector2 pos, bool animated = true);
     public void StartSpawningFood();
     public void StopSpawningFood();
     public void ProcessEatenFood(SnakeConfig player, FoodConfig food);

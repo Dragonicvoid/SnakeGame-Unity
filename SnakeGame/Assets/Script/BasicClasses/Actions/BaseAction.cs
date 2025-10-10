@@ -1,4 +1,3 @@
-#nullable enable
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -24,9 +23,9 @@ public class BaseAction : IBaseAction
 
   AStar? aStar = null;
 
-  const float playerConeDegree = BOT_CONFIG.AGGRESSIVE_CONE_RAD;
+  float playerConeDegree = BOT_CONFIG.GetConfig().AGGRESSIVE_CONE_RAD;
 
-  const float playerMinDist = BOT_CONFIG.AGGRESSIVE_CONE_DIST;
+  float playerMinDist = BOT_CONFIG.GetConfig().AGGRESSIVE_CONE_DIST;
 
   const float maxOpenList = 700;
 
@@ -38,7 +37,9 @@ public class BaseAction : IBaseAction
     aStar = new AStar();
   }
 
-  public virtual void Init() { }
+  public virtual void Init()
+  {
+  }
 
   public virtual void OnChange() { }
 

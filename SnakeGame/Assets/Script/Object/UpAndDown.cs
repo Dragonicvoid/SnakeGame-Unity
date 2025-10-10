@@ -1,4 +1,4 @@
-#nullable enable
+
 using System;
 using System.Collections.Generic;
 using UnityEngine;
@@ -34,14 +34,9 @@ public class UpAndDown : MonoBehaviour
 
   void OnEnable()
   {
-    TweenData data = new TweenData
-    {
-      start = new Vector2(0, -height),
-      target = new Vector2(0, height),
-      repeatAction = animate,
-    };
+    if (!sprite) return;
 
-    animate(data);
+    sprite.transform.localPosition = Vector3.zero;
   }
 
   void animate(TweenData data)
@@ -69,7 +64,7 @@ public class UpAndDown : MonoBehaviour
         target = start + (delta * dist);
         sprite.transform.localPosition = new Vector3(
           initPos.Value.x,
-          Mathf.Floor(initPos.Value.y + Mathf.Floor(target / 2) * 2)
+          Mathf.Floor(initPos.Value.y + target)
         );
       },
       (dist, data) =>
@@ -80,6 +75,25 @@ public class UpAndDown : MonoBehaviour
     );
     IEnumerator<object> enumerator = Tween.Create(obj);
     anim = StartCoroutine(enumerator);
+  }
+
+  public void StartAnimating()
+  {
+    StopAnimating();
+    TweenData data = new TweenData
+    {
+      start = new Vector2(0, -height),
+      target = new Vector2(0, height),
+      repeatAction = animate,
+    };
+
+    animate(data);
+  }
+
+  public void StopAnimating()
+  {
+    if (sprite) sprite.transform.localPosition = Vector3.zero;
+    if (anim != null) StopCoroutine(anim);
   }
 
   void OnDestroy()

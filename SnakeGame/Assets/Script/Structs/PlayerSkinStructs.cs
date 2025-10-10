@@ -1,5 +1,7 @@
 public struct PlayerSkin
 {
-    public SkinDetail Skin;
+    public SkinDetail SkinPrimary;
+    public SkinDetail SkinSecond;
+
     public SNAKE_TYPE Type;
 }

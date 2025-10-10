@@ -1,4 +1,3 @@
-#nullable enable
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -111,6 +110,48 @@ public class SnakeBody
   }
 }
 
+public class FireState
+{
+  public List<FireBody> Body { get; set; }
+
+  public FireState()
+  {
+    Body = new List<FireBody>();
+  }
+}
+
+public class FireBody
+{
+  public Vector2 Position { get; set; }
+  public Vector2 Dir { get; set; }
+  public Fire Fire { get; set; }
+  public float Speed { get; set; }
+  public float SpawnTime { get; set; }
+
+  public FireBody(
+      Vector2 position,
+      Vector2 dir,
+      Fire fire,
+      float speed,
+      float? spawnTime
+    )
+  {
+    Position = position;
+    Dir = dir;
+    Fire = fire;
+    Speed = speed;
+
+    if (spawnTime != null)
+    {
+      SpawnTime = spawnTime.Value;
+    }
+    else
+    {
+      SpawnTime = Time.time;
+    }
+  }
+}
+
 public class SnakeState
 {
   public FoodGrabber FoodGrabber { get; set; }
@@ -162,10 +203,14 @@ public class SnakeState
 public class SnakeConfig
 {
   public string Id { get; set; }
+  public float LastReactTime { get; set; }
   public SnakeState State { get; set; }
+  public FireState FireState { get; set; }
   public bool IsBot { get; set; }
   public bool IsAlive { get; set; }
-  public ISnakeRenderable? Render { get; set; }
+  public int FoodInStomach { get; set; }
+  public ISnakeRenderable? Render
+  { get; set; }
   public Dictionary<BOT_ACTION, IBaseAction>? PossibleActions { get; set; }
   public IBaseAction? Action { get; set; }
 
@@ -183,6 +228,9 @@ public class SnakeConfig
     this.State = State;
     this.IsBot = IsBot;
     this.IsAlive = IsAlive;
+    FoodInStomach = 0;
+    LastReactTime = Time.time;
+    FireState = new FireState();
 
     if (Render != null)
     {

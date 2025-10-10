@@ -1,8 +1,6 @@
-#nullable enable
-using System;
+
 using UnityEngine;
 using UnityEngine.UI;
-using UnityEngine.UIElements;
 
 public class UiManager : MonoBehaviour
 {
@@ -16,12 +14,27 @@ public class UiManager : MonoBehaviour
   GameObject? movUI = null;
   [SerializeField]
   GameObject? movUIFront = null;
+  [SerializeField]
+  Background? background = null;
 
   private float movMaxLength = 50;
 
   void Awake()
   {
     setListener();
+  }
+
+  public void StartGame()
+  {
+    ShowStartUI(false);
+    background?.GoToGameplayPos();
+  }
+
+  public void EndGame()
+  {
+    UiEvent.Instance.onGameEndAnimFinish -= onGameEndAnimFinish;
+    UiEvent.Instance.onGameEndAnimFinish += onGameEndAnimFinish;
+    background?.GoToMainMenuPos();
   }
 
   public void ShowStartUI(bool val = true)
@@ -44,9 +57,17 @@ public class UiManager : MonoBehaviour
 
   private void setListener()
   {
+    stopListener();
     GameplayMoveEvent.Instance.onGameUiStartTouch += onTouchStart;
     GameplayMoveEvent.Instance.onGameUiMoveTouch += onTouchMove;
     GameplayMoveEvent.Instance.onGameUiEndTouch += onTouchEnd;
+  }
+
+  void stopListener()
+  {
+    GameplayMoveEvent.Instance.onGameUiStartTouch -= onTouchStart;
+    GameplayMoveEvent.Instance.onGameUiMoveTouch -= onTouchMove;
+    GameplayMoveEvent.Instance.onGameUiEndTouch -= onTouchEnd;
   }
 
   private void onTouchStart(Vector2 pos)
@@ -62,6 +83,12 @@ public class UiManager : MonoBehaviour
   private void onTouchEnd()
   {
     showMovUI(false, null);
+  }
+
+  private void onGameEndAnimFinish()
+  {
+    UiEvent.Instance.onGameEndAnimFinish -= onGameEndAnimFinish;
+    ShowStartUI(true);
   }
 
   private void showMovUI(bool show, Vector2? pos)
@@ -112,8 +139,6 @@ public class UiManager : MonoBehaviour
 
   void OnDestroy()
   {
-    GameplayMoveEvent.Instance.onGameUiStartTouch -= onTouchStart;
-    GameplayMoveEvent.Instance.onGameUiMoveTouch -= onTouchMove;
-    GameplayMoveEvent.Instance.onGameUiEndTouch -= onTouchEnd;
+    stopListener();
   }
 }

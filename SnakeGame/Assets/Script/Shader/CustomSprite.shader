@@ -52,12 +52,10 @@ Shader "Transparent/CustomSprite"
             {
                 float2 uv0 = i.uv * (float)_Repeat;
                 float2 f = frac(uv0);
-                // sample the texture
                 float4 col = tex2D(_MainTex, f.xy);
                 col *= i.color;
 
-                fixed4 colFix = float4(col.xyz, col.a * 1.0);
-                return colFix;
+                return col;
             }
             ENDCG
         }

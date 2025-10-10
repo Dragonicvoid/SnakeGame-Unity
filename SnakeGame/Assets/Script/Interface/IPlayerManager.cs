@@ -1,4 +1,4 @@
-#nullable enable
+
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -30,6 +30,7 @@ public interface IPlayerManager
     );
   public void UpdateDirection(SnakeConfig player, Vector2 botNewDir);
   public void UpdateCoordinate(float delta = 0.016f);
+  public void UpdateFire(float delta = 0.016f);
   public SnakeConfig? GetMainPlayer();
   public SnakeConfig? GetEnemy();
   public SnakeConfig? GetPlayerById(string id);

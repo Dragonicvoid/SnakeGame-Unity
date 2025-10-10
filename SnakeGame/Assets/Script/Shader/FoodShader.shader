@@ -2,11 +2,9 @@ Shader "Transparent/FoodShader"
 {
     Properties 
     {
-        _Height("Height", float) = 0.9
-        _Width("Width", float) = 0.9
-        _Fade("Fading Effect on the edge", float) = 0.05
-        _MainTex ("Texture", 2D) = "white" {}
-        _Repeat("Repeating Tile", Int) = 1
+        _Height("Height", float) = 0.2
+        _Width("Width", float) = 0.6
+        _Fade("Fading Effect on the edge", float) = 0.5
     }
     SubShader
     {
@@ -61,6 +59,8 @@ Shader "Transparent/FoodShader"
                 float2 dist = smoothstep(float2(_Width - reduce, _Height), float2(_Width - reduce + _Fade, _Height + _Fade), float2(abs(normUV.x), abs(normUV.y)));
                 color.a *= 1.0 - max(dist.x, dist.y);
                 color *= i.color;
+
+                clip(color.a - 0.1);
             
                 fixed4 o = color;
                 return o;

@@ -1,7 +1,8 @@
-#nullable enable
+
 using System.Collections.Generic;
 using Unity.VisualScripting;
 using UnityEngine;
+using UnityEngine.Rendering;
 using UnityEngine.UI;
 
 
@@ -35,7 +36,9 @@ public class StartSnakePrev : MonoBehaviour
 
   float duration = 0.5f;
 
-  public SkinDetail? SkinData = null;
+  public SkinDetail? SkinDataPrim = null;
+
+  public SkinDetail? SkinDataSecond = null;
 
   public SNAKE_TYPE SnakeType = SNAKE_TYPE.NORMAL;
 
@@ -45,16 +48,17 @@ public class StartSnakePrev : MonoBehaviour
     renTex = new RenderTexture(
       (int)rect.rect.width,
       (int)rect.rect.height,
-      UnityEngine.Experimental.Rendering.GraphicsFormat.R8G8B8A8_UNorm,
-      UnityEngine.Experimental.Rendering.GraphicsFormat.D32_SFloat_S8_UInt
+      Util.GetGraphicFormat(),
+      Util.GetDepthFormat()
     );
+    Util.ClearDepthRT(renTex, new CommandBuffer(), true);
     if (snakeRender != null && renTex != null)
     {
       snakeShape = new List<SnakeBody>();
-      for (int i = 6; i >= -6; i--)
+      for (int i = 3; i >= -3; i--)
       {
         snakeShape.Add(new SnakeBody(
-          new Vector2(0, snakeSize * i),
+          new Vector2(0, snakeSize * 0.75f * i),
           snakeSize,
           new List<Vector2>(),
           new Vector2(),
@@ -78,7 +82,7 @@ public class StartSnakePrev : MonoBehaviour
   {
     while (true)
     {
-      yield return new WaitForSeconds(0.016f);
+      yield return PersistentData.Instance.GetWaitSecond(0.016f);
       snakeRender?.Render();
     }
   }
@@ -89,7 +93,7 @@ public class StartSnakePrev : MonoBehaviour
     {
       TweenData data = new TweenData((i % 2) == 0 ? 1 : -1, snakeShape[i]);
       animDance(data);
-      yield return new WaitForSeconds(0.25f);
+      yield return PersistentData.Instance.GetWaitSecond(0.25f);
     }
   }
 
@@ -127,7 +131,17 @@ public class StartSnakePrev : MonoBehaviour
 
   public void SetSnakeSkin(SkinDetail skin, bool isPrimary)
   {
-    SkinData = skin;
+    if (SkinDataPrim == null || SkinDataSecond == null) return;
+
+    if (isPrimary)
+    {
+      SkinDataPrim = skin;
+    }
+    else
+    {
+      SkinDataSecond = skin;
+    }
+
     snakeRender?.SetSnakeSkin(skin, isPrimary);
   }
 }

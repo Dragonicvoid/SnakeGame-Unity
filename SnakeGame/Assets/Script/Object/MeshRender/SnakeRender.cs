@@ -1,4 +1,4 @@
-#nullable enable
+
 using System.Collections.Generic;
 using Unity.Collections;
 using Unity.Mathematics;
@@ -22,6 +22,8 @@ public class SnakeRender : MonoBehaviour, ISnakeRenderable
         public Vector2 center;
         public Vector3 nextPos;
         public Vector3 prevPos;
+        public Vector3 unnormNextPos;
+        public Vector3 unnormPrevPos;
     }
 
     [SerializeField]
@@ -39,20 +41,18 @@ public class SnakeRender : MonoBehaviour, ISnakeRenderable
             _mat = value;
         }
     }
-    [SerializeField]
-    float tileSize = 20;
 
     [SerializeField]
-    private SnakeTexture? _snakeTexture = null;
+    private SnakeTexture? snakeTexture = null;
     public SnakeTexture? SnakeTexture
     {
         get
         {
-            return _snakeTexture;
+            return snakeTexture;
         }
         set
         {
-            _snakeTexture = value;
+            snakeTexture = value;
         }
     }
 
@@ -105,7 +105,6 @@ public class SnakeRender : MonoBehaviour, ISnakeRenderable
 
     void setBodyMeshData()
     {
-        if (SnakeBodies?.Count <= 0) return;
         if (!mesh)
         {
             mesh = new Mesh
@@ -113,8 +112,9 @@ public class SnakeRender : MonoBehaviour, ISnakeRenderable
                 name = gameObject.name
             };
         }
+        mesh.Clear();
 
-        int descrCount = 6;
+        int descrCount = 8;
         NativeArray<VertexAttributeDescriptor> attr = new NativeArray<VertexAttributeDescriptor>(descrCount, Allocator.Temp, NativeArrayOptions.UninitializedMemory);
         attr[0] = new VertexAttributeDescriptor(VertexAttribute.Position, VertexAttributeFormat.Float32, 4);
         attr[1] = new VertexAttributeDescriptor(VertexAttribute.Tangent, VertexAttributeFormat.Float32, 1);
@@ -122,6 +122,8 @@ public class SnakeRender : MonoBehaviour, ISnakeRenderable
         attr[3] = new VertexAttributeDescriptor(VertexAttribute.TexCoord1, VertexAttributeFormat.Float32, 2);
         attr[4] = new VertexAttributeDescriptor(VertexAttribute.TexCoord2, VertexAttributeFormat.Float32, 3);
         attr[5] = new VertexAttributeDescriptor(VertexAttribute.TexCoord3, VertexAttributeFormat.Float32, 3);
+        attr[6] = new VertexAttributeDescriptor(VertexAttribute.TexCoord4, VertexAttributeFormat.Float32, 3);
+        attr[7] = new VertexAttributeDescriptor(VertexAttribute.TexCoord5, VertexAttributeFormat.Float32, 3);
 
         int vertexPerSnake = 4;
         int vertexCount = vertexPerSnake * (SnakeBodies?.Count ?? 0);
@@ -132,28 +134,39 @@ public class SnakeRender : MonoBehaviour, ISnakeRenderable
 
         for (int i = 0; i < SnakeBodies?.Count; i++)
         {
+            float snakeSize = ARENA_DEFAULT_SIZE.SNAKE;
             float x = SnakeBodies[i].Position.x;
             float y = SnakeBodies[i].Position.y;
-            float r = tileSize;
+            float r = snakeSize;
 
             float? prevXNorm = null;
             float? prevYNorm = null;
-            float prevR = tileSize;
+            float unNormPrevXNorm = 0;
+            float unNormPrevYNorm = 0;
+            float prevR = snakeSize;
             if (i - 1 >= 0 && i - 1 < SnakeBodies.Count)
             {
-                Vector2 delta = new Vector2((SnakeBodies[i - 1].Position.x - x) / tileSize, (SnakeBodies[i - 1].Position.y - y) / tileSize);
+                Vector2 delta = new Vector2((SnakeBodies[i - 1].Position.x - x) / snakeSize, (SnakeBodies[i - 1].Position.y - y) / snakeSize);
                 prevXNorm = delta.x;
                 prevYNorm = delta.y;
+
+                unNormPrevXNorm = delta.x;
+                unNormPrevYNorm = delta.y;
             }
 
             float? nextXNorm = null;
             float? nextYNorm = null;
-            float nextR = tileSize;
+            float unNormNextXNorm = 0;
+            float unNormNextYNorm = 0;
+            float nextR = snakeSize;
             if (i + 1 >= 0 && i + 1 < SnakeBodies.Count)
             {
-                Vector2 delta = new Vector2((SnakeBodies[i + 1].Position.x - x) / tileSize, (SnakeBodies[i + 1].Position.y - y) / tileSize);
+                Vector2 delta = new Vector2((SnakeBodies[i + 1].Position.x - x) / snakeSize, (SnakeBodies[i + 1].Position.y - y) / snakeSize);
                 nextXNorm = delta.x;
                 nextYNorm = delta.y;
+
+                unNormNextXNorm = delta.x;
+                unNormNextYNorm = delta.y;
             }
 
             if (prevXNorm == null || prevYNorm == null)
@@ -163,6 +176,9 @@ public class SnakeRender : MonoBehaviour, ISnakeRenderable
 
                 prevXNorm = norm.x * 0.1f;
                 prevYNorm = norm.y * 0.1f;
+
+                unNormPrevXNorm = norm.x;
+                unNormPrevYNorm = norm.y;
             }
             else if (nextXNorm == null || nextYNorm == null)
             {
@@ -171,9 +187,11 @@ public class SnakeRender : MonoBehaviour, ISnakeRenderable
 
                 nextXNorm = norm.x * 0.1f;
                 nextYNorm = norm.y * 0.1f;
+
+                unNormNextXNorm = norm.x;
+                unNormNextYNorm = norm.y;
             }
 
-            float snakeSize = tileSize;
             int padding = i * vertexPerSnake;
 
             half h0 = new half(0f), h1 = new half(1f);
@@ -185,6 +203,8 @@ public class SnakeRender : MonoBehaviour, ISnakeRenderable
                 center = new Vector2(x, y),
                 nextPos = new Vector3(nextXNorm ?? 0, nextYNorm ?? 0, nextR),
                 prevPos = new Vector3(prevXNorm ?? 0, prevYNorm ?? 0, prevR),
+                unnormNextPos = new Vector3(unNormNextXNorm, unNormNextYNorm, nextR),
+                unnormPrevPos = new Vector3(unNormPrevXNorm, unNormPrevYNorm, nextR),
             };
             vertex[padding + 1] = new SnakeVertex
             {
@@ -194,6 +214,8 @@ public class SnakeRender : MonoBehaviour, ISnakeRenderable
                 center = new Vector2(x, y),
                 nextPos = new Vector3(nextXNorm ?? 0, nextYNorm ?? 0, nextR),
                 prevPos = new Vector3(prevXNorm ?? 0, prevYNorm ?? 0, prevR),
+                unnormNextPos = new Vector3(unNormNextXNorm, unNormNextYNorm, nextR),
+                unnormPrevPos = new Vector3(unNormPrevXNorm, unNormPrevYNorm, nextR),
             };
             vertex[padding + 2] = new SnakeVertex
             {
@@ -203,6 +225,8 @@ public class SnakeRender : MonoBehaviour, ISnakeRenderable
                 center = new Vector2(x, y),
                 nextPos = new Vector3(nextXNorm ?? 0, nextYNorm ?? 0, nextR),
                 prevPos = new Vector3(prevXNorm ?? 0, prevYNorm ?? 0, prevR),
+                unnormNextPos = new Vector3(unNormNextXNorm, unNormNextYNorm, nextR),
+                unnormPrevPos = new Vector3(unNormPrevXNorm, unNormPrevYNorm, nextR),
             };
             vertex[padding + 3] = new SnakeVertex
             {
@@ -212,6 +236,8 @@ public class SnakeRender : MonoBehaviour, ISnakeRenderable
                 center = new Vector2(x, y),
                 nextPos = new Vector3(nextXNorm ?? 0, nextYNorm ?? 0, nextR),
                 prevPos = new Vector3(prevXNorm ?? 0, prevYNorm ?? 0, prevR),
+                unnormNextPos = new Vector3(unNormNextXNorm, unNormNextYNorm, nextR),
+                unnormPrevPos = new Vector3(unNormPrevXNorm, unNormPrevYNorm, nextR),
             };
         }
 
@@ -270,7 +296,7 @@ public class SnakeRender : MonoBehaviour, ISnakeRenderable
         if (!mesh || !meshRend || cmdBuffer == null || !RendTex) return;
 
         cmdBuffer.Clear();
-        var lookMatrix = Camera.main.worldToCameraMatrix;
+        var lookMatrix = Util.CreateViewMatrix(new Vector3(0, 0, -10), Quaternion.identity, Vector3.one).inverse;
         var orthoMatrix = Matrix4x4.Ortho(-RendTex.width / 2, RendTex.width / 2, -RendTex.height / 2, RendTex.height / 2, 0.3f, 1000f);
         cmdBuffer.SetViewProjectionMatrices(lookMatrix, orthoMatrix);
 
@@ -279,11 +305,11 @@ public class SnakeRender : MonoBehaviour, ISnakeRenderable
             cmdBuffer.SetRenderTarget(RendTex);
             cmdBuffer.ClearRenderTarget(true, true, Color.clear, 1f);
             cmdBuffer.DrawMesh(mesh, Matrix4x4.identity, _mat, 0, 0);
-
-            // Hack resize Web-view
-            cmdBuffer.SetRenderTarget(PersistentData.Instance.RenderTex);
-            cmdBuffer.ClearRenderTarget(false, false, Color.clear, 1f);
         }
+
+        // Hack resize Web-view
+        cmdBuffer.SetRenderTarget(PersistentData.Instance.RenderTex);
+        cmdBuffer.ClearRenderTarget(false, false, Color.clear, 1f);
 
         Graphics.ExecuteCommandBuffer(cmdBuffer);
     }
@@ -297,29 +323,12 @@ public class SnakeRender : MonoBehaviour, ISnakeRenderable
     {
         if (skin == null) return;
 
-        _snakeTexture?.SetSkin(skin, isPrimary);
-
-        if (skin != null && Mat)
+        if (Mat)
         {
-            Mat.SetTexture(isPrimary ? "_MainTex" : "_SecondTex", isPrimary ? _snakeTexture?.PrimaryTex : _snakeTexture?.SecondTex);
-        }
-    }
+            Mat.SetTexture(isPrimary ? "_MainTex" : "_SecondTex", isPrimary ? snakeTexture?.PrimaryTex : snakeTexture?.SecondTex);
+            Mat.SetFloat(isPrimary ? "_MainSize" : "_SecondSize", isPrimary ? skin.main_size : skin.second_size);
 
-    private void updateMesh()
-    {
-        if (mesh)
-        {
-            mesh.Clear();
-        }
-
-        setBodyMeshData();
-    }
-
-    private void destroyMat()
-    {
-        if (_mat)
-        {
-            Destroy(_mat);
+            snakeTexture?.SetSkin(skin, isPrimary);
         }
     }
 }

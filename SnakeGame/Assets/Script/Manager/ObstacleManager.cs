@@ -1,4 +1,4 @@
-#nullable enable
+
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -14,7 +14,7 @@ public class ObstacleManager : MonoBehaviour, IObstacleManager
   IRef<IGridManager> gridManager;
 
   private List<List<TileMapData>> obstacleMap = new List<List<TileMapData>>();
-  List<ObstacleData> spikes = new List<ObstacleData>();
+  public List<ObstacleData> Spikes { set; get; } = new List<ObstacleData>();
 
   void Awake()
   {
@@ -48,11 +48,11 @@ public class ObstacleManager : MonoBehaviour, IObstacleManager
 
   public void ClearObstacle()
   {
-    foreach (ObstacleData s in spikes)
+    foreach (ObstacleData s in Spikes)
     {
       Destroy(s.Obj);
     }
-    spikes.Clear();
+    Spikes.Clear();
     obstacleMap.Clear();
   }
 
@@ -72,7 +72,7 @@ public class ObstacleManager : MonoBehaviour, IObstacleManager
     );
     GameObject? spikeObj = instantiateSpike(coor);
     spikeData.Obj = spikeObj;
-    spikes.Add(spikeData);
+    Spikes.Add(spikeData);
   }
 
   private GameObject? instantiateSpike(Coordinate coor)
@@ -122,9 +122,9 @@ public class ObstacleManager : MonoBehaviour, IObstacleManager
     switch (obstacleType)
     {
       case ARENA_OBJECT_TYPE.SPIKE:
-        return spikes;
+        return Spikes;
       default:
-        return spikes;
+        return Spikes;
     }
   }
 

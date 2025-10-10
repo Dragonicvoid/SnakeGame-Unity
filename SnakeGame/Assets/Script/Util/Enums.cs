@@ -37,6 +37,7 @@ public enum LAYER
     DEBUG = 3,
     WATER = 4,
     UI = 5,
+    UI_FOR_TRAIL = 6,
 
     PHYSICS_FOOD = 14,
     PHYSICS_PLAYER = 15,
@@ -45,4 +46,11 @@ public enum LAYER
     PHYSICS_ENEMY = 18,
     PHYSICS_PLAYER_BODIES = 19,
     PHYSICS_ENEMY_BODIES = 20,
+}
+
+public enum SNAKE_RENDER_PASS
+{
+    MAIN_BODY = 0,
+    SECOND_BODY = 1,
+    PREVIEW = 2,
 }

@@ -1,4 +1,4 @@
-#nullable enable
+
 using System;
 using System.Collections.Generic;
 using UnityEngine;
@@ -9,6 +9,7 @@ public class GameManager : MonoBehaviour
   public IRef<IGridManager>? GridManager = null;
   public IRef<IPlayerManager>? PlayerManager = null;
   public IRef<IFoodManager>? FoodManager = null;
+  public TutorialManager? TutorialManager = null;
   public UiManager? UiManager = null;
   public ArenaInput? ArenaInput = null;
   public BotPlanner? Planner = null;
@@ -17,31 +18,21 @@ public class GameManager : MonoBehaviour
 
   private float gameStartTime = 0;
 
-  Coroutine? gameUpdateCorutine = null;
+  Coroutine? gameUpdateCoroutine = null;
 
-  private DIFFICULTY diff = DIFFICULTY.MEDIUM;
-
-  bool paused = true;
+  Coroutine? enemySpawnCoroutine = null;
 
   void FixedUpdate()
   {
-    if (paused) return;
+    if (PersistentData.Instance.isPaused) return;
 
     gameUpdate();
   }
 
   public void StartGame()
   {
-    ArenaManager?.I.InitializedMap();
-    gameStartTime = Time.fixedTime;
-    UiManager?.ShowStartUI(false);
-    ArenaInput?.StartInputListener();
-
-    CreatePlayer();
-    setCollisionEvent();
-    setGameEvent();
-
-    paused = false;
+    setStartAnimEvent();
+    UiManager?.StartGame();
   }
 
   void gameUpdate()
@@ -54,61 +45,105 @@ public class GameManager : MonoBehaviour
     }
 
     PlayerManager?.I.UpdateCoordinate(deltaTime);
+    PlayerManager?.I.UpdateFire(deltaTime);
   }
 
-  private void CreatePlayer()
+  private void onTutorialFinish()
   {
-    Vector2 centerPos = ArenaManager?.I.CenterPos ?? new Vector2(0, 0);
+    GameEvent.Instance.onTutorialFinish -= onTutorialFinish;
 
-    float rand = UnityEngine.Random.Range(0, 100) / 100;
+    setEnemySpawnEvent();
+    FoodManager?.I.StartSpawningFood();
+  }
+
+  private void SpawnMainPlayer(Vector2 dir)
+  {
     Vector2 playerPos =
-      ArenaManager?.I.SpawnPos[rand > 0.5 ? 0 : 1] ?? new Vector2(0, 0);
-    Vector2 playerDir = new Vector2(1, 0);
-    if (playerPos.x > centerPos.x)
-    {
-      playerDir.Set(-1, 0);
-    }
-    PlayerManager?.I.CreatePlayer(playerPos, playerDir);
+      ArenaManager?.I.SpawnPos[0] ?? new Vector2(0, 0);
+
+    PlayerManager?.I.CreatePlayer(playerPos, dir.normalized);
+
+    GameplayMoveEvent.Instance.onGameUiMoveTouch -= SpawnMainPlayer;
+  }
+
+  IEnumerator<object> SpawnEnemy()
+  {
+    yield return PersistentData.Instance.GetWaitSecond(GENERAL_CONFIG.ENEMY_SPAWN_TIME);
 
     Vector2 enemyPos =
-      ArenaManager?.I.SpawnPos[rand > 0.5 ? 1 : 0] ?? new Vector2(0, 0);
-    Vector2 enemyDir = new Vector2(1, 0);
-    if (enemyPos.x > centerPos.x)
-    {
-      enemyDir.Set(-1, 0);
-    }
-    PlayerManager?.I.CreatePlayer(enemyPos, enemyDir, true);
+      ArenaManager?.I.SpawnPos[1] ?? new Vector2(0, 0);
 
-    FoodManager?.I.StartSpawningFood();
+    if (enemyPos.x == 0 && enemyPos.y == 0)
+    {
+      enemyPos = new Vector2(1, 1);
+    }
+
+    Vector2 dir = new Vector2(-enemyPos.x, -enemyPos.y);
+    PlayerManager?.I.CreatePlayer(enemyPos, dir.normalized, true);
   }
 
   void stopGame()
   {
     FoodManager?.I.StopSpawningFood();
+    TutorialManager?.StopTutorial();
     ArenaInput?.StopInputListener();
-    paused = true;
+    PersistentData.Instance.isPaused = true;
+    if (enemySpawnCoroutine != null)
+    {
+      StopCoroutine(enemySpawnCoroutine);
+    }
+
+    stopEnemySpawnEvent();
     stopCollisionEvent();
     stopGameEvent();
   }
 
   public void GoToMainMenu()
   {
+    UiManager?.EndGame();
     FoodManager?.I.RemoveAllFood();
     PlayerManager?.I.RemoveAllPlayers();
     FoodManager?.I.RemoveAllFood();
-    UiManager?.ShowStartUI();
+    ArenaManager?.I.ClearSpikeRender();
     UiManager?.ShowEndUI(null, false);
+  }
+
+  void setStartAnimEvent()
+  {
+    stopStartAnimEvent();
+    UiEvent.Instance.onGameStartAnimFinish += onGameStartAnimFinish;
+    UiEvent.Instance.onCameraMoveFinish += onCameraMoveFinish;
+    UiEvent.Instance.onSpikeAnimationComplete += onSpikeAnimComplete;
+    UiEvent.Instance.onMainPlayerVortexSpawn += onMainVortexSpawn;
   }
 
   void setCollisionEvent()
   {
+    stopCollisionEvent();
     CollisionEvent.Instance.onHeadCollide += onHeadCollide;
     CollisionEvent.Instance.onFoodCollide += onFoodCollide;
   }
 
   void setGameEvent()
   {
+    stopGameEvent();
+    GameplayMoveEvent.Instance.onGameUiMoveTouch += SpawnMainPlayer;
     GameEvent.Instance.onGameOver += onGameOver;
+    GameEvent.Instance.onTutorialFinish += onTutorialFinish;
+  }
+
+  void setEnemySpawnEvent()
+  {
+    stopEnemySpawnEvent();
+    UiEvent.Instance.onEnemyVortexSpawn += onEnemyVortexSpawn;
+  }
+
+  void stopStartAnimEvent()
+  {
+    UiEvent.Instance.onGameStartAnimFinish -= onGameStartAnimFinish;
+    UiEvent.Instance.onCameraMoveFinish -= onCameraMoveFinish;
+    UiEvent.Instance.onSpikeAnimationComplete -= onSpikeAnimComplete;
+    UiEvent.Instance.onMainPlayerVortexSpawn -= onMainVortexSpawn;
   }
 
   void stopCollisionEvent()
@@ -119,14 +154,21 @@ public class GameManager : MonoBehaviour
 
   void stopGameEvent()
   {
+    GameplayMoveEvent.Instance.onGameUiMoveTouch -= SpawnMainPlayer;
     GameEvent.Instance.onGameOver -= onGameOver;
+    GameEvent.Instance.onTutorialFinish -= onTutorialFinish;
+  }
+
+  void stopEnemySpawnEvent()
+  {
+    UiEvent.Instance.onEnemyVortexSpawn -= onEnemyVortexSpawn;
   }
 
   void onHeadCollide(HeadCollideData data)
   {
     GameOverData gameOverData = new GameOverData(
       Time.time,
-      diff,
+      PersistentData.Instance.Difficulty,
       false,
       PlayerManager?.I.GetMainPlayer(),
       PlayerManager?.I.GetEnemy()
@@ -210,9 +252,49 @@ public class GameManager : MonoBehaviour
     UiManager?.ShowEndUI(data);
   }
 
+  void onGameStartAnimFinish()
+  {
+    stopStartAnimEvent();
+    gameStartTime = Time.time;
+    ArenaInput?.StartInputListener();
+    TutorialManager?.StartTutorial();
+
+    setCollisionEvent();
+    setGameEvent();
+
+    PersistentData.Instance.isPaused = false;
+  }
+
+  void onMainVortexSpawn()
+  {
+    UiEvent.Instance.onMainPlayerVortexSpawn -= onMainVortexSpawn;
+    UiEvent.Instance.GameStartAnimFinish();
+  }
+
+  void onCameraMoveFinish()
+  {
+    UiEvent.Instance.onCameraMoveFinish -= onCameraMoveFinish;
+
+    ArenaManager?.I.InitializedMap();
+  }
+
+  void onSpikeAnimComplete()
+  {
+    UiEvent.Instance.onSpikeAnimationComplete -= onSpikeAnimComplete;
+  }
+
+  void onEnemyVortexSpawn()
+  {
+    UiEvent.Instance.onEnemyVortexSpawn -= onEnemyVortexSpawn;
+    enemySpawnCoroutine = StartCoroutine(SpawnEnemy());
+  }
+
   void handleBotLogic(SnakeConfig snake)
   {
     if (!snake.IsBot) return;
+
+    float deltaTime = Time.time - snake.LastReactTime;
+    if (deltaTime < BOT_CONFIG.GetConfig().REACTION_TIME) return;
 
     if (
       PlayerManager == null ||
@@ -230,13 +312,13 @@ public class GameManager : MonoBehaviour
 
     detectedPlayer = PlayerManager.I.FindNearestPlayerTowardPoint(
       snake,
-      BOT_CONFIG.TRIGGER_AREA_DST
+      BOT_CONFIG.GetConfig().TRIGGER_AREA_DST
     );
 
     detectedWall =
       ArenaManager.I.FindObsAnglesFromSnake(
         snake,
-        BOT_CONFIG.TRIGGER_AREA_DST
+        BOT_CONFIG.GetConfig().TRIGGER_AREA_DST
       ) ?? new List<float>();
 
     // need to updated to adjust botData
@@ -246,7 +328,7 @@ public class GameManager : MonoBehaviour
       detectedFood =
         ArenaManager.I.GetNearestDetectedFood(
           snake,
-          BOT_CONFIG.TRIGGER_AREA_DST
+          BOT_CONFIG.GetConfig().TRIGGER_AREA_DST
         ) ?? null;
     }
 
@@ -333,5 +415,7 @@ public class GameManager : MonoBehaviour
       snake.Action?.PrevPathfindingData,
       possibleActions
       );
+
+    snake.LastReactTime = Time.time;
   }
 }

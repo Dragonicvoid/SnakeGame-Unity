@@ -1,4 +1,4 @@
-#nullable enable
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -33,7 +33,7 @@ public class GoToPlayer : BaseAction
 
     public override void Run(SnakeConfig player, SnakeActionData data)
     {
-        this.Player = player;
+        Player = player;
         CurrData = data;
 
         ManagerActionData manager = data.Manager;
@@ -52,8 +52,23 @@ public class GoToPlayer : BaseAction
 
         float TILE = ARENA_DEFAULT_SIZE.TILE;
         Vector2 frontRay = mainPlayer.State.Body[0].Velocity;
-        Vector2 currHeadPos = player.State.Body[0].Position;
         Vector2 mainPlayerHead = mainPlayer.State.Body[0].Position;
+
+        Vector2 currHeadPos = player.State.Body[0].Position;
+        Vector2 mainToCurrVec = new Vector2(
+                currHeadPos.x - mainPlayerHead.x,
+                currHeadPos.y - mainPlayerHead.y
+              );
+
+        float radianToTarget = Mathf.Acos(
+                (frontRay.x * mainToCurrVec.x + frontRay.y * mainToCurrVec.y) / (Mathf.Sqrt(frontRay.x * frontRay.x + frontRay.y * frontRay.y) * Mathf.Sqrt(mainToCurrVec.x * mainToCurrVec.x + mainToCurrVec.y * mainToCurrVec.y))
+        );
+        radianToTarget = Mathf.Abs(radianToTarget);
+        bool readyToFire = Player.FoodInStomach >= GENERAL_CONFIG.FOOD_TO_FIRE;
+        if (radianToTarget < (Mathf.PI / 6) && readyToFire)
+        {
+            GameEvent.Instance.SnakeFire(Player);
+        }
 
         if (Vector2.Distance(mainPlayerHead, currHeadPos) < TILE * 5)
         {
@@ -64,10 +79,7 @@ public class GoToPlayer : BaseAction
         {
             headingLeft = isLeft(
               frontRay,
-              new Vector2(
-                currHeadPos.x - mainPlayerHead.x,
-                currHeadPos.y - mainPlayerHead.y
-              )
+              mainToCurrVec
             );
         }
 
@@ -154,8 +166,8 @@ public class GoToPlayer : BaseAction
 
         if (firstTime)
         {
-            Cooldown = BOT_CONFIG.AGGRESSIVE_COOLDOWN;
-            aggresiveDuration = BOT_CONFIG.AGGRRESIVE_TIME;
+            Cooldown = BOT_CONFIG.GetConfig().AGGRESSIVE_COOLDOWN;
+            aggresiveDuration = BOT_CONFIG.GetConfig().AGGRRESIVE_TIME;
             firstTime = false;
             aggresiveEndsTStamp = Cooldown > 0 ? (Cooldown * -1) : 0;
         }
@@ -197,6 +209,7 @@ public class GoToPlayer : BaseAction
         }
 
         Score += ACTION_SCORE.BECOME_AGGRESIVE;
+        Score += (player.FoodInStomach >= GENERAL_CONFIG.FOOD_TO_FIRE) ? ACTION_SCORE.READY_TO_FIRE : 0f;
 
         if (deltaTStamp < forceToChangePath)
         {
