@@ -353,7 +353,7 @@ MonoBehaviour:
   repeat: 1
   tiling: {x: 1, y: 1}
   offset: {x: 0, y: 0}
-  mat: {fileID: 2100000, guid: 9c27e3cde6e23cd47a03959d3d3006c3, type: 2}
+  mat: {fileID: 2100000, guid: 87c274435f25a5b4abfe99e654e8272e, type: 2}
 --- !u!1 &1922099629
 GameObject:
   m_ObjectHideFlags: 0

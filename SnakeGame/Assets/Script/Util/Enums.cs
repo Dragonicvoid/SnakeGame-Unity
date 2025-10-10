@@ -37,6 +37,7 @@ public enum LAYER
     DEBUG = 3,
     WATER = 4,
     UI = 5,
+    UI_FOR_TRAIL = 6,
 
     PHYSICS_FOOD = 14,
     PHYSICS_PLAYER = 15,

@@ -3,14 +3,17 @@ using System.Collections.Generic;
 public static class GENERAL_CONFIG
 {
   public const float SPEED = 10f;
-  public const int FOOD_TO_FIRE = 5;
-
+  public const int FOOD_TO_FIRE = 1;
   public const float ENEMY_SPAWN_TIME = 2f;
+  public const float FIRE_ALIVE_TIME = 5f;
+
+  public const int FIRE_PER_SHOT = 3;
 }
 
 public static class ARENA_DEFAULT_SIZE
 {
   public const float SNAKE = 40f;
+  public const float FIRE = 20f;
   public const float TILE = 20f;
   public const float WIDTH = 700f;
   public const float HEIGHT = 700f;
@@ -25,6 +28,7 @@ public static class ACTION_SCORE
   public const float OBSTACLE_DETECTED = 9000f;
   public const float FOUND_FOOD_NEARBY = 200f;
   public const float SMALL_BODY = 50f;
+  public const float READY_TO_FIRE = 840f;
   public const float GO_TO_PLAYER_DEFAULT = -40f;
   public const float BECOME_AGGRESIVE = 440f;
   public const float AGGRESIVE_ON_COOLDOWN = -360f;

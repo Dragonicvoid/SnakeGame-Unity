@@ -45,6 +45,7 @@ public class GameManager : MonoBehaviour
     }
 
     PlayerManager?.I.UpdateCoordinate(deltaTime);
+    PlayerManager?.I.UpdateFire(deltaTime);
   }
 
   private void onTutorialFinish()
@@ -254,7 +255,7 @@ public class GameManager : MonoBehaviour
   void onGameStartAnimFinish()
   {
     stopStartAnimEvent();
-    gameStartTime = Time.fixedTime;
+    gameStartTime = Time.time;
     ArenaInput?.StartInputListener();
     TutorialManager?.StartTutorial();
 
@@ -415,6 +416,6 @@ public class GameManager : MonoBehaviour
       possibleActions
       );
 
-    snake.LastReactTime = Time.fixedTime;
+    snake.LastReactTime = Time.time;
   }
 }

@@ -80,9 +80,10 @@ Shader "Transparent/VortexShader"
 
             fixed4 frag (v2f i) : SV_Target
             {
+                float time = floor(_Time.z / 0.15) * 0.15;
                 float4 screen = _ScreenColor;
                 float4 secondScreenVal = _SecondColor * (1.0 - screen) + screen;
-                float shouldScreen = (sin(_Time.z) + 1.) / 2.;
+                float shouldScreen = (sin(time) + 1.) / 2.;
 
                 float uvDist = distance(i.uv, float2(0.5, 0.5));
                 float2 uv0 = (i.uv - 0.5) * 2;
@@ -94,7 +95,7 @@ Shader "Transparent/VortexShader"
                 polarData polar = getPolarData(uv0); 
 
                 float alphaNorm = polar.alpha / (2 * PI);
-                alphaNorm = frac(alphaNorm + _Time.y);
+                alphaNorm = frac(alphaNorm + time);
                 float fDist = frac(polar.distance);
                 float iDist = floor(polar.distance);
                 float vortex = 

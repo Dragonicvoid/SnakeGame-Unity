@@ -1,11 +1,10 @@
-using System.Collections.Generic;
 using System.Linq;
 using Unity.Collections;
 using Unity.Mathematics;
 using UnityEngine;
 using UnityEngine.Rendering;
 
-public class Vortex : MonoBehaviour
+public class Fire : MonoBehaviour
 {
   [System.Runtime.InteropServices.StructLayout(System.Runtime.InteropServices.LayoutKind.Sequential)]
   struct VertexType
@@ -39,18 +38,9 @@ public class Vortex : MonoBehaviour
   }
 
   [SerializeField]
-  Color mainColor = Color.white;
+  Color color = Color.white;
   [SerializeField]
-  Color secondaryColor = Color.white;
-  [SerializeField]
-  Color screenColor = Color.white;
-  [SerializeField]
-  int vortexCount = 2;
-  [SerializeField]
-  [Range(0.0f, 0.5f)]
-  float width = 0f;
-
-  float show = 0f;
+  Collider2D? collider;
 
   Material? mat;
 
@@ -62,10 +52,8 @@ public class Vortex : MonoBehaviour
 
   void OnEnable()
   {
-    show = 0f;
     setMaterial();
     setMeshData();
-    playShowAnim();
   }
 
   void OnValidate()
@@ -83,7 +71,7 @@ public class Vortex : MonoBehaviour
 
     if (!mat)
     {
-      Shader shader = Shader.Find("Transparent/VortexShader");
+      Shader shader = Shader.Find("Transparent/Fire");
       mat = new Material(shader);
     }
 
@@ -100,13 +88,7 @@ public class Vortex : MonoBehaviour
       meshRend.material = mat;
     }
 
-    mat.SetInt("_VortexSize", vortexCount);
-    mat.SetFloat("_VortexWidth", width);
-    mat.SetFloat("_Show", show);
-
-    mat.SetColor("_MainColor", mainColor);
-    mat.SetColor("_SecondColor", secondaryColor);
-    mat.SetColor("_ScreenColor", screenColor);
+    mat.SetColor("_Color", color);
   }
 
   void setMeshData()
@@ -169,69 +151,9 @@ public class Vortex : MonoBehaviour
     }
   }
 
-  void playShowAnim()
+  public void SetLayer(LAYER layer)
   {
-    stopAnim();
-    BaseTween<object> tweenData = new BaseTween<object>(
-      0.5f,
-      null,
-      (dist, _) =>
-      {
-        show = 0;
-        mat?.SetFloat("_Show", show);
-      },
-      (dist, _) =>
-      {
-        show = Util.EaseOut(dist, 3);
-        mat?.SetFloat("_Show", show);
-      },
-      (dist, _) =>
-      {
-        show = 1;
-        mat?.SetFloat("_Show", show);
-        UiEvent.Instance.VortexComplete(this);
-      }
-    );
-
-    IEnumerator<object> tween = Tween.Create(tweenData);
-    animCour = StartCoroutine(tween);
-  }
-
-  public void PlayHideAnim()
-  {
-    stopAnim();
-    BaseTween<object> tweenData = new BaseTween<object>(
-      0.5f,
-      null,
-      (dist, _) =>
-      {
-        show = 1f;
-        mat?.SetFloat("_Show", show);
-      },
-      (dist, _) =>
-      {
-        show = Util.EaseOut(1.0f - dist, 3);
-        mat?.SetFloat("_Show", show);
-      },
-      (dist, _) =>
-      {
-        show = 0;
-        mat?.SetFloat("_Show", show);
-
-        gameObject.SetActive(false);
-      }
-    );
-
-    IEnumerator<object> tween = Tween.Create(tweenData);
-    animCour = StartCoroutine(tween);
-  }
-
-  void stopAnim()
-  {
-    if (animCour == null) return;
-
-    StopCoroutine(animCour);
-    animCour = null;
+    collider.gameObject.layer = (int)layer;
   }
 
   private void destroyMat()
