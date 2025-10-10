@@ -1,4 +1,4 @@
-#nullable enable
+
 using System.Collections.Generic;
 using Unity.Collections;
 using Unity.Mathematics;

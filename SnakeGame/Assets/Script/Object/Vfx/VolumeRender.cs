@@ -1,4 +1,4 @@
-#nullable enable
+
 using UnityEngine;
 
 // This code is from Volume-Rendering Code

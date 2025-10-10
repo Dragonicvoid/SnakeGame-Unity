@@ -1,30 +1,17 @@
-
+using System.Collections.Generic;
+using System.Linq;
 using Unity.Collections;
+using Unity.Mathematics;
 using UnityEngine;
 using UnityEngine.Rendering;
-using Unity.Mathematics;
-using System.Linq;
 
-public class CustomSprite : MonoBehaviour
+public class Vortex : MonoBehaviour
 {
   [System.Runtime.InteropServices.StructLayout(System.Runtime.InteropServices.LayoutKind.Sequential)]
   struct VertexType
   {
     public Vector3 pos;
-    public Color color;
     public half2 uv;
-  }
-
-  [SerializeField]
-  Texture? _texture;
-  public Texture? Texture
-  {
-    get { return _texture; }
-    set
-    {
-      _texture = value;
-      Render();
-    }
   }
 
   [SerializeField]
@@ -52,51 +39,38 @@ public class CustomSprite : MonoBehaviour
   }
 
   [SerializeField]
-  Color _color = Color.white;
-  Color color
-  {
-    get { return _color; }
-    set
-    {
-      _color = value;
-      setMeshData();
-    }
-  }
+  Color mainColor = Color.white;
+  [SerializeField]
+  Color secondaryColor = Color.white;
+  [SerializeField]
+  Color screenColor = Color.white;
+  [SerializeField]
+  int vortexCount = 2;
+  [SerializeField]
+  [Range(0.0f, 0.5f)]
+  float width = 0f;
 
-  [SerializeField]
-  int repeat = 1;
+  float show = 0f;
 
-  [SerializeField]
-  Vector2 tiling = new Vector2(1f, 1f);
-
-  [SerializeField]
-  Vector2 offset = new Vector2(0f, 0f);
-  [SerializeField]
   Material? mat;
 
   Mesh? mesh;
 
   MeshRenderer? meshRend;
 
+  Coroutine? animCour;
+
   void OnEnable()
   {
+    show = 0f;
     setMaterial();
-    setTexture();
     setMeshData();
+    playShowAnim();
   }
 
   void OnValidate()
   {
     setMaterial();
-    setTexture();
-    setMeshData();
-  }
-
-  public void Render()
-  {
-    setMaterial();
-    setTexture();
-    setMeshData();
   }
 
   void setMaterial()
@@ -109,7 +83,7 @@ public class CustomSprite : MonoBehaviour
 
     if (!mat)
     {
-      Shader shader = Shader.Find("Transparent/CustomSprite");
+      Shader shader = Shader.Find("Transparent/VortexShader");
       mat = new Material(shader);
     }
 
@@ -125,15 +99,14 @@ public class CustomSprite : MonoBehaviour
       }
       meshRend.material = mat;
     }
-    mat.SetTextureOffset("_MainTex", offset);
-    mat.SetTextureScale("_MainTex", tiling);
-    mat.SetInt("_Repeat", repeat);
-  }
 
-  void setTexture()
-  {
-    if (mat && _texture)
-      mat.SetTexture("_MainTex", _texture);
+    mat.SetInt("_VortexSize", vortexCount);
+    mat.SetFloat("_VortexWidth", width);
+    mat.SetFloat("_Show", show);
+
+    mat.SetColor("_MainColor", mainColor);
+    mat.SetColor("_SecondColor", secondaryColor);
+    mat.SetColor("_ScreenColor", screenColor);
   }
 
   void setMeshData()
@@ -146,10 +119,9 @@ public class CustomSprite : MonoBehaviour
       };
     }
     mesh.Clear();
-    NativeArray<VertexAttributeDescriptor> attr = new NativeArray<VertexAttributeDescriptor>(3, Allocator.Temp, NativeArrayOptions.UninitializedMemory);
+    NativeArray<VertexAttributeDescriptor> attr = new NativeArray<VertexAttributeDescriptor>(2, Allocator.Temp, NativeArrayOptions.UninitializedMemory);
     attr[0] = new VertexAttributeDescriptor(VertexAttribute.Position, VertexAttributeFormat.Float32, 3);
-    attr[1] = new VertexAttributeDescriptor(VertexAttribute.Color, VertexAttributeFormat.Float32, 4);
-    attr[2] = new VertexAttributeDescriptor(VertexAttribute.TexCoord0, VertexAttributeFormat.Float16, 2);
+    attr[1] = new VertexAttributeDescriptor(VertexAttribute.TexCoord0, VertexAttributeFormat.Float16, 2);
 
     mesh.SetVertexBufferParams(4, attr);
     attr.Dispose();
@@ -160,10 +132,10 @@ public class CustomSprite : MonoBehaviour
 
     half h0 = new half(0f), h1 = new half(1f);
 
-    vertex[0] = new VertexType { pos = new Vector3(-currWidth, -currHeight), color = _color, uv = new half2(h0, h0) };
-    vertex[1] = new VertexType { pos = new Vector3(currWidth, -currHeight), color = _color, uv = new half2(h1, h0) };
-    vertex[2] = new VertexType { pos = new Vector3(-currWidth, currHeight), color = _color, uv = new half2(h0, h1) };
-    vertex[3] = new VertexType { pos = new Vector3(currWidth, currHeight), color = _color, uv = new half2(h1, h1) };
+    vertex[0] = new VertexType { pos = new Vector3(-currWidth, -currHeight), uv = new half2(h0, h0) };
+    vertex[1] = new VertexType { pos = new Vector3(currWidth, -currHeight), uv = new half2(h1, h0) };
+    vertex[2] = new VertexType { pos = new Vector3(-currWidth, currHeight), uv = new half2(h0, h1) };
+    vertex[3] = new VertexType { pos = new Vector3(currWidth, currHeight), uv = new half2(h1, h1) };
 
     mesh.SetVertexBufferData(vertex, 0, 0, 4);
     vertex.Dispose();
@@ -173,11 +145,6 @@ public class CustomSprite : MonoBehaviour
     mesh.SetIndexBufferData(new short[6] { 0, 2, 1, 1, 2, 3 }, 0, 0, indexCount);
 
     mesh.subMeshCount = 1;
-    mesh.bounds = new Bounds
-    {
-      center = transform.localPosition,
-      extents = new Vector3(currWidth, currHeight)
-    };
     mesh.SetSubMesh(0, new SubMeshDescriptor
     {
       indexStart = 0,
@@ -200,6 +167,71 @@ public class CustomSprite : MonoBehaviour
       }
       filter.mesh = mesh;
     }
+  }
+
+  void playShowAnim()
+  {
+    stopAnim();
+    BaseTween<object> tweenData = new BaseTween<object>(
+      0.5f,
+      null,
+      (dist, _) =>
+      {
+        show = 0;
+        mat?.SetFloat("_Show", show);
+      },
+      (dist, _) =>
+      {
+        show = dist;
+        mat?.SetFloat("_Show", show);
+      },
+      (dist, _) =>
+      {
+        show = 1;
+        mat?.SetFloat("_Show", show);
+        UiEvent.Instance.VortexComplete(this);
+      }
+    );
+
+    IEnumerator<object> tween = Tween.Create(tweenData);
+    animCour = StartCoroutine(tween);
+  }
+
+  public void PlayHideAnim()
+  {
+    stopAnim();
+    BaseTween<object> tweenData = new BaseTween<object>(
+      0.5f,
+      null,
+      (dist, _) =>
+      {
+        show = 1f;
+        mat?.SetFloat("_Show", show);
+      },
+      (dist, _) =>
+      {
+        show = Util.EaseOut(1.0f - dist, 3);
+        mat?.SetFloat("_Show", show);
+      },
+      (dist, _) =>
+      {
+        show = 0;
+        mat?.SetFloat("_Show", show);
+
+        gameObject.SetActive(false);
+      }
+    );
+
+    IEnumerator<object> tween = Tween.Create(tweenData);
+    animCour = StartCoroutine(tween);
+  }
+
+  void stopAnim()
+  {
+    if (animCour == null) return;
+
+    StopCoroutine(animCour);
+    animCour = null;
   }
 
   private void destroyMat()

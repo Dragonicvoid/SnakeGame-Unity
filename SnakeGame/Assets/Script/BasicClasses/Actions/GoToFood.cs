@@ -1,4 +1,3 @@
-#nullable enable
 using UnityEngine;
 
 public class GoToFood : BaseAction

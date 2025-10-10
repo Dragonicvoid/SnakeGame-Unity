@@ -1,4 +1,4 @@
-#nullable enable
+
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Rendering;
@@ -219,6 +219,8 @@ public class PlayerManager : MonoBehaviour, IPlayerManager
     {
       aiRenderer?.SetSnakeToDebug(player);
     }
+
+    GameEvent.Instance.SnakeSpawn(isBot);
   }
 
   public void RemoveAllPlayers()

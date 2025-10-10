@@ -2,11 +2,9 @@ Shader "Transparent/FoodShader"
 {
     Properties 
     {
-        _Height("Height", float) = 0.4
+        _Height("Height", float) = 0.2
         _Width("Width", float) = 0.6
         _Fade("Fading Effect on the edge", float) = 0.5
-        _MainTex ("Texture", 2D) = "white" {}
-        _Repeat("Repeating Tile", Int) = 1
     }
     SubShader
     {

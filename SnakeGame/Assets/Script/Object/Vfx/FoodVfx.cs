@@ -121,12 +121,12 @@ public class FoodVfx : MonoBehaviour
         attr[2] = new VertexAttributeDescriptor(VertexAttribute.TexCoord0, VertexAttributeFormat.Float16, 2);
         attr[3] = new VertexAttributeDescriptor(VertexAttribute.TexCoord1, VertexAttributeFormat.Float32, 1);
 
-        mesh.SetVertexBufferParams(12, attr);
+        mesh.SetVertexBufferParams(8, attr);
         attr.Dispose();
         float currHeight = size.y / 2f;
         float currWidth = size.x / 2f;
 
-        NativeArray<VertexType> vertex = new NativeArray<VertexType>(12, Allocator.Temp, NativeArrayOptions.UninitializedMemory);
+        NativeArray<VertexType> vertex = new NativeArray<VertexType>(8, Allocator.Temp, NativeArrayOptions.UninitializedMemory);
 
         half h0 = new half(0f), h1 = new half(1f);
 
@@ -144,25 +144,25 @@ public class FoodVfx : MonoBehaviour
         vertex[6] = new VertexType { pos = new Vector3(-currWidth + neuronRot[0].x, currHeight + neuronRot[0].y, neuronRot[0].z), color = _color, uv = new half2(h0, h1), isMain = 0f };
         vertex[7] = new VertexType { pos = new Vector3(currWidth + neuronRot[0].x, currHeight + neuronRot[0].y, neuronRot[0].z), color = _color, uv = new half2(h1, h1), isMain = 0f };
 
-        vertex[8] = new VertexType { pos = new Vector3(-currWidth + neuronRot[1].x, -currHeight + neuronRot[1].y, neuronRot[1].z), color = _color, uv = new half2(h0, h0), isMain = 0f };
-        vertex[9] = new VertexType { pos = new Vector3(currWidth + neuronRot[1].x, -currHeight + neuronRot[1].y, neuronRot[1].z), color = _color, uv = new half2(h1, h0), isMain = 0f };
-        vertex[10] = new VertexType { pos = new Vector3(-currWidth + neuronRot[1].x, currHeight + neuronRot[1].y, neuronRot[1].z), color = _color, uv = new half2(h0, h1), isMain = 0f };
-        vertex[11] = new VertexType { pos = new Vector3(currWidth + neuronRot[1].x, currHeight + neuronRot[1].y, neuronRot[1].z), color = _color, uv = new half2(h1, h1), isMain = 0f };
+        // vertex[8] = new VertexType { pos = new Vector3(-currWidth + neuronRot[1].x, -currHeight + neuronRot[1].y, neuronRot[1].z), color = _color, uv = new half2(h0, h0), isMain = 0f };
+        // vertex[9] = new VertexType { pos = new Vector3(currWidth + neuronRot[1].x, -currHeight + neuronRot[1].y, neuronRot[1].z), color = _color, uv = new half2(h1, h0), isMain = 0f };
+        // vertex[10] = new VertexType { pos = new Vector3(-currWidth + neuronRot[1].x, currHeight + neuronRot[1].y, neuronRot[1].z), color = _color, uv = new half2(h0, h1), isMain = 0f };
+        // vertex[11] = new VertexType { pos = new Vector3(currWidth + neuronRot[1].x, currHeight + neuronRot[1].y, neuronRot[1].z), color = _color, uv = new half2(h1, h1), isMain = 0f };
 
-        mesh.SetVertexBufferData(vertex, 0, 0, 12);
+        mesh.SetVertexBufferData(vertex, 0, 0, 8);
         vertex.Dispose();
 
-        int indexCount = 18;
+        int indexCount = 12;
         mesh.SetIndexBufferParams(indexCount, IndexFormat.UInt16);
-        mesh.SetIndexBufferData(new short[18] {
+        mesh.SetIndexBufferData(new short[12] {
             0, 2, 1,
             1, 2, 3,
 
             4, 6, 5,
-            5, 6, 7,
+            5, 6, 7
 
-            8, 10, 9,
-            9, 10, 11
+            // 8, 10, 9,
+            // 9, 10, 11
             },
         0, 0, indexCount);
 
@@ -175,7 +175,7 @@ public class FoodVfx : MonoBehaviour
         mesh.SetSubMesh(0, new SubMeshDescriptor
         {
             indexStart = 0,
-            indexCount = 18,
+            indexCount = 12,
             topology = MeshTopology.Triangles,
             baseVertex = 0,
             bounds = new Bounds

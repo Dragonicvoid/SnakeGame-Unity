@@ -1,5 +1,3 @@
-#nullable enable
-
 public class GameOverData
 {
   public float Time { get; set; }

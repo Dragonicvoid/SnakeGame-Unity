@@ -1,4 +1,4 @@
-#nullable enable
+
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -39,6 +39,9 @@ public class SpikeVfx : MonoBehaviour
   [SerializeField]
   Color activateColor = Color.red;
 
+  [Range(0f, 1f)]
+  float show = 1f;
+
   List<SnakeConfig> snakes;
 
   List<ObstacleData> spikes;
@@ -57,7 +60,9 @@ public class SpikeVfx : MonoBehaviour
 
   RenderTexture? quadTex;
 
-  Coroutine renderCou;
+  Coroutine? renderCou;
+
+  Coroutine? showAnimCour;
 
   void Awake()
   {
@@ -87,6 +92,7 @@ public class SpikeVfx : MonoBehaviour
   {
     this.spikes = spikes;
     updateSpikeMesh();
+    playSpikeShowAnim();
   }
 
   public void SetSnakes(List<SnakeConfig> snakes)
@@ -127,6 +133,8 @@ public class SpikeVfx : MonoBehaviour
     }
     spikeMat.SetFloat("_MaxDistance", playerRangeToReact);
     spikeMat.SetFloat("_SpikeHeight", spikeDistance);
+    spikeMat.SetFloat("_Show", show);
+
     spikeMat.SetColor("_NormalColor", normalColor);
     spikeMat.SetColor("_ActivateColor", activateColor);
   }
@@ -444,6 +452,42 @@ public class SpikeVfx : MonoBehaviour
     cmdBuffer.ClearRenderTarget(false, false, Color.clear, 1f);
 
     Graphics.ExecuteCommandBuffer(cmdBuffer);
+  }
+
+  void playSpikeShowAnim()
+  {
+    stopSpikeShowAnim();
+    BaseTween<object> tweenData = new BaseTween<object>(
+      1.5f,
+      null,
+      (dist, _) =>
+      {
+        show = 0;
+        spikeMat?.SetFloat("_Show", show);
+      },
+      (dist, _) =>
+      {
+        show = dist;
+        spikeMat?.SetFloat("_Show", show);
+      },
+      (dist, _) =>
+      {
+        show = 1;
+        spikeMat?.SetFloat("_Show", show);
+        UiEvent.Instance.SpikeAnimationComplete();
+      }
+    );
+
+    IEnumerator<object> tween = Tween.Create(tweenData);
+    showAnimCour = StartCoroutine(tween);
+  }
+
+  void stopSpikeShowAnim()
+  {
+    if (showAnimCour == null) return;
+
+    StopCoroutine(showAnimCour);
+    showAnimCour = null;
   }
 
   float getSpikeHeightDist(Vector3 currPos)

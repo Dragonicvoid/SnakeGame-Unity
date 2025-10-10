@@ -1,4 +1,4 @@
-#nullable enable
+
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -16,7 +16,7 @@ public class TutorialMove : BaseTutorial
 
   IEnumerator<object> showMoveTutorial()
   {
-    yield return PersistentData.Instance.GetWaitSecond(3f);
+    yield return PersistentData.Instance.GetWaitSecond(0.5f);
 
     moveTutorial?.gameObject.SetActive(true);
   }

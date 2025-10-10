@@ -10,6 +10,26 @@ public class GameEvent : MonoBehaviour
     Instance = this;
   }
 
+  public event Action onMainPlayerspawn;
+  public event Action onEnemySpawn;
+  public void SnakeSpawn(bool isBot)
+  {
+    if (isBot)
+    {
+      if (onEnemySpawn != null)
+      {
+        onEnemySpawn();
+      }
+    }
+    else
+    {
+      if (onMainPlayerspawn != null)
+      {
+        onMainPlayerspawn();
+      }
+    }
+  }
+
   public event Action onTutorialFinish;
   public void FinishTutorial()
   {

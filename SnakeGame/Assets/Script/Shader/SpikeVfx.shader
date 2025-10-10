@@ -4,6 +4,7 @@ Shader "Custom/SpikeVfx"
     {
         _MaxDistance("Distance max to spike before it expands", float) = 20.
         _SpikeHeight("Spike Height", float) = 5.
+        _Show("Range 0 - 1 Where 0 is not drawn and 1 is drawn, filling from left to right", Range(0., 1.)) = 1.0
 
         _NormalColor("Color when it is idle", Color) = (1.0, 1.0, 1.0, 1.0)
         _ActivateColor("Color when player are near", Color) = (1.0, 1.0, 1.0, 1.0)
@@ -34,6 +35,7 @@ Shader "Custom/SpikeVfx"
             // Property
             float _MaxDistance;
             float _SpikeHeight;
+            float _Show;
             float4 _NormalColor;
             float4 _ActivateColor;
 
@@ -46,7 +48,7 @@ Shader "Custom/SpikeVfx"
             struct v2f
             {
                 float4 vertex : SV_POSITION;
-                float3 vertexWS : POSITION1;
+                float4 vertexWS : POSITION1;
                 half2 uv : TEXCOORD0;
                 float depth : DEPTH;
             };
@@ -83,7 +85,16 @@ Shader "Custom/SpikeVfx"
             float4 frag (v2f i) : SV_Target
             {
                 float heightDist = max(0., 1.0 - (getClosestPlayerDist(i.vertexWS) / _MaxDistance));
+
+                float4 viewPos = UnityObjectToClipPos(i.vertexWS);
+                float4 clipPos = mul(UNITY_MATRIX_VP, i.vertexWS);
+                float2 screenUV = clipPos.xy / clipPos.w;
+                screenUV = screenUV * 0.5 + 0.5;
+
+                float show = min(-screenUV.y + _Show * 2, 1.0);
                 float4 color = lerp(_NormalColor, _ActivateColor, heightDist);
+                color.a *= show;
+
                 return color;
             }
             ENDCG
