@@ -168,7 +168,7 @@ public class AssetLoader : MonoBehaviour
     AssetLoadEvent.Instance.onDownloadAssetFailed -= onAssetFailed;
     AssetLoadEvent.Instance.onDownloadAssetSuccess -= onAssetSuccess;
 
-    StopCoroutine(downloadEnumerator);
+    if (downloadEnumerator != null) StopCoroutine(downloadEnumerator);
     downloadEnumerator = null;
   }
 }

@@ -87,6 +87,7 @@ Shader "Transparent/Fire"
                 float4 col = _Color;
                 col.rgb *= float3(reflectAngle,reflectAngle,reflectAngle);
                 col.a *= triangl;
+                clip(col.a - 0.1);
                 return col;
             }
             ENDCG

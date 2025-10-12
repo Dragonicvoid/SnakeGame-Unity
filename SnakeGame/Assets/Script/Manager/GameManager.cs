@@ -250,6 +250,13 @@ public class GameManager : MonoBehaviour
   {
     stopGame();
     UiManager?.ShowEndUI(data);
+
+    if (data.IsWon)
+    {
+      SaveState save = SaveManager.Instance.SaveData;
+      save.WonStat[(int)PersistentData.Instance.Difficulty]++;
+      SaveManager.Instance.Save();
+    }
   }
 
   void onGameStartAnimFinish()

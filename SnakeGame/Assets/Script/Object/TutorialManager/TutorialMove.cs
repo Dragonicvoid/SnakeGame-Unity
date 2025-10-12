@@ -29,7 +29,7 @@ public class TutorialMove : BaseTutorial
 
   public override void OnChange()
   {
-    StopCoroutine(showTutorial);
+    if (showTutorial != null) StopCoroutine(showTutorial);
     moveTutorial?.gameObject.SetActive(false);
     GameplayMoveEvent.Instance.onGameUiMoveTouch -= onTouchMove;
   }

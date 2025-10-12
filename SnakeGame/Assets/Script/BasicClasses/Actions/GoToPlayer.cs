@@ -65,7 +65,7 @@ public class GoToPlayer : BaseAction
         );
         radianToTarget = Mathf.Abs(radianToTarget);
         bool readyToFire = Player.FoodInStomach >= GENERAL_CONFIG.FOOD_TO_FIRE;
-        if (radianToTarget < (Mathf.PI / 6) && readyToFire)
+        if ((radianToTarget < Mathf.PI / 4f) && readyToFire)
         {
             GameEvent.Instance.SnakeFire(Player);
         }
