@@ -752,7 +752,7 @@ public class PlayerManager : MonoBehaviour, IPlayerManager
 
   void onSnakeFire(SnakeConfig snake)
   {
-    if (snake.FoodInStomach < GENERAL_CONFIG.FOOD_TO_FIRE) return;
+    if (snake == null || snake.FoodInStomach < GENERAL_CONFIG.FOOD_TO_FIRE) return;
 
     snake.FoodInStomach = 0;
     bool isMainPlayer = snake.Id == PLAYER_ID;
@@ -763,15 +763,12 @@ public class PlayerManager : MonoBehaviour, IPlayerManager
 
     SnakeBody head = snake.State.Body[0];
     Vector2 headPos = head.Position;
-    List<FireBody> bodies = new List<FireBody>();
     for (int i = 0; i < GENERAL_CONFIG.FIRE_PER_SHOT; i++)
     {
       Fire fire = fireSpawner.Spawn(headPos, isMainPlayer);
-      FireBody body = new FireBody(headPos, head.Velocity, fire, (i + 1) * snake.State.Speed + 1, Time.time);
-      bodies.Add(body);
+      FireBody body = new FireBody(headPos, head.Velocity, fire, (i + 1) * snake.State.Speed * 2, Time.time);
+      snake.FireState.Body.Add(body);
     }
-
-    snake.FireState.Body = bodies;
   }
 
   Vector2 getFoodGrabberPosition(SnakeBody head)

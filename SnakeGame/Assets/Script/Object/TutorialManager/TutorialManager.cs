@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -42,6 +43,8 @@ public class TutorialManager : MonoBehaviour
     }
     else
     {
+      SaveManager.Instance.SaveData.TimeLastTutorial = Util.GetCurrWorldTime();
+      SaveManager.Instance.Save();
       GameEvent.Instance.FinishTutorial();
     }
   }

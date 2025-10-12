@@ -13,6 +13,11 @@ public class TutorialEatFood : BaseTutorial
     Coroutine showTutorial;
     public override void Init()
     {
+        if (!SaveManager.Instance.shouldDoTutorial)
+        {
+            Next();
+            return;
+        }
         GameEvent.Instance.onPlayerSizeIncrease -= onPlayerSizeIncrease;
         GameEvent.Instance.onPlayerSizeIncrease += onPlayerSizeIncrease;
         showTutorial = StartCoroutine(showEatTutorial());
@@ -44,7 +49,10 @@ public class TutorialEatFood : BaseTutorial
     public override void OnChange()
     {
         GameEvent.Instance.onPlayerSizeIncrease -= onPlayerSizeIncrease;
-        StopCoroutine(showTutorial);
+        if (showTutorial != null)
+        {
+            StopCoroutine(showTutorial);
+        }
         eatAnim?.gameObject.SetActive(false);
     }
 }

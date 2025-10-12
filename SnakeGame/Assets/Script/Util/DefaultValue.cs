@@ -3,11 +3,11 @@ using System.Collections.Generic;
 public static class GENERAL_CONFIG
 {
   public const float SPEED = 10f;
-  public const int FOOD_TO_FIRE = 1;
+  public const int FOOD_TO_FIRE = 5;
   public const float ENEMY_SPAWN_TIME = 2f;
   public const float FIRE_ALIVE_TIME = 5f;
-
-  public const int FIRE_PER_SHOT = 3;
+  public const int FIRE_PER_SHOT = 1;
+  public const float TIME_BEFORE_TUTORIAL_AGAIN = 172800; // 2 Days
 }
 
 public static class ARENA_DEFAULT_SIZE
@@ -74,10 +74,10 @@ public static class BOT_CONFIG
           AGGRRESIVE_TIME = 5f,
           AGGRESSIVE_CONE_RAD = 360f,
           AGGRESSIVE_CONE_DIST = 700f,
-          AGGRESSIVE_COOLDOWN = 10f,
-          TRIGGER_AREA_DST = 130f,
-          TURN_RADIUS = 1f,
-          REACTION_TIME = 0.5f,
+          AGGRESSIVE_COOLDOWN = 0f,
+          TRIGGER_AREA_DST = 100f,
+          TURN_RADIUS = 0f,
+          REACTION_TIME = 0.4f,
         }
       },
       {
@@ -88,9 +88,9 @@ public static class BOT_CONFIG
           AGGRESSIVE_CONE_RAD = 360f,
           AGGRESSIVE_CONE_DIST = 850f,
           AGGRESSIVE_COOLDOWN = 3f,
-          TRIGGER_AREA_DST = 180f,
-          TURN_RADIUS = 2f,
-          REACTION_TIME = 0.2f,
+          TRIGGER_AREA_DST = 90f,
+          TURN_RADIUS = 0f,
+          REACTION_TIME = 0.15f,
         }
       }
     };

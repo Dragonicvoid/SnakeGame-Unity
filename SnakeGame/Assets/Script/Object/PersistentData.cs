@@ -15,6 +15,7 @@ public class PersistentData : MonoBehaviour
 
   void Start()
   {
+    Difficulty = (DIFFICULTY)SaveManager.Instance.SaveData.LastDiffSelect;
     RenderTex = RenderTexture.active;
     Application.targetFrameRate = 120;
   }

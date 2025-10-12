@@ -440,7 +440,7 @@ public class SpikeVfx : MonoBehaviour
 
   public void ClearRender()
   {
-    StopCoroutine(renderCou);
+    if (renderCou != null) StopCoroutine(renderCou);
     if (cmdBuffer == null || !quadTex) return;
 
     cmdBuffer.Clear();
@@ -480,6 +480,11 @@ public class SpikeVfx : MonoBehaviour
 
     IEnumerator<object> tween = Tween.Create(tweenData);
     showAnimCour = StartCoroutine(tween);
+  }
+
+  public RenderTexture GetTexture()
+  {
+    return quadTex;
   }
 
   void stopSpikeShowAnim()

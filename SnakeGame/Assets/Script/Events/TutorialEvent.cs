@@ -10,7 +10,7 @@ public class TutorialEvent : MonoBehaviour
     Instance = this;
   }
 
-  public event Action onNextTutorial;
+  public event Action? onNextTutorial;
   public void NextTutorial()
   {
     if (onNextTutorial != null)

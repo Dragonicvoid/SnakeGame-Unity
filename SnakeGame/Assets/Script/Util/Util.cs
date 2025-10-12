@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Runtime.Serialization.Formatters.Binary;
+using System.Xml.Serialization;
 using UnityEngine;
 using UnityEngine.Experimental.Rendering;
 using UnityEngine.Rendering;
@@ -291,5 +292,29 @@ public static class Util
     cmdBuffer.ClearRenderTarget(false, false, Color.clear, 1f);
 
     if (run) Graphics.ExecuteCommandBuffer(cmdBuffer);
+  }
+
+  // Serialize save file
+  public static string Serialize<T>(this T toSerialize)
+  {
+    XmlSerializer xml = new XmlSerializer(typeof(T));
+    StringWriter writer = new StringWriter();
+    xml.Serialize(writer, toSerialize);
+    return writer.ToString();
+  }
+
+  public static T Deserialize<T>(this string toDeserialize)
+  {
+    XmlSerializer xml = new XmlSerializer(typeof(T));
+    StringReader reader = new StringReader(toDeserialize);
+    return (T)xml.Deserialize(reader);
+  }
+
+  // Return in s
+  public static long GetCurrWorldTime()
+  {
+    DateTime currentTime = DateTime.UtcNow;
+    long unixTime = ((DateTimeOffset)currentTime).ToUnixTimeSeconds();
+    return unixTime;
   }
 }
