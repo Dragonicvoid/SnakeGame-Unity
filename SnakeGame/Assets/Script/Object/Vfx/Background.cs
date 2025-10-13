@@ -7,6 +7,7 @@ using Unity.Mathematics;
 using UnityEngine;
 using UnityEngine.Rendering;
 
+[ExecuteInEditMode]
 public class Background : MonoBehaviour
 {
   [System.Runtime.InteropServices.StructLayout(System.Runtime.InteropServices.LayoutKind.Sequential)]
@@ -65,31 +66,34 @@ public class Background : MonoBehaviour
 
   void Awake()
   {
-    cmdBuffer = new CommandBuffer();
-    posBound.Set(-(QuadWidth / 2f) - (LengthBound.y / 2f), (QuadWidth / 2f) + (LengthBound.y / 2f));
-    blocks = new List<BlockData>();
-    generateRandomBlock();
-    setQuadMeshData();
+    if (Application.isPlaying)
+    {
+      cmdBuffer = new CommandBuffer();
+      posBound.Set(-(QuadWidth / 2f) - (LengthBound.y / 2f), (QuadWidth / 2f) + (LengthBound.y / 2f));
+      blocks = new List<BlockData>();
+      generateRandomBlock();
+      setQuadMeshData();
 
-    blockRendTex = new RenderTexture(
-      (int)QuadWidth,
-      (int)QuadHeight,
-      Util.GetGraphicFormat(),
-      Util.GetDepthFormat()
-    );
-    Util.ClearDepthRT(blockRendTex, cmdBuffer, true);
+      blockRendTex = new RenderTexture(
+        (int)QuadWidth,
+        (int)QuadHeight,
+        Util.GetGraphicFormat(),
+        Util.GetDepthFormat()
+      );
+      Util.ClearDepthRT(blockRendTex, cmdBuffer, true);
 
-    setMaterial();
-    setTexture();
+      setMaterial();
+      setTexture();
 
-    GameEvent.Instance.onMainPlayerEat -= onMainPlayerEat;
-    GameEvent.Instance.onMainPlayerEat += onMainPlayerEat;
+      GameEvent.Instance.onMainPlayerEat -= onMainPlayerEat;
+      GameEvent.Instance.onMainPlayerEat += onMainPlayerEat;
 
-    GameEvent.Instance.onGameOver -= onGameOver;
-    GameEvent.Instance.onGameOver += onGameOver;
+      GameEvent.Instance.onGameOver -= onGameOver;
+      GameEvent.Instance.onGameOver += onGameOver;
 
-    GameEvent.Instance.onMainPlayerFire -= onMainPlayerFire;
-    GameEvent.Instance.onMainPlayerFire += onMainPlayerFire;
+      GameEvent.Instance.onMainPlayerFire -= onMainPlayerFire;
+      GameEvent.Instance.onMainPlayerFire += onMainPlayerFire;
+    }
   }
 
   void OnEnable()
@@ -137,7 +141,8 @@ public class Background : MonoBehaviour
       blockMat = new Material(shader);
     }
 
-    if (Application.isPlaying)
+
+    if (!Application.isEditor)
     {
       if (meshRender.materials.Length > 0)
       {
@@ -148,6 +153,13 @@ public class Background : MonoBehaviour
         meshRender.materials.Append(quadMat);
       }
       meshRender.material = quadMat;
+    }
+    else
+    {
+      meshRender.sharedMaterial = quadMat;
+      Material tempMaterial = new Material(meshRender.sharedMaterial);
+      meshRender.sharedMaterial = tempMaterial;
+      quadMat = tempMaterial;
     }
 
     blockMat.SetColor("_Color", blockColor);
@@ -219,15 +231,12 @@ public class Background : MonoBehaviour
       }
     });
 
-    if (Application.isPlaying)
+    MeshFilter filter = GetComponent<MeshFilter>();
+    if (!filter)
     {
-      MeshFilter filter = GetComponent<MeshFilter>();
-      if (!filter)
-      {
-        filter = gameObject.AddComponent<MeshFilter>();
-      }
-      filter.mesh = quadMeshes;
+      filter = gameObject.AddComponent<MeshFilter>();
     }
+    filter.mesh = quadMeshes;
   }
 
   private void setBlockMesh()
@@ -417,9 +426,7 @@ public class Background : MonoBehaviour
       cmdBuffer.ReleaseTemporaryRT(blur1);
       cmdBuffer.ReleaseTemporaryRT(blur2);
 
-      // Hack resize Web-view
-      cmdBuffer.SetRenderTarget(PersistentData.Instance.RenderTex);
-      cmdBuffer.ClearRenderTarget(false, false, Color.clear, 1f);
+      Util.ClearWebViewScreen(cmdBuffer);
 
       Graphics.ExecuteCommandBuffer(cmdBuffer);
     }
@@ -432,9 +439,7 @@ public class Background : MonoBehaviour
     cmdBuffer.SetRenderTarget(blockRendTex);
     cmdBuffer.ClearRenderTarget(true, true, color, 1f);
 
-    // Hack resize Web-view
-    cmdBuffer.SetRenderTarget(PersistentData.Instance.RenderTex);
-    cmdBuffer.ClearRenderTarget(false, false, Color.clear, 1f);
+    Util.ClearWebViewScreen(cmdBuffer);
 
     Graphics.ExecuteCommandBuffer(cmdBuffer);
   }

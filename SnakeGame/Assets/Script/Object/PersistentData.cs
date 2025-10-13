@@ -1,16 +1,26 @@
-using System;
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.SceneManagement;
 
 public class PersistentData : MonoBehaviour
 {
-  public static PersistentData Instance;
+  public static PersistentData _instance;
+
+  public static PersistentData Instance
+  {
+    get
+    {
+      if (_instance == null)
+      {
+        _instance = new PersistentData();
+      }
+      return _instance;
+    }
+  }
 
   void Awake()
   {
     DontDestroyOnLoad(gameObject);
-    Instance = this;
+    _instance = this;
   }
 
   void Start()

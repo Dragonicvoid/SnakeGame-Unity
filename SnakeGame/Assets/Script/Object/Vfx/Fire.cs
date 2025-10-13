@@ -75,7 +75,8 @@ public class Fire : MonoBehaviour
       mat = new Material(shader);
     }
 
-    if (Application.isPlaying)
+
+    if (!Application.isEditor)
     {
       if (meshRend.materials.Length > 0)
       {
@@ -87,6 +88,14 @@ public class Fire : MonoBehaviour
       }
       meshRend.material = mat;
     }
+    else
+    {
+      meshRend.sharedMaterial = mat;
+      Material tempMaterial = new Material(meshRend.sharedMaterial);
+      meshRend.sharedMaterial = tempMaterial;
+      mat = tempMaterial;
+    }
+
 
     mat.SetColor("_Color", color);
   }
@@ -127,6 +136,11 @@ public class Fire : MonoBehaviour
     mesh.SetIndexBufferData(new short[6] { 0, 2, 1, 1, 2, 3 }, 0, 0, indexCount);
 
     mesh.subMeshCount = 1;
+    mesh.bounds = new Bounds
+    {
+      center = transform.localPosition,
+      extents = new Vector3(currWidth, currHeight)
+    };
     mesh.SetSubMesh(0, new SubMeshDescriptor
     {
       indexStart = 0,
@@ -140,15 +154,13 @@ public class Fire : MonoBehaviour
       }
     });
 
-    if (Application.isPlaying)
+
+    MeshFilter filter = GetComponent<MeshFilter>();
+    if (!filter)
     {
-      MeshFilter filter = GetComponent<MeshFilter>();
-      if (!filter)
-      {
-        filter = gameObject.AddComponent<MeshFilter>();
-      }
-      filter.mesh = mesh;
+      filter = gameObject.AddComponent<MeshFilter>();
     }
+    filter.mesh = mesh;
   }
 
   public void SetLayer(LAYER layer)

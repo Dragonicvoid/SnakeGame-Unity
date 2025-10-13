@@ -5,6 +5,7 @@ using UnityEngine.Rendering;
 using Unity.Mathematics;
 using System.Linq;
 
+[ExecuteInEditMode]
 public class CustomSprite : MonoBehaviour
 {
   [System.Runtime.InteropServices.StructLayout(System.Runtime.InteropServices.LayoutKind.Sequential)]
@@ -78,18 +79,19 @@ public class CustomSprite : MonoBehaviour
 
   MeshRenderer? meshRend;
 
+  void Awake()
+  {
+    Render();
+  }
+
   void OnEnable()
   {
-    setMaterial();
-    setTexture();
-    setMeshData();
+    Render();
   }
 
   void OnValidate()
   {
-    setMaterial();
-    setTexture();
-    setMeshData();
+    Render();
   }
 
   public void Render()
@@ -113,7 +115,7 @@ public class CustomSprite : MonoBehaviour
       mat = new Material(shader);
     }
 
-    if (Application.isPlaying)
+    if (!Application.isEditor)
     {
       if (meshRend.materials.Length > 0)
       {
@@ -125,6 +127,14 @@ public class CustomSprite : MonoBehaviour
       }
       meshRend.material = mat;
     }
+    else
+    {
+      meshRend.sharedMaterial = mat;
+      Material tempMaterial = new Material(meshRend.sharedMaterial);
+      meshRend.sharedMaterial = tempMaterial;
+      mat = tempMaterial;
+    }
+
     mat.SetTextureOffset("_MainTex", offset);
     mat.SetTextureScale("_MainTex", tiling);
     mat.SetInt("_Repeat", repeat);
@@ -191,15 +201,12 @@ public class CustomSprite : MonoBehaviour
       }
     });
 
-    if (Application.isPlaying)
+    MeshFilter filter = GetComponent<MeshFilter>();
+    if (!filter)
     {
-      MeshFilter filter = GetComponent<MeshFilter>();
-      if (!filter)
-      {
-        filter = gameObject.AddComponent<MeshFilter>();
-      }
-      filter.mesh = mesh;
+      filter = gameObject.AddComponent<MeshFilter>();
     }
+    filter.mesh = mesh;
   }
 
   private void destroyMat()

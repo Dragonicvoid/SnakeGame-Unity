@@ -205,6 +205,11 @@ public class SkinSelectItem : MonoBehaviour
     mesh.SetIndexBufferData(new short[6] { 0, 2, 1, 1, 2, 3 }, 0, 0, indexCount);
 
     mesh.subMeshCount = 1;
+    mesh.bounds = new Bounds
+    {
+      center = transform.localPosition,
+      extents = new Vector3(currWidth, currHeight)
+    };
     mesh.SetSubMesh(0, new SubMeshDescriptor
     {
       indexStart = 0,
@@ -238,9 +243,7 @@ public class SkinSelectItem : MonoBehaviour
 
     cmdBuffer.ReleaseTemporaryRT(temp1);
 
-    // Hack resize Web-view
-    cmdBuffer.SetRenderTarget(PersistentData.Instance.RenderTex);
-    cmdBuffer.ClearRenderTarget(false, false, Color.clear, 1f);
+    Util.ClearWebViewScreen(cmdBuffer);
 
     Graphics.ExecuteCommandBuffer(cmdBuffer);
   }

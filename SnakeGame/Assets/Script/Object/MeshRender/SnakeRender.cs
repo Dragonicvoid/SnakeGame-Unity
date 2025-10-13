@@ -99,7 +99,18 @@ public class SnakeRender : MonoBehaviour, ISnakeRenderable
         {
             Shader shader = Shader.Find("Transparent/SnakeRender");
             _mat = new Material(shader);
-            meshRend.material = _mat;
+
+            if (!Application.isEditor)
+            {
+                meshRend.material = _mat;
+            }
+            else
+            {
+                meshRend.sharedMaterial = _mat;
+                Material tempMaterial = new Material(meshRend.sharedMaterial);
+                meshRend.sharedMaterial = tempMaterial;
+                _mat = tempMaterial;
+            }
         }
     }
 
@@ -280,15 +291,13 @@ public class SnakeRender : MonoBehaviour, ISnakeRenderable
             baseVertex = 0,
         });
 
-        if (Application.isPlaying)
+
+        MeshFilter filter = GetComponent<MeshFilter>();
+        if (!filter)
         {
-            MeshFilter filter = GetComponent<MeshFilter>();
-            if (!filter)
-            {
-                filter = gameObject.AddComponent<MeshFilter>();
-            }
-            filter.mesh = mesh;
+            filter = gameObject.AddComponent<MeshFilter>();
         }
+        filter.mesh = mesh;
     }
 
     void setRenderPass()
@@ -307,9 +316,7 @@ public class SnakeRender : MonoBehaviour, ISnakeRenderable
             cmdBuffer.DrawMesh(mesh, Matrix4x4.identity, _mat, 0, 0);
         }
 
-        // Hack resize Web-view
-        cmdBuffer.SetRenderTarget(PersistentData.Instance.RenderTex);
-        cmdBuffer.ClearRenderTarget(false, false, Color.clear, 1f);
+        Util.ClearWebViewScreen(cmdBuffer);
 
         Graphics.ExecuteCommandBuffer(cmdBuffer);
     }

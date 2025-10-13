@@ -2,9 +2,11 @@ using System.Collections.Generic;
 using System.Linq;
 using Unity.Collections;
 using Unity.Mathematics;
+using UnityEditor;
 using UnityEngine;
 using UnityEngine.Rendering;
 
+[ExecuteInEditMode]
 public class FoodVfx : MonoBehaviour
 {
     [System.Runtime.InteropServices.StructLayout(System.Runtime.InteropServices.LayoutKind.Sequential)]
@@ -48,7 +50,9 @@ public class FoodVfx : MonoBehaviour
 
     void Awake()
     {
+        Debug.Log("Create VFX");
         setMaterial();
+        setMeshData();
     }
 
     IEnumerator<object> Render()
@@ -91,7 +95,7 @@ public class FoodVfx : MonoBehaviour
             mat = new Material(shader);
         }
 
-        if (Application.isPlaying)
+        if (!Application.isEditor)
         {
             if (meshRend.materials.Length > 0)
             {
@@ -102,6 +106,13 @@ public class FoodVfx : MonoBehaviour
                 meshRend.materials.Append(mat);
             }
             meshRend.material = mat;
+        }
+        else
+        {
+            meshRend.sharedMaterial = mat;
+            Material tempMaterial = new Material(meshRend.sharedMaterial);
+            meshRend.sharedMaterial = tempMaterial;
+            mat = tempMaterial;
         }
     }
 
@@ -185,15 +196,12 @@ public class FoodVfx : MonoBehaviour
             }
         });
 
-        if (Application.isPlaying)
+        MeshFilter filter = GetComponent<MeshFilter>();
+        if (!filter)
         {
-            MeshFilter filter = GetComponent<MeshFilter>();
-            if (!filter)
-            {
-                filter = gameObject.AddComponent<MeshFilter>();
-            }
-            filter.mesh = mesh;
+            filter = gameObject.AddComponent<MeshFilter>();
         }
+        filter.mesh = mesh;
     }
 
     private List<Vector3> getRotPos()

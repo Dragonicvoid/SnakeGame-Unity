@@ -155,9 +155,7 @@ public class TutorialEatAnim : MonoBehaviour
     cmdBuffer.ClearRenderTarget(true, true, Color.clear, 1f);
     cmdBuffer.DrawMesh(mesh, Matrix4x4.identity, mat, 0, 0);
 
-    // Hack resize Web-view
-    cmdBuffer.SetRenderTarget(PersistentData.Instance.RenderTex);
-    cmdBuffer.ClearRenderTarget(false, false, Color.clear, 1f);
+    Util.ClearWebViewScreen(cmdBuffer);
 
     Graphics.ExecuteCommandBuffer(cmdBuffer);
   }

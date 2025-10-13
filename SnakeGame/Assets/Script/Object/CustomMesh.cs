@@ -39,7 +39,16 @@ public class CustomMesh : MonoBehaviour
             meshRender = gameObject.AddComponent<MeshRenderer>();
         }
 
-        meshRender.material = mat;
+        if (!Application.isEditor)
+        {
+            meshRender.material = mat;
+        }
+        else
+        {
+            meshRender.sharedMaterial = mat;
+            Material tempMaterial = new Material(meshRender.sharedMaterial);
+            meshRender.sharedMaterial = tempMaterial;
+        }
     }
 
 
@@ -162,14 +171,12 @@ public class CustomMesh : MonoBehaviour
             }
         });
 
-        if (Application.isPlaying)
+
+        MeshFilter filter = GetComponent<MeshFilter>();
+        if (!filter)
         {
-            MeshFilter filter = GetComponent<MeshFilter>();
-            if (!filter)
-            {
-                filter = gameObject.AddComponent<MeshFilter>();
-            }
-            filter.mesh = mesh;
+            filter = gameObject.AddComponent<MeshFilter>();
         }
+        filter.mesh = mesh;
     }
 }

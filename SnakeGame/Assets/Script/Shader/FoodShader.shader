@@ -56,7 +56,7 @@ Shader "Transparent/FoodShader"
                 float4 color = float4(1., 1., 1., 1.);
                 float2 normUV = (i.uv - 0.5) * 2.0;
                 float reduce = lerp(1.0 - _Height, _Height, 1.0 - i.uv.y);
-                float2 dist = smoothstep(float2(_Width - reduce, _Height), float2(_Width - reduce + _Fade, _Height + _Fade), float2(abs(normUV.x), abs(normUV.y)));
+                float2 dist = step(float2(_Width - reduce + _Fade, _Height + _Fade), float2(abs(normUV.x), abs(normUV.y)));
                 color.a *= 1.0 - max(dist.x, dist.y);
                 color *= i.color;
 

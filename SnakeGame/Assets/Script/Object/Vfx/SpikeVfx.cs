@@ -115,15 +115,26 @@ public class SpikeVfx : MonoBehaviour
       quadMat = new Material(shader);
     }
 
-    if (renderer.materials.Length > 0)
+    if (!Application.isEditor)
     {
-      renderer.materials[0] = quadMat;
+      if (renderer.materials.Length > 0)
+      {
+        renderer.materials[0] = quadMat;
+      }
+      else
+      {
+        renderer.materials.Append(quadMat);
+      }
+      renderer.material = quadMat;
     }
     else
     {
-      renderer.materials.Append(quadMat);
+      renderer.sharedMaterial = quadMat;
+      Material tempMaterial = new Material(renderer.sharedMaterial);
+      renderer.sharedMaterial = tempMaterial;
+      quadMat = tempMaterial;
     }
-    renderer.material = quadMat;
+
     quadMat.SetTexture("_MainTex", quadTex);
 
     if (!spikeMat)
@@ -192,15 +203,12 @@ public class SpikeVfx : MonoBehaviour
       }
     });
 
-    if (Application.isPlaying)
+    MeshFilter filter = GetComponent<MeshFilter>();
+    if (!filter)
     {
-      MeshFilter filter = GetComponent<MeshFilter>();
-      if (!filter)
-      {
-        filter = gameObject.AddComponent<MeshFilter>();
-      }
-      filter.mesh = quadMesh;
+      filter = gameObject.AddComponent<MeshFilter>();
     }
+    filter.mesh = quadMesh;
   }
 
   void updateSpikeMesh()
@@ -430,9 +438,7 @@ public class SpikeVfx : MonoBehaviour
 
       cmdBuffer.ReleaseTemporaryRT(tempID);
 
-      // Hack resize Web-view
-      cmdBuffer.SetRenderTarget(PersistentData.Instance.RenderTex);
-      cmdBuffer.ClearRenderTarget(false, false, Color.clear, 1f);
+      Util.ClearWebViewScreen(cmdBuffer);
 
       Graphics.ExecuteCommandBuffer(cmdBuffer);
     }
@@ -447,9 +453,7 @@ public class SpikeVfx : MonoBehaviour
     cmdBuffer.SetRenderTarget(quadTex);
     cmdBuffer.ClearRenderTarget(true, true, Color.clear, 1f);
 
-    // Hack resize Web-view
-    cmdBuffer.SetRenderTarget(PersistentData.Instance.RenderTex);
-    cmdBuffer.ClearRenderTarget(false, false, Color.clear, 1f);
+    Util.ClearWebViewScreen(cmdBuffer);
 
     Graphics.ExecuteCommandBuffer(cmdBuffer);
   }

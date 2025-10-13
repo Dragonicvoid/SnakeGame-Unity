@@ -7,11 +7,23 @@ public class AssetManager : MonoBehaviour
 
     public Dictionary<string, string> assetsText = new Dictionary<string, string>();
 
-    public static AssetManager Instance;
+    public static AssetManager _instance;
 
-    private void Awake()
+    public static AssetManager Instance
     {
-        Instance = this;
+        get
+        {
+            if (_instance == null)
+            {
+                _instance = new AssetManager();
+            }
+            return _instance;
+        }
+    }
+
+    void Awake()
+    {
+        _instance = this;
     }
 
     public void AddTexture(string key, Texture2D tex)
