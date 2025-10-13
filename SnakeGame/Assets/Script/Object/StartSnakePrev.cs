@@ -91,6 +91,10 @@ public class StartSnakePrev : MonoBehaviour
   {
     for (int i = 0; i < snakeShape.Count; i++)
     {
+      snakeShape[i].Position = new Vector2(0, snakeShape[i].Position.y);
+    }
+    for (int i = 0; i < snakeShape.Count; i++)
+    {
       TweenData data = new TweenData((i % 2) == 0 ? 1 : -1, snakeShape[i]);
       animDance(data);
       yield return PersistentData.Instance.GetWaitSecond(0.25f);

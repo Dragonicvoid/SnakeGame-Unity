@@ -76,7 +76,7 @@ public static class BOT_CONFIG
           AGGRESSIVE_CONE_DIST = 700f,
           AGGRESSIVE_COOLDOWN = 0f,
           TRIGGER_AREA_DST = 100f,
-          TURN_RADIUS = 0f,
+          TURN_RADIUS = 0.5f,
           REACTION_TIME = 0.4f,
         }
       },
@@ -89,7 +89,7 @@ public static class BOT_CONFIG
           AGGRESSIVE_CONE_DIST = 850f,
           AGGRESSIVE_COOLDOWN = 3f,
           TRIGGER_AREA_DST = 90f,
-          TURN_RADIUS = 0f,
+          TURN_RADIUS = 1f,
           REACTION_TIME = 0.15f,
         }
       }

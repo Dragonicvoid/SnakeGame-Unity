@@ -70,14 +70,17 @@ public class SpikeVfx : MonoBehaviour
     spikes = new List<ObstacleData>();
     cmdBuffer = new CommandBuffer();
 
-    quadTex = new RenderTexture(
-      (int)ARENA_DEFAULT_SIZE.WIDTH,
-      (int)ARENA_DEFAULT_SIZE.HEIGHT,
-      Util.GetGraphicFormat(),
-      Util.GetDepthFormat()
-    );
+    if (!quadTex)
+    {
+      quadTex = new RenderTexture(
+        (int)ARENA_DEFAULT_SIZE.WIDTH,
+        (int)ARENA_DEFAULT_SIZE.HEIGHT,
+        Util.GetGraphicFormat(),
+        Util.GetDepthFormat()
+        );
 
-    Util.ClearDepthRT(quadTex, cmdBuffer, true);
+      Util.ClearDepthRT(quadTex, cmdBuffer, true);
+    }
 
     setMaterial();
     setQuadMesh();
@@ -185,11 +188,7 @@ public class SpikeVfx : MonoBehaviour
     quadMesh.SetIndexBufferData(new short[6] { 0, 2, 1, 1, 2, 3 }, 0, 0, indexCount);
 
     quadMesh.subMeshCount = 1;
-    quadMesh.bounds = new Bounds
-    {
-      center = transform.localPosition,
-      extents = new Vector3(currWidth, currHeight)
-    };
+    quadMesh.RecalculateBounds();
     quadMesh.SetSubMesh(0, new SubMeshDescriptor
     {
       indexStart = 0,
@@ -488,6 +487,17 @@ public class SpikeVfx : MonoBehaviour
 
   public RenderTexture GetTexture()
   {
+    if (!quadTex)
+    {
+      quadTex = new RenderTexture(
+        (int)ARENA_DEFAULT_SIZE.WIDTH,
+        (int)ARENA_DEFAULT_SIZE.HEIGHT,
+        Util.GetGraphicFormat(),
+        Util.GetDepthFormat()
+        );
+
+      Util.ClearDepthRT(quadTex, cmdBuffer ?? new CommandBuffer(), true);
+    }
     return quadTex;
   }
 

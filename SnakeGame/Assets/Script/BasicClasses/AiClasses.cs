@@ -8,6 +8,7 @@ public class PlannerFactor
   public List<SnakeConfig> PlayerList { get; set; }
   public List<float> DetectedPlayer { get; set; }
   public List<float> DetectedWall { get; set; }
+  public List<float> DetectedFire { get; set; }
   public Vector2 CurrCoord { get; set; }
   public FoodConfig? DetectedFood { get; set; }
 
@@ -16,6 +17,7 @@ public class PlannerFactor
     List<SnakeConfig> PlayerList,
     List<float> DetectedPlayer,
     List<float> DetectedWall,
+    List<float> DetectedFire,
     Vector2 CurrCoord,
     FoodConfig? DetectedFood
   )
@@ -24,6 +26,7 @@ public class PlannerFactor
     this.PlayerList = PlayerList;
     this.DetectedPlayer = DetectedPlayer;
     this.DetectedWall = DetectedWall;
+    this.DetectedFire = DetectedFire;
     this.CurrCoord = CurrCoord;
 
     if (DetectedFood != null)

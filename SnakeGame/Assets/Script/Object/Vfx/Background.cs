@@ -213,11 +213,7 @@ public class Background : MonoBehaviour
     quadMeshes.SetIndexBufferData(new short[6] { 0, 2, 1, 1, 2, 3 }, 0, 0, indexCount);
 
     quadMeshes.subMeshCount = 1;
-    quadMeshes.bounds = new Bounds
-    {
-      center = transform.localPosition,
-      extents = new Vector3(currWidth, currHeight)
-    };
+    quadMeshes.RecalculateBounds();
     quadMeshes.SetSubMesh(0, new SubMeshDescriptor
     {
       indexStart = 0,

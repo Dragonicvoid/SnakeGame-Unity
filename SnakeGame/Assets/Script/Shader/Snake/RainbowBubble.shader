@@ -46,6 +46,15 @@ Shader "Snake/RainbowBubble"
                 return o;
             }
 
+            float3 desaturate(float3 col, float deSatVal) {
+                float L = 0.3*col.r + 0.6*col.g + 0.1*col.b;
+                float new_r = col.r + deSatVal * (L - col.r);
+                float new_g = col.g + deSatVal * (L - col.g);
+                float new_b = col.b + deSatVal * (L - col.b);
+
+                return float3(new_r, new_g, new_b);
+            }
+
             // Credit: this Part of code is taken from Shader Toy
             // https://www.shadertoy.com/view/lsfBWs
             float3 rainbow(float level)
@@ -53,7 +62,7 @@ Shader "Snake/RainbowBubble"
                 float r = float(level <= 2.0) + float(level > 4.0) * 0.5;
                 float g = max(1.0 - abs(level - 2.0) * 0.5, 0.0);
                 float b = (1.0 - (level - 4.0) * 0.5) * float(level >= 4.0);
-                return float3(r, g, b);
+                return desaturate(float3(r, g, b), 0.35);
             }
 
             float3 smoothRainbow (float x)
@@ -118,6 +127,15 @@ Shader "Snake/RainbowBubble"
                 return o;
             }
 
+            float3 desaturate(float3 col, float deSatVal) {
+                float L = 0.3*col.r + 0.6*col.g + 0.1*col.b;
+                float new_r = col.r + deSatVal * (L - col.r);
+                float new_g = col.g + deSatVal * (L - col.g);
+                float new_b = col.b + deSatVal * (L - col.b);
+
+                return float3(new_r, new_g, new_b);
+            }
+
             // Credit: this Part of code is taken from Shader Toy
             // https://www.shadertoy.com/view/lsfBWs
             float3 rainbow(float level)
@@ -125,7 +143,7 @@ Shader "Snake/RainbowBubble"
                 float r = float(level <= 2.0) + float(level > 4.0) * 0.5;
                 float g = max(1.0 - abs(level - 2.0) * 0.5, 0.0);
                 float b = (1.0 - (level - 4.0) * 0.5) * float(level >= 4.0);
-                return float3(r, g, b);
+                return desaturate(float3(r, g, b), 0.35);
             }
 
             float3 smoothRainbow (float x)
@@ -189,6 +207,15 @@ Shader "Snake/RainbowBubble"
                 return o;
             }
 
+            float3 desaturate(float3 col, float deSatVal) {
+                float L = 0.3*col.r + 0.6*col.g + 0.1*col.b;
+                float new_r = col.r + deSatVal * (L - col.r);
+                float new_g = col.g + deSatVal * (L - col.g);
+                float new_b = col.b + deSatVal * (L - col.b);
+
+                return float3(new_r, new_g, new_b);
+            }
+
             // Credit: this Part of code is taken from Shader Toy
             // https://www.shadertoy.com/view/lsfBWs
             float3 rainbow(float level)
@@ -196,7 +223,7 @@ Shader "Snake/RainbowBubble"
                 float r = float(level <= 2.0) + float(level > 4.0) * 0.5;
                 float g = max(1.0 - abs(level - 2.0) * 0.5, 0.0);
                 float b = (1.0 - (level - 4.0) * 0.5) * float(level >= 4.0);
-                return float3(r, g, b);
+                return desaturate(float3(r, g, b), 0.35);
             }
 
             float3 smoothRainbow (float x)

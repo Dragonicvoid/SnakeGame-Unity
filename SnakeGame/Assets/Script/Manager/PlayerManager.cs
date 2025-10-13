@@ -1,5 +1,6 @@
 
 using System.Collections.Generic;
+using System.Runtime.CompilerServices;
 using UnityEngine;
 using UnityEngine.Rendering;
 
@@ -307,6 +308,63 @@ public class PlayerManager : MonoBehaviour, IPlayerManager
     return detectedObstacleAngles;
   }
 
+  public List<float> FindNearestProjNearPlayer(
+   SnakeConfig currentPlayer,
+   float radius
+        )
+  {
+    List<float> duplicateAngleDetection = new List<float>();
+    List<float> detectedObstacleAngles = new List<float>();
+    SnakeState state = currentPlayer.State;
+
+    if (state.Body.Count <= 0) return new List<float>();
+
+    SnakeBody botHead = state.Body[0];
+    List<FireBody> fires = new List<FireBody>();
+    foreach (SnakeConfig otherPlayer in PlayerList)
+    {
+      if (otherPlayer.Id == currentPlayer.Id) continue;
+
+      fires.AddRange(otherPlayer.FireState.Body);
+    }
+
+    foreach (FireBody fire in fires)
+    {
+      bool detectFire = isCircleOverlap(
+        botHead.Position.x,
+        botHead.Position.y,
+        fire.Position.x,
+        fire.Position.y,
+        radius,
+        ARENA_DEFAULT_SIZE.SNAKE
+      );
+
+      if (detectFire)
+      {
+        Vector2 snakeDir = new Vector2(botHead.Velocity.x, botHead.Velocity.y);
+        float headAngle = Mathf.Atan2(snakeDir.y, snakeDir.x);
+        float headInDegree = headAngle * Mathf.Rad2Deg;
+
+        float obstacleAngle = Mathf.Atan2(
+          botHead.Position.y - fire.Position.y,
+          botHead.Position.x - fire.Position.x
+        );
+        float angleInDegree = obstacleAngle * Mathf.Rad2Deg;
+        float finalAngle = headInDegree < 0 ? (Mathf.Abs(headInDegree) + angleInDegree) : (360 - (headInDegree - angleInDegree));
+        finalAngle %= 360;
+        finalAngle = finalAngle < 0 ? (360 + finalAngle) : finalAngle;
+
+        if (duplicateAngleDetection.FindIndex((a) => a == obstacleAngle) == -1)
+        {
+          duplicateAngleDetection.Add(obstacleAngle);
+          detectedObstacleAngles.Add(finalAngle);
+        }
+      }
+    }
+
+    return detectedObstacleAngles;
+  }
+
   SnakeBody? createBody(
     bool isBot,
     bool isHead,
@@ -403,7 +461,7 @@ public class PlayerManager : MonoBehaviour, IPlayerManager
         TurnRadiusModification(
           player,
           new Vector2(botNewDir.x, botNewDir.y),
-          BOT_CONFIG.GetConfig().TURN_RADIUS,
+          player.IsBot ? BOT_CONFIG.GetConfig().TURN_RADIUS : 0,
           remaining,
           currDir
         ) ?? new Vector2(0, 0);
@@ -637,7 +695,9 @@ public class PlayerManager : MonoBehaviour, IPlayerManager
         }
 
         Vector2 dir = bodyState.Dir;
-        Vector2 newDir = dir * new Vector2(TILE * delta * bodyState.Speed, TILE * delta * bodyState.Speed);
+        Vector2 norm = new Vector2(dir.x, dir.y);
+        norm.Normalize();
+        Vector2 newDir = norm * new Vector2(TILE * delta * bodyState.Speed, TILE * delta * bodyState.Speed);
         Vector2 finalPos = new Vector2(prevPos.x + newDir.x, prevPos.y + newDir.y);
 
         if (bodyState.Fire) bodyState.Fire.transform.localPosition = new Vector3(

@@ -161,11 +161,7 @@ public class FoodVfx : MonoBehaviour
         0, 0, indexCount);
 
         mesh.subMeshCount = 1;
-        mesh.bounds = new Bounds
-        {
-            center = transform.localPosition,
-            extents = new Vector3(currWidth, currHeight)
-        };
+        mesh.RecalculateBounds();
         mesh.SetSubMesh(0, new SubMeshDescriptor
         {
             indexStart = 0,

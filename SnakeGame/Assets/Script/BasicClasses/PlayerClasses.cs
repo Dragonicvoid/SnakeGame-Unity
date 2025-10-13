@@ -254,18 +254,21 @@ public class SnakeActionData
   public ManagerActionData Manager { get; set; }
   public List<float> DetectedPlayer { get; set; }
   public List<float> DetectedWall { get; set; }
+  public List<float> DetectedFire { get; set; }
   public FoodConfig? DetectedFood { get; set; }
 
   public SnakeActionData(
     ManagerActionData Manager,
     List<float> DetectedPlayer,
     List<float> DetectedWall,
+    List<float> DetectedFire,
     FoodConfig? DetectedFood
   )
   {
     this.Manager = Manager;
     this.DetectedPlayer = DetectedPlayer;
     this.DetectedWall = DetectedWall;
+    this.DetectedFire = DetectedFire;
     if (DetectedFood != null)
     {
       this.DetectedFood = DetectedFood;

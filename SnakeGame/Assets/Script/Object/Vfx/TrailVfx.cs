@@ -196,11 +196,7 @@ public class TrailVfx : MonoBehaviour
     mesh.SetIndexBufferData(new short[6] { 0, 2, 1, 1, 2, 3 }, 0, 0, indexCount);
 
     mesh.subMeshCount = 1;
-    mesh.bounds = new Bounds
-    {
-      center = transform.localPosition,
-      extents = new Vector3(currWidth, currHeight)
-    };
+    mesh.RecalculateBounds();
     mesh.SetSubMesh(0, new SubMeshDescriptor
     {
       indexStart = 0,

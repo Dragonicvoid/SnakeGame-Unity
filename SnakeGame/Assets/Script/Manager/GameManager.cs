@@ -313,6 +313,7 @@ public class GameManager : MonoBehaviour
 
     List<float> detectedPlayer = new List<float>();
     List<float> detectedWall = new List<float>();
+    List<float> detectedFire = new List<float>();
     FoodConfig? detectedFood = null;
 
     if (snake.State.InDirectionChange) return;
@@ -327,6 +328,11 @@ public class GameManager : MonoBehaviour
         snake,
         BOT_CONFIG.GetConfig().TRIGGER_AREA_DST
       ) ?? new List<float>();
+
+    detectedFire = PlayerManager.I.FindNearestProjNearPlayer(
+      snake,
+      BOT_CONFIG.GetConfig().TRIGGER_AREA_DST
+    );
 
     // need to updated to adjust botData
     FoodTargetData? targetFood = snake.State.TargetFood;
@@ -369,8 +375,9 @@ public class GameManager : MonoBehaviour
     PlannerFactor factor = new PlannerFactor(
       snake,
       PlayerManager.I.PlayerList,
-    detectedPlayer,
+      detectedPlayer,
       detectedWall,
+      detectedFire,
       currState.Position,
       detectedFood
     // gridWithMostFood: gridWithMostFood,
@@ -412,6 +419,7 @@ public class GameManager : MonoBehaviour
       ),
       detectedPlayer,
       detectedWall,
+      detectedFire,
       detectedFood
     ));
 

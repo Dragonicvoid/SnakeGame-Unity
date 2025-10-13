@@ -48,6 +48,7 @@ public class CustomMesh : MonoBehaviour
             meshRender.sharedMaterial = mat;
             Material tempMaterial = new Material(meshRender.sharedMaterial);
             meshRender.sharedMaterial = tempMaterial;
+            mat = tempMaterial;
         }
     }
 

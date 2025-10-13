@@ -15,6 +15,11 @@ public interface IPlayerManager
     float radius
     );
 
+  public List<float> FindNearestProjNearPlayer(
+ SnakeConfig currentPlayer,
+ float radius
+ );
+
   public Vector2 GetPlayerDirection(string id);
 
   public void HandleMovement(
