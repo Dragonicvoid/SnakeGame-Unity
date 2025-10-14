@@ -7,6 +7,8 @@ public class AssetManager : MonoBehaviour
 
     public Dictionary<string, string> assetsText = new Dictionary<string, string>();
 
+    public Dictionary<string, AudioClip> assetsAudio = new Dictionary<string, AudioClip>();
+
     public static AssetManager _instance;
 
     public static AssetManager Instance
@@ -34,6 +36,11 @@ public class AssetManager : MonoBehaviour
     public void AddTextAsset(string key, string text)
     {
         assetsText.Add(key, text);
+    }
+
+    public void AddAudio(string key, AudioClip audio)
+    {
+        assetsAudio.Add(key, audio);
     }
 
     public void Remove(string key)

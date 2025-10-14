@@ -246,6 +246,7 @@ public class SkinSelectItem : MonoBehaviour
 
   public void Select()
   {
+    AudioManager.Instance.PlaySFX(ASSET_KEY.SFX_CLICK_SKIN);
     StartCoroutine(getTextureAndLoadImage());
     UiEvent.Instance.SkinSelected(
       SkinData?.id ?? 0,

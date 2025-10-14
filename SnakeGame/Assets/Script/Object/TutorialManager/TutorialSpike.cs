@@ -68,10 +68,6 @@ public class TutorialSpike : BaseTutorial
 
     highlightMat.SetTexture("_MainTex", spikeTex);
     highlightMat.SetTexture("_BlurTex", blurTex);
-    Debug.Log("Set up Mat: " + highlightMat);
-
-    Debug.Log("Spike Tex: " + spikeTex);
-    Debug.Log("Blur Tex: " + blurTex);
   }
 
   void render()

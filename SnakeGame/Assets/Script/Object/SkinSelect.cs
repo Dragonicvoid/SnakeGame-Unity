@@ -69,6 +69,7 @@ public class SkinSelect : MonoBehaviour
 
   void onTabSkinSelect(int id)
   {
+    AudioManager.Instance.PlaySFX(ASSET_KEY.SFX_CLICK_TAB);
     if (!primarySkinPrev || !secondSkinPrev) return;
     if (id == 0)
     {

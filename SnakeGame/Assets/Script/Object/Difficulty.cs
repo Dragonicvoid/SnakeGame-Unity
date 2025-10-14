@@ -33,6 +33,7 @@ public class Difficulty : MonoBehaviour
 
   public void onNextClick()
   {
+    AudioManager.Instance.PlaySFX(ASSET_KEY.SFX_BUTTON_CLICK);
     int prevValue = (int)currDiff;
     int nextValue = (int)currDiff + 1;
     if (nextValue > 2) nextValue = (int)DIFFICULTY.EASY;
@@ -48,6 +49,7 @@ public class Difficulty : MonoBehaviour
 
   public void onPrevClick()
   {
+    AudioManager.Instance.PlaySFX(ASSET_KEY.SFX_BUTTON_CLICK);
     int prevValue = (int)currDiff;
     int nextValue = (int)currDiff - 1;
     if (nextValue < 0) nextValue = (int)DIFFICULTY.HARD;

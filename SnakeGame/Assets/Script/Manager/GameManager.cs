@@ -22,6 +22,11 @@ public class GameManager : MonoBehaviour
 
   Coroutine? enemySpawnCoroutine = null;
 
+  void Awake()
+  {
+    AudioManager.Instance.PlayBGM(ASSET_KEY.BGM_MAIN_MENU, 0.5f, true);
+  }
+
   void FixedUpdate()
   {
     if (PersistentData.Instance.isPaused) return;
@@ -31,6 +36,7 @@ public class GameManager : MonoBehaviour
 
   public void StartGame()
   {
+    AudioManager.Instance.PlaySFX(ASSET_KEY.SFX_START_PLAY);
     setStartAnimEvent();
     UiManager?.StartGame();
   }
@@ -106,6 +112,9 @@ public class GameManager : MonoBehaviour
     FoodManager?.I.RemoveAllFood();
     ArenaManager?.I.ClearSpikeRender();
     UiManager?.ShowEndUI(null, false);
+
+    AudioManager.Instance.PlaySFX(ASSET_KEY.SFX_BACK_TO_MENU);
+    AudioManager.Instance.PlayBGM(ASSET_KEY.BGM_MAIN_MENU, 0.5f, true);
   }
 
   void setStartAnimEvent()
@@ -253,9 +262,14 @@ public class GameManager : MonoBehaviour
 
     if (data.IsWon)
     {
+      AudioManager.Instance.PlaySFX(ASSET_KEY.SFX_WIN);
       SaveState save = SaveManager.Instance.SaveData;
       save.WonStat[(int)PersistentData.Instance.Difficulty]++;
       SaveManager.Instance.Save();
+    }
+    else
+    {
+      AudioManager.Instance.PlaySFX(ASSET_KEY.SFX_LOSE);
     }
   }
 
@@ -292,6 +306,7 @@ public class GameManager : MonoBehaviour
 
   void onEnemyVortexSpawn()
   {
+    AudioManager.Instance.PlayBGM(ASSET_KEY.BGM_GAMEPLAY, 1f, true);
     UiEvent.Instance.onEnemyVortexSpawn -= onEnemyVortexSpawn;
     enemySpawnCoroutine = StartCoroutine(SpawnEnemy());
   }

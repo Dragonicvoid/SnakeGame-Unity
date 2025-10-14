@@ -19,7 +19,7 @@ MonoBehaviour:
     width: 2560
     height: 1349
   m_ShowMode: 4
-  m_Title: Hierarchy
+  m_Title: Project
   m_RootView: {fileID: 2}
   m_MinSize: {x: 875, y: 300}
   m_MaxSize: {x: 10000, y: 10000}
@@ -119,7 +119,7 @@ MonoBehaviour:
   m_MinSize: {x: 300, y: 100}
   m_MaxSize: {x: 24288, y: 16192}
   vertical: 0
-  controlID: 37
+  controlID: 95
   draggingID: 0
 --- !u!114 &6
 MonoBehaviour:
@@ -145,7 +145,7 @@ MonoBehaviour:
   m_MinSize: {x: 200, y: 100}
   m_MaxSize: {x: 16192, y: 16192}
   vertical: 1
-  controlID: 38
+  controlID: 39
   draggingID: 0
 --- !u!114 &7
 MonoBehaviour:
@@ -167,11 +167,11 @@ MonoBehaviour:
     x: 0
     y: 0
     width: 1993
-    height: 900
+    height: 899
   m_MinSize: {x: 200, y: 50}
   m_MaxSize: {x: 16192, y: 8096}
   vertical: 0
-  controlID: 39
+  controlID: 40
   draggingID: 0
 --- !u!114 &8
 MonoBehaviour:
@@ -190,8 +190,8 @@ MonoBehaviour:
     serializedVersion: 2
     x: 0
     y: 0
-    width: 609
-    height: 900
+    width: 610
+    height: 899
   m_MinSize: {x: 201, y: 226}
   m_MaxSize: {x: 4001, y: 4026}
   m_ActualView: {fileID: 13}
@@ -214,10 +214,10 @@ MonoBehaviour:
   m_Children: []
   m_Position:
     serializedVersion: 2
-    x: 609
+    x: 610
     y: 0
-    width: 1384
-    height: 900
+    width: 1383
+    height: 899
   m_MinSize: {x: 202, y: 226}
   m_MaxSize: {x: 4002, y: 4026}
   m_ActualView: {fileID: 14}
@@ -242,9 +242,9 @@ MonoBehaviour:
   m_Position:
     serializedVersion: 2
     x: 0
-    y: 900
+    y: 899
     width: 1993
-    height: 393
+    height: 394
   m_MinSize: {x: 231, y: 276}
   m_MaxSize: {x: 10001, y: 10026}
   m_ActualView: {fileID: 15}
@@ -300,10 +300,10 @@ MonoBehaviour:
     m_TextWithWhitespace: "Game\u200B"
   m_Pos:
     serializedVersion: 2
-    x: 609
+    x: 610
     y: 79
-    width: 1382
-    height: 874
+    width: 1381
+    height: 873
   m_SerializedDataModeController:
     m_DataMode: 0
     m_PreferredDataMode: 0
@@ -323,7 +323,7 @@ MonoBehaviour:
   m_ShowGizmos: 0
   m_TargetDisplay: 0
   m_ClearColor: {r: 0, g: 0, b: 0, a: 0}
-  m_TargetSize: {x: 853, y: 853}
+  m_TargetSize: {x: 852, y: 852}
   m_TextureFilterMode: 0
   m_TextureHideFlags: 61
   m_RenderIMGUI: 1
@@ -338,10 +338,10 @@ MonoBehaviour:
     m_VRangeLocked: 0
     hZoomLockedByDefault: 0
     vZoomLockedByDefault: 0
-    m_HBaseRangeMin: -426.5
-    m_HBaseRangeMax: 426.5
-    m_VBaseRangeMin: -426.5
-    m_VBaseRangeMax: 426.5
+    m_HBaseRangeMin: -426
+    m_HBaseRangeMax: 426
+    m_VBaseRangeMin: -426
+    m_VBaseRangeMax: 426
     m_HAllowExceedBaseRangeMin: 1
     m_HAllowExceedBaseRangeMax: 1
     m_VAllowExceedBaseRangeMin: 1
@@ -359,23 +359,23 @@ MonoBehaviour:
       serializedVersion: 2
       x: 0
       y: 21
-      width: 1382
-      height: 853
+      width: 1381
+      height: 852
     m_Scale: {x: 1, y: 1}
-    m_Translation: {x: 691, y: 426.5}
+    m_Translation: {x: 690.5, y: 426}
     m_MarginLeft: 0
     m_MarginRight: 0
     m_MarginTop: 0
     m_MarginBottom: 0
     m_LastShownAreaInsideMargins:
       serializedVersion: 2
-      x: -691
-      y: -426.5
-      width: 1382
-      height: 853
+      x: -690.5
+      y: -426
+      width: 1381
+      height: 852
     m_MinimalGUI: 1
   m_defaultScale: 1
-  m_LastWindowPixelSize: {x: 1382, y: 874}
+  m_LastWindowPixelSize: {x: 1381, y: 873}
   m_ClearInEditMode: 1
   m_NoCameraWarning: 1
   m_LowResolutionForAspectRatios: 01000000000000000000
@@ -405,8 +405,8 @@ MonoBehaviour:
     serializedVersion: 2
     x: 0
     y: 24
-    width: 608
-    height: 874
+    width: 609
+    height: 873
   m_SerializedDataModeController:
     m_DataMode: 0
     m_PreferredDataMode: 0
@@ -423,7 +423,7 @@ MonoBehaviour:
       scrollPos: {x: 0, y: 0}
       m_SelectedIDs: 
       m_LastClickedID: 0
-      m_ExpandedIDs: 48cafbffc4cbfbfffacefbff20cffbff98f0fbff96f2fbffa0fafbff1cfcfbff52fffbff78fffbfffa0cfcff760efcffa211fcffc811fcff5e2afcff2c56fcffdc76fcffd678fcff6c90fcffda92fcffd494fcff3ebbfcff36bdfcffd213fdff9a3bfdff2a8efdffd4b5fdffccb7fdfff0d4fdff3ef6fdffc216feff2c4ffeff2e51feff3a75feffbc94feff74b2feff1ebdfeff76d3feff6ed5feff06fbfeff00fdfeff7035ffff8437ffff1839ffff5473ffff208cffffd08dffff6ec0ffffc4c9ffff4cddffffe6ddffffe8e3ffff22e9ffff20fbffffa0ac000038ae0000b4b6000010be0000e6be0000febf000026c50000fcc5000014c700001ec90000f4c9000056ca00007cca0000b6ca00000ccb000018cd0000eecd000006cf0000d2e100009af00000d8000100ae010100d40101009a020100c602010048030100d0040100a605010092060100c80801009e090100c40901008a0a0100b60a0100022901001629010084290100202a0100
+      m_ExpandedIDs: 608cffffdc8dffff1291ffff3891ffff389effffb49fffffeaa2ffff10a3ffff46b0ffffc2b1ffffeeb4ffff14b5ffff4ad0ffff3edaffffbadbfffff0deffff16dfffff28eeffffa4efffffdaf2ffff00f3ffff20fbffff
       m_RenameOverlay:
         m_UserAcceptedRename: 0
         m_Name: 
@@ -469,10 +469,10 @@ MonoBehaviour:
     m_TextWithWhitespace: "Scene\u200B"
   m_Pos:
     serializedVersion: 2
-    x: 610
+    x: 611
     y: 24
-    width: 1382
-    height: 874
+    width: 1381
+    height: 873
   m_SerializedDataModeController:
     m_DataMode: 0
     m_PreferredDataMode: 0
@@ -1050,9 +1050,9 @@ MonoBehaviour:
   m_Pos:
     serializedVersion: 2
     x: 0
-    y: 924
+    y: 923
     width: 1992
-    height: 367
+    height: 368
   m_SerializedDataModeController:
     m_DataMode: 0
     m_PreferredDataMode: 0
@@ -1075,7 +1075,7 @@ MonoBehaviour:
     m_SkipHidden: 0
     m_SearchArea: 1
     m_Folders:
-    - Assets/Script/Shader
+    - Assets
     m_Globs: []
     m_ProductIds: 
     m_AnyWithAssetOrigin: 0
@@ -1085,15 +1085,15 @@ MonoBehaviour:
   m_ViewMode: 1
   m_StartGridSize: 64
   m_LastFolders:
-  - Assets/Script/Shader
+  - Assets
   m_LastFoldersGridSize: -1
   m_LastProjectPath: H:\valdo 7d\github.com\Dragonicvoid\SnakeGame-Unity\SnakeGame
   m_LockTracker:
     m_IsLocked: 0
   m_FolderTreeState:
-    scrollPos: {x: 0, y: 117}
-    m_SelectedIDs: baab0000
-    m_LastClickedID: 43962
+    scrollPos: {x: 0, y: 79}
+    m_SelectedIDs: 62a90000
+    m_LastClickedID: 43362
     m_ExpandedIDs: 0000000062a9000064a9000066a9000068a900006aa900006ca900006ea9000070a9000072a9000074a9000076a9000078a900007aa900007ca900007ea9000080a9000082a90000
     m_RenameOverlay:
       m_UserAcceptedRename: 0

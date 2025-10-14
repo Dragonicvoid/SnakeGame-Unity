@@ -1,6 +1,5 @@
 
 using System.Collections.Generic;
-using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.Rendering;
 using UnityEngine.UI;
@@ -27,8 +26,6 @@ public class StartSnakePrev : MonoBehaviour
   RenderTexture? renTex = null;
 
   float snakeSize = ARENA_DEFAULT_SIZE.SNAKE;
-
-  List<IEnumerator<float>> tween;
 
   float danceLength = ARENA_DEFAULT_SIZE.SNAKE * 0.1f;
 

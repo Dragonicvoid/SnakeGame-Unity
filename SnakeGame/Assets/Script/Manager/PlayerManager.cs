@@ -795,6 +795,7 @@ public class PlayerManager : MonoBehaviour, IPlayerManager
     if (snake.Id == PLAYER_ID)
     {
       GameEvent.Instance.MainPlayerEat(Mathf.Min((float)snake.FoodInStomach / GENERAL_CONFIG.FOOD_TO_FIRE, 1));
+      AudioManager.Instance.PlaySFX(ASSET_KEY.SFX_EAT);
     }
 
     StartCoroutine(anim);
@@ -812,14 +813,17 @@ public class PlayerManager : MonoBehaviour, IPlayerManager
 
   void onSnakeFire(SnakeConfig snake)
   {
-    if (snake == null || snake.FoodInStomach < GENERAL_CONFIG.FOOD_TO_FIRE) return;
+    if (snake == null || snake.FoodInStomach < GENERAL_CONFIG.FOOD_TO_FIRE || snake.State.Body.Count <= 0) return;
 
     snake.FoodInStomach = 0;
     bool isMainPlayer = snake.Id == PLAYER_ID;
 
-    if (isMainPlayer) GameEvent.Instance.MainPlayerFire(0);
+    if (isMainPlayer)
+    {
+      GameEvent.Instance.MainPlayerFire(0);
+    }
 
-    if (snake.State.Body.Count <= 0) return;
+    AudioManager.Instance.PlaySFX(ASSET_KEY.SFX_FIRE);
 
     SnakeBody head = snake.State.Body[0];
     Vector2 headPos = head.Position;
