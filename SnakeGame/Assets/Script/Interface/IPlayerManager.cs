@@ -10,15 +10,17 @@ public interface IPlayerManager
   public void CreatePlayer(Vector2 pos, Vector2 moveDir, bool isBot = false);
   public void RemoveAllPlayers();
 
-  public List<float> FindNearestPlayerTowardPoint(
+  public DodgeObstacleData FindNearestPlayerTowardPoint(
     SnakeConfig currentPlayer,
     float radius
     );
 
-  public List<float> FindNearestProjNearPlayer(
+  public DodgeObstacleData FindNearestProjNearPlayer(
  SnakeConfig currentPlayer,
  float radius
  );
+
+  public void UpdateSnakeHeadSprite(SnakeConfig snake, float nearest);
 
   public Vector2 GetPlayerDirection(string id);
 

@@ -206,17 +206,22 @@ public class ArenaManager : MonoBehaviour, IArenaManager
  * assuming snake Movement Dir is Vector2(0,1).
  * The result will be between 0-360 moving Counter-clockwise from Vector2(0,1);
  */
-  public List<float>? FindObsAnglesFromSnake(SnakeConfig player, float radius)
+  public DodgeObstacleData FindObsAnglesFromSnake(SnakeConfig player, float radius)
   {
+    DodgeObstacleData data = new DodgeObstacleData
+    {
+      Angles = new List<float>(),
+      Nearest = float.MaxValue,
+    };
     SnakeBody? playerHead = player.State.Body[0];
 
-    if (playerHead == null) return null;
+    if (playerHead == null) return data;
 
     Vector2 pos = playerHead.Position;
     HashSet<GridConfig?>? gridToCheck = getGridsToCheck(pos);
     List<SpikeConfig> spikes = new List<SpikeConfig>();
 
-    if (gridToCheck == null) return null;
+    if (gridToCheck == null) return data;
 
     foreach (GridConfig? grid in gridToCheck)
     {
@@ -226,7 +231,7 @@ public class ArenaManager : MonoBehaviour, IArenaManager
       }
     }
 
-    if (spikes.Count <= 0) return new List<float>();
+    if (spikes.Count <= 0) return data;
 
     List<float> duplicateAngleDetection = new List<float>();
     List<float> detectedObstacleAngles = new List<float>();
@@ -234,6 +239,7 @@ public class ArenaManager : MonoBehaviour, IArenaManager
 
     SnakeBody? botHead = state.Body[0];
     Vector2 snakeDir = new Vector2(botHead.Velocity.x, botHead.Velocity.y);
+    float nearest = float.MaxValue;
 
     foreach (SpikeConfig spike in spikes)
     {
@@ -260,6 +266,12 @@ public class ArenaManager : MonoBehaviour, IArenaManager
         finalAngle %= 360;
         finalAngle = finalAngle < 0 ? (360 + finalAngle) : finalAngle;
 
+        float currDist = Vector2.Distance(spike.Position, botHead.Position);
+        if (currDist < nearest)
+        {
+          nearest = currDist;
+        }
+
         if (duplicateAngleDetection.FindIndex((angle) => angle == invrsObsAngle) == -1)
         {
           duplicateAngleDetection.Add(invrsObsAngle);
@@ -268,7 +280,9 @@ public class ArenaManager : MonoBehaviour, IArenaManager
       }
     }
 
-    return detectedObstacleAngles;
+    data.Angles = detectedObstacleAngles;
+    data.Nearest = nearest;
+    return data;
   }
 
   private bool isCircleHitBox(

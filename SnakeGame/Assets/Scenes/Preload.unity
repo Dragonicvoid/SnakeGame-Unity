@@ -645,6 +645,7 @@ MonoBehaviour:
   RenderTex: {fileID: 0}
   SelectedMap: 0
   Difficulty: 1
+  IsButtonLock: 0
   isPaused: 1
 --- !u!4 &1092449369
 Transform:

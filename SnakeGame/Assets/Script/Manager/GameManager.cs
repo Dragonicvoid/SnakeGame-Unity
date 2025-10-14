@@ -319,6 +319,28 @@ public class GameManager : MonoBehaviour
 
   void handleBotLogic(SnakeConfig snake)
   {
+    DodgeObstacleData detectedPlayer;
+    DodgeObstacleData detectedWall;
+    DodgeObstacleData detectedFire;
+
+    detectedPlayer = PlayerManager.I.FindNearestPlayerTowardPoint(
+      snake,
+      BOT_CONFIG.GetConfig().TRIGGER_AREA_DST
+    );
+
+    detectedWall =
+      ArenaManager.I.FindObsAnglesFromSnake(
+        snake,
+        BOT_CONFIG.GetConfig().TRIGGER_AREA_DST
+      );
+
+    detectedFire = PlayerManager.I.FindNearestProjNearPlayer(
+      snake,
+      BOT_CONFIG.GetConfig().TRIGGER_AREA_DST
+    );
+
+    PlayerManager.I.UpdateSnakeHeadSprite(snake, Mathf.Min(new float[] { detectedPlayer.Nearest, detectedWall.Nearest, detectedFire.Nearest }));
+
     if (!snake.IsBot) return;
 
     float deltaTime = Time.time - snake.LastReactTime;
@@ -332,32 +354,13 @@ public class GameManager : MonoBehaviour
     )
       return;
 
-    List<float> detectedPlayer = new List<float>();
-    List<float> detectedWall = new List<float>();
-    List<float> detectedFire = new List<float>();
     FoodConfig? detectedFood = null;
 
     if (snake.State.InDirectionChange) return;
 
-    detectedPlayer = PlayerManager.I.FindNearestPlayerTowardPoint(
-      snake,
-      BOT_CONFIG.GetConfig().TRIGGER_AREA_DST
-    );
-
-    detectedWall =
-      ArenaManager.I.FindObsAnglesFromSnake(
-        snake,
-        BOT_CONFIG.GetConfig().TRIGGER_AREA_DST
-      ) ?? new List<float>();
-
-    detectedFire = PlayerManager.I.FindNearestProjNearPlayer(
-      snake,
-      BOT_CONFIG.GetConfig().TRIGGER_AREA_DST
-    );
-
     // need to updated to adjust botData
     FoodTargetData? targetFood = snake.State.TargetFood;
-    if (detectedPlayer.Count < 1 && targetFood == null)
+    if (detectedPlayer.Angles.Count < 1 && targetFood == null)
     {
       detectedFood =
         ArenaManager.I.GetNearestDetectedFood(
@@ -396,9 +399,9 @@ public class GameManager : MonoBehaviour
     PlannerFactor factor = new PlannerFactor(
       snake,
       PlayerManager.I.PlayerList,
-      detectedPlayer,
-      detectedWall,
-      detectedFire,
+      detectedPlayer.Angles,
+      detectedWall.Angles,
+      detectedFire.Angles,
       currState.Position,
       detectedFood
     // gridWithMostFood: gridWithMostFood,
@@ -438,9 +441,9 @@ public class GameManager : MonoBehaviour
       ArenaManager?.I,
         FoodManager.I
       ),
-      detectedPlayer,
-      detectedWall,
-      detectedFire,
+      detectedPlayer.Angles,
+      detectedWall.Angles,
+      detectedFire.Angles,
       detectedFood
     ));
 

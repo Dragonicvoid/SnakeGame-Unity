@@ -6,53 +6,27 @@ using UnityEngine.Rendering;
 
 public class PlayerManager : MonoBehaviour, IPlayerManager
 {
-  [SerializeField]
-  IRef<IArenaManager>? arenaManager = null;
-
-  [SerializeField]
-  SnakeRender? playerRender = null;
-
-  [SerializeField]
-  SnakeRender? enemyRender = null;
-
-  [SerializeField]
-  TrailVfx? playerVfx = null;
-
-  [SerializeField]
-  TrailVfx? enemyVfx = null;
-
-  [SerializeField]
-  SkinSelect? skinSelect = null;
-
-  [SerializeField]
-  GameObject? collParent = null;
-
-  [SerializeField]
-  GameObject? sBodyPref = null;
-
-  [SerializeField]
-  GameObject? sFoodGrabPref = null;
-
-  [SerializeField]
-  AiRenderer? aiRenderer = null;
-
-  [SerializeField]
-  SpikeVfx? spikeVfx = null;
-
-  [SerializeField]
-  FireSpawner? fireSpawner = null;
+  [SerializeField] IRef<IArenaManager>? arenaManager = null;
+  [SerializeField] SnakeRender? playerRender = null;
+  [SerializeField] SnakeRender? enemyRender = null;
+  [SerializeField] SnakeHead? playerHead = null;
+  [SerializeField] SnakeHead? enemyHead = null;
+  [SerializeField] TrailVfx? playerVfx = null;
+  [SerializeField] TrailVfx? enemyVfx = null;
+  [SerializeField] SkinSelect? skinSelect = null;
+  [SerializeField] GameObject? collParent = null;
+  [SerializeField] GameObject? sBodyPref = null;
+  [SerializeField] GameObject? sFoodGrabPref = null;
+  [SerializeField] AiRenderer? aiRenderer = null;
+  [SerializeField] SpikeVfx? spikeVfx = null;
+  [SerializeField] FireSpawner? fireSpawner = null;
 
   public List<SnakeConfig> PlayerList { set; get; }
-
-  string PLAYER_ID = "MAIN_PLAYER";
-
-  string ENEMY_ID = "ENEMY";
-
   Dictionary<string, IEnumerator<object>> eatAnim;
-
   float intervalToFire = 0.25f;
-
   float lastTouchStart = 0f;
+  string PLAYER_ID = "MAIN_PLAYER";
+  string ENEMY_ID = "ENEMY";
 
   void Awake()
   {
@@ -63,11 +37,13 @@ public class PlayerManager : MonoBehaviour, IPlayerManager
     GameplayMoveEvent.Instance.onGameUiStartTouch -= onTouchStart;
     GameEvent.Instance.onPlayerSizeIncrease -= onSizeIncrease;
     GameEvent.Instance.onSnakeFire -= onSnakeFire;
+    GameEvent.Instance.onGameOver -= onGameOver;
 
     GameplayMoveEvent.Instance.onSnakeMoveCalculated += onTouchMove;
     GameplayMoveEvent.Instance.onGameUiStartTouch += onTouchStart;
     GameEvent.Instance.onPlayerSizeIncrease += onSizeIncrease;
     GameEvent.Instance.onSnakeFire += onSnakeFire;
+    GameEvent.Instance.onGameOver += onGameOver;
   }
 
   void FixedUpdate()
@@ -188,6 +164,9 @@ public class PlayerManager : MonoBehaviour, IPlayerManager
         enemyVfx.SetRendTex(enemyRender.RendTex);
       }
       enemyRender?.SetSnakeBody(bodies);
+
+      enemyHead.gameObject.SetActive(true);
+      enemyHead.UpdateStatus(moveDir, bodies[0].Position);
     }
     else
     {
@@ -208,6 +187,9 @@ public class PlayerManager : MonoBehaviour, IPlayerManager
         playerVfx.SetRendTex(playerRender.RendTex);
       }
       playerRender?.SetSnakeBody(bodies);
+
+      playerHead.gameObject.SetActive(true);
+      playerHead.UpdateStatus(moveDir, bodies[0].Position);
     }
 
     HandleMovement(player.Id, new MovementOpts
@@ -248,22 +230,30 @@ public class PlayerManager : MonoBehaviour, IPlayerManager
     playerRender?.SetSnakeBody(new List<SnakeBody>());
     enemyVfx?.ClearRender();
     playerVfx?.ClearRender();
+    playerHead.gameObject.SetActive(false);
+    enemyHead.gameObject.SetActive(false);
 
     aiRenderer?.SetSnakeToDebug(null);
   }
 
-  public List<float> FindNearestPlayerTowardPoint(
+  public DodgeObstacleData FindNearestPlayerTowardPoint(
     SnakeConfig currentPlayer,
     float radius
         )
   {
+    DodgeObstacleData data = new DodgeObstacleData
+    {
+      Angles = new List<float>(),
+      Nearest = float.MaxValue,
+    };
     List<float> duplicateAngleDetection = new List<float>();
     List<float> detectedObstacleAngles = new List<float>();
     SnakeState state = currentPlayer.State;
 
-    if (state.Body.Count <= 0) return new List<float>();
+    if (state.Body.Count <= 0) return data;
 
     SnakeBody botHead = state.Body[0];
+    float nearest = float.MaxValue;
 
     foreach (SnakeConfig otherPlayer in PlayerList)
     {
@@ -296,6 +286,12 @@ public class PlayerManager : MonoBehaviour, IPlayerManager
           finalAngle %= 360;
           finalAngle = finalAngle < 0 ? (360 + finalAngle) : finalAngle;
 
+          float currDist = Vector2.Distance(otherPlayer.State.Body[i].Position, botHead.Position);
+          if (currDist < nearest)
+          {
+            nearest = currDist;
+          }
+
           if (duplicateAngleDetection.FindIndex((a) => a == obstacleAngle) == -1)
           {
             duplicateAngleDetection.Add(obstacleAngle);
@@ -305,19 +301,27 @@ public class PlayerManager : MonoBehaviour, IPlayerManager
       }
     }
 
-    return detectedObstacleAngles;
+    data.Angles = detectedObstacleAngles;
+    data.Nearest = nearest;
+    return data;
   }
 
-  public List<float> FindNearestProjNearPlayer(
+  public DodgeObstacleData FindNearestProjNearPlayer(
    SnakeConfig currentPlayer,
    float radius
         )
   {
+    DodgeObstacleData data = new DodgeObstacleData
+    {
+      Angles = new List<float>(),
+      Nearest = float.MaxValue,
+    };
+
     List<float> duplicateAngleDetection = new List<float>();
     List<float> detectedObstacleAngles = new List<float>();
     SnakeState state = currentPlayer.State;
 
-    if (state.Body.Count <= 0) return new List<float>();
+    if (state.Body.Count <= 0) return data;
 
     SnakeBody botHead = state.Body[0];
     List<FireBody> fires = new List<FireBody>();
@@ -327,6 +331,8 @@ public class PlayerManager : MonoBehaviour, IPlayerManager
 
       fires.AddRange(otherPlayer.FireState.Body);
     }
+
+    float nearest = float.MaxValue;
 
     foreach (FireBody fire in fires)
     {
@@ -354,6 +360,12 @@ public class PlayerManager : MonoBehaviour, IPlayerManager
         finalAngle %= 360;
         finalAngle = finalAngle < 0 ? (360 + finalAngle) : finalAngle;
 
+        float currDist = Vector2.Distance(fire.Position, botHead.Position);
+        if (currDist < nearest)
+        {
+          nearest = currDist;
+        }
+
         if (duplicateAngleDetection.FindIndex((a) => a == obstacleAngle) == -1)
         {
           duplicateAngleDetection.Add(obstacleAngle);
@@ -362,7 +374,9 @@ public class PlayerManager : MonoBehaviour, IPlayerManager
       }
     }
 
-    return detectedObstacleAngles;
+    data.Angles = detectedObstacleAngles;
+    data.Nearest = nearest;
+    return data;
   }
 
   SnakeBody? createBody(
@@ -636,6 +650,9 @@ public class PlayerManager : MonoBehaviour, IPlayerManager
               foodGrabberPos.x,
               foodGrabberPos.y
             );
+
+            SnakeHead head = snake.IsBot ? enemyHead : playerHead;
+            head.UpdateStatus(snakeDir, new Vector2(headPos.x + newDir.x, headPos.y + newDir.y));
           }
 
           finalPos = bodyState.Obj?.transform.localPosition ?? new Vector3(0, 0);
@@ -724,6 +741,18 @@ public class PlayerManager : MonoBehaviour, IPlayerManager
 
       state.Body = nonExpiredFire;
     }
+  }
+
+  public void UpdateSnakeHeadSprite(SnakeConfig snake, float nearest)
+  {
+    SnakeHead head = snake.Id == PLAYER_ID ? playerHead : enemyHead;
+    head.UpdateHeadSprite(nearest);
+  }
+
+  private void onGameOver(GameOverData data)
+  {
+    SnakeHead head = data.IsWon ? enemyHead : playerHead;
+    head.UpdateHeadSprite(-1f);
   }
 
   void onTouchMove(Vector2 delta)
