@@ -7,7 +7,6 @@ using Unity.Mathematics;
 using UnityEngine;
 using UnityEngine.Rendering;
 
-[ExecuteInEditMode]
 public class Background : MonoBehaviour
 {
   [System.Runtime.InteropServices.StructLayout(System.Runtime.InteropServices.LayoutKind.Sequential)]
@@ -66,34 +65,32 @@ public class Background : MonoBehaviour
 
   void Awake()
   {
-    if (Application.isPlaying)
-    {
-      cmdBuffer = new CommandBuffer();
-      posBound.Set(-(QuadWidth / 2f) - (LengthBound.y / 2f), (QuadWidth / 2f) + (LengthBound.y / 2f));
-      blocks = new List<BlockData>();
-      generateRandomBlock();
-      setQuadMeshData();
+    blocks = new List<BlockData>();
+    cmdBuffer = new CommandBuffer();
 
-      blockRendTex = new RenderTexture(
-        (int)QuadWidth,
-        (int)QuadHeight,
-        Util.GetGraphicFormat(),
-        Util.GetDepthFormat()
-      );
-      Util.ClearDepthRT(blockRendTex, cmdBuffer, true);
+    posBound.Set(-(QuadWidth / 2f) - (LengthBound.y / 2f), (QuadWidth / 2f) + (LengthBound.y / 2f));
+    generateRandomBlock();
+    setQuadMeshData();
 
-      setMaterial();
-      setTexture();
+    blockRendTex = new RenderTexture(
+      (int)QuadWidth,
+      (int)QuadHeight,
+      Util.GetGraphicFormat(),
+      Util.GetDepthFormat()
+    );
+    Util.ClearDepthRT(blockRendTex, cmdBuffer, true);
 
-      GameEvent.Instance.onMainPlayerEat -= onMainPlayerEat;
-      GameEvent.Instance.onMainPlayerEat += onMainPlayerEat;
+    setMaterial();
+    setTexture();
 
-      GameEvent.Instance.onGameOver -= onGameOver;
-      GameEvent.Instance.onGameOver += onGameOver;
+    GameEvent.Instance.onMainPlayerEat -= onMainPlayerEat;
+    GameEvent.Instance.onMainPlayerEat += onMainPlayerEat;
 
-      GameEvent.Instance.onMainPlayerFire -= onMainPlayerFire;
-      GameEvent.Instance.onMainPlayerFire += onMainPlayerFire;
-    }
+    GameEvent.Instance.onGameOver -= onGameOver;
+    GameEvent.Instance.onGameOver += onGameOver;
+
+    GameEvent.Instance.onMainPlayerFire -= onMainPlayerFire;
+    GameEvent.Instance.onMainPlayerFire += onMainPlayerFire;
   }
 
   void OnEnable()

@@ -54,9 +54,43 @@ public class PersistentData : MonoBehaviour
 
   Dictionary<float, WaitForSeconds> waitForSecond = new Dictionary<float, WaitForSeconds>();
 
-  private bool isLoading;
+  public bool IsButtonLock = false;
 
   public bool isPaused = true;
 
   List<AsyncOperation> scenesLoading = new List<AsyncOperation>();
+
+  Coroutine unlockDelayCour;
+
+  public void LockButton(float time = 0.032f)
+  {
+    IsButtonLock = true;
+
+    // if has time value positive the next button click by time
+    // if has time value 0 or negative lock button forever until it is manually unlocked
+    if (time > 0)
+    {
+      if (unlockDelayCour != null)
+      {
+        StopCoroutine(unlockDelayCour);
+      }
+      unlockDelayCour = StartCoroutine(unlockButtonByDelay(time));
+    }
+  }
+
+  IEnumerator<object> unlockButtonByDelay(float time)
+  {
+    yield return null;
+    yield return GetWaitSecond(time);
+    UnlockButton();
+  }
+
+  public void UnlockButton()
+  {
+    if (unlockDelayCour != null)
+    {
+      StopCoroutine(unlockDelayCour);
+    }
+    IsButtonLock = false;
+  }
 }

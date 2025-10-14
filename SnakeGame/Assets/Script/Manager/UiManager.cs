@@ -1,13 +1,25 @@
 
+using System;
+using System.Collections;
 using UnityEngine;
 using UnityEngine.UI;
 
 public class UiManager : MonoBehaviour
 {
+  class UIAnimData
+  {
+    public Coroutine Cour;
+    public Action OnFinish;
+  }
+
   [SerializeField]
-  GameObject? startUI = null;
+  RectTransform? uiCanvas = null;
   [SerializeField]
-  GameObject? endUI = null;
+  RectTransform? startUI = null;
+  [SerializeField]
+  RectTransform? endUI = null;
+  [SerializeField]
+  RectTransform? creditUI = null;
   [SerializeField]
   Text? endLabel = null;
   [SerializeField]
@@ -18,6 +30,10 @@ public class UiManager : MonoBehaviour
   Background? background = null;
 
   private float movMaxLength = 50;
+
+  UIAnimData? showCor;
+
+  UIAnimData? hideCor;
 
   void Awake()
   {
@@ -41,18 +57,132 @@ public class UiManager : MonoBehaviour
   {
     if (startUI == null) return;
 
-    startUI.SetActive(val);
+    if (val)
+    {
+      showUIAnim(startUI);
+    }
+    else
+    {
+      hideUIAnim(startUI);
+    }
   }
 
   public void ShowEndUI(GameOverData? data, bool val = true)
   {
+    if (endLabel != null && data != null)
+    {
+      endLabel.text = data.IsWon == false ? "You Lose" : "You Won";
+    }
+
     if (endUI == null) return;
 
-    endUI.SetActive(val);
+    if (val)
+    {
+      showUIAnim(endUI);
+    }
+    else
+    {
+      hideUIAnim(endUI);
+    }
+  }
 
-    if (endLabel == null || !val || data == null) return;
+  public void ShowCreditUI(bool val = true)
+  {
+    if (creditUI == null) return;
 
-    endLabel.text = data.IsWon == false ? "You Lose" : "You Won";
+    if (val)
+    {
+      showUIAnim(creditUI);
+    }
+    else
+    {
+      hideUIAnim(creditUI);
+    }
+  }
+
+  void showUIAnim(RectTransform ui)
+  {
+    if (showCor != null)
+    {
+      StopCoroutine(showCor.Cour);
+      showCor.OnFinish();
+    }
+
+    float startY = uiCanvas.rect.height;
+    float targetY = 0;
+    showCor = new UIAnimData
+    {
+      OnFinish = () => { },
+    };
+    BaseTween<UIAnimData> tweenData = new BaseTween<UIAnimData>(
+      0.5f,
+      showCor,
+      (dst, _) =>
+      {
+        ui.gameObject.SetActive(true);
+        ui.anchoredPosition = new Vector2(0, startY);
+      },
+      (dst, _) =>
+      {
+        float distTarget = Util.EaseOut(dst, 3) * (targetY - startY);
+        ui.anchoredPosition = new Vector2(0, startY + distTarget);
+      },
+      (dst, data) =>
+      {
+        ui.anchoredPosition = new Vector2(0, targetY);
+        data.OnFinish();
+        showCor = null;
+      }
+    );
+    IEnumerator tween = Tween.Create(tweenData);
+    showCor.Cour = StartCoroutine(tween);
+  }
+
+  void hideUIAnim(RectTransform ui)
+  {
+    if (hideCor != null)
+    {
+      StopCoroutine(hideCor.Cour);
+      hideCor.OnFinish();
+    }
+
+    float startY = ui.anchoredPosition.y;
+    float targetY = -uiCanvas.rect.height;
+    hideCor = new UIAnimData
+    {
+      OnFinish = () =>
+      {
+        ui.gameObject.SetActive(false);
+      },
+    };
+    BaseTween<UIAnimData> tweenData = new BaseTween<UIAnimData>(
+      0.5f,
+      hideCor,
+      (dst, _) =>
+      {
+        ui.anchoredPosition = new Vector2(0, startY);
+      },
+      (dst, _) =>
+      {
+        float distTarget = Util.EaseOut(dst, 3) * (targetY - startY);
+        ui.anchoredPosition = new Vector2(0, startY + distTarget);
+      },
+      (dst, data) =>
+      {
+        ui.anchoredPosition = new Vector2(0, targetY);
+        data.OnFinish();
+        hideCor = null;
+      }
+    );
+    IEnumerator tween = Tween.Create(tweenData);
+    hideCor.Cour = StartCoroutine(tween);
+  }
+
+  public void onClickCredit(bool show)
+  {
+    AudioManager.Instance.PlaySFX(ASSET_KEY.SFX_BUTTON_CLICK);
+    ShowStartUI(!show);
+    ShowCreditUI(show);
   }
 
   private void setListener()

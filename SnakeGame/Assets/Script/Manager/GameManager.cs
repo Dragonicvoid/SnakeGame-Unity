@@ -24,7 +24,7 @@ public class GameManager : MonoBehaviour
 
   void Awake()
   {
-    AudioManager.Instance.PlayBGM(ASSET_KEY.BGM_MAIN_MENU, 0.5f, true);
+    AudioManager.Instance.PlayBGM(ASSET_KEY.BGM_MAIN_MENU, 1f, true);
   }
 
   void FixedUpdate()
@@ -36,6 +36,9 @@ public class GameManager : MonoBehaviour
 
   public void StartGame()
   {
+    if (PersistentData.Instance.IsButtonLock) return;
+    PersistentData.Instance.LockButton();
+
     AudioManager.Instance.PlaySFX(ASSET_KEY.SFX_START_PLAY);
     setStartAnimEvent();
     UiManager?.StartGame();
@@ -106,6 +109,9 @@ public class GameManager : MonoBehaviour
 
   public void GoToMainMenu()
   {
+    if (PersistentData.Instance.IsButtonLock) return;
+    PersistentData.Instance.LockButton();
+
     UiManager?.EndGame();
     FoodManager?.I.RemoveAllFood();
     PlayerManager?.I.RemoveAllPlayers();
@@ -114,7 +120,7 @@ public class GameManager : MonoBehaviour
     UiManager?.ShowEndUI(null, false);
 
     AudioManager.Instance.PlaySFX(ASSET_KEY.SFX_BACK_TO_MENU);
-    AudioManager.Instance.PlayBGM(ASSET_KEY.BGM_MAIN_MENU, 0.5f, true);
+    AudioManager.Instance.PlayBGM(ASSET_KEY.BGM_MAIN_MENU, 1f, true);
   }
 
   void setStartAnimEvent()

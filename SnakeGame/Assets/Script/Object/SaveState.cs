@@ -6,9 +6,10 @@ using UnityEngine;
 
 public class SaveState
 {
-    public List<int> WonStat;
-    public long TimeLastTutorial;
-    public int LastDiffSelect;
+    public List<int>? WonStat;
+    public long? TimeLastTutorial;
+    public int? LastDiffSelect;
+    public int? AudioVolume;
 
     //constructor when the save are created
     public SaveState()
@@ -34,5 +35,6 @@ public class SaveState
 
         TimeLastTutorial = 0;
         LastDiffSelect = (int)DIFFICULTY.MEDIUM;
+        AudioVolume = 2;
     }
 }

@@ -221,7 +221,7 @@ public class AudioManager : MonoBehaviour
 
   public void SetVolume(float vol)
   {
-    masterVol = vol;
+    masterVol = Mathf.Clamp(vol, 0, 1);
 
     foreach (KeyValuePair<string, AudioSource> item in runningAudio)
     {
