@@ -27,12 +27,15 @@ public class TutorialSpike : BaseTutorial
       Util.GetGraphicFormat(),
       Util.GetDepthFormat()
     );
+    Util.ClearDepthRT(rendTex, cmdBuffer, true);
+
     blurTex = new RenderTexture(
       (int)ARENA_DEFAULT_SIZE.WIDTH,
       (int)ARENA_DEFAULT_SIZE.HEIGHT,
       Util.GetGraphicFormat(),
       Util.GetDepthFormat()
     );
+    Util.ClearDepthRT(blurTex, cmdBuffer, true);
     if (image)
     {
       image.texture = rendTex;
@@ -43,7 +46,6 @@ public class TutorialSpike : BaseTutorial
     {
       spikeTex = spike.GetTexture();
     }
-    Util.ClearDepthRT(rendTex, cmdBuffer, true);
 
     setMat();
   }
@@ -103,8 +105,7 @@ public class TutorialSpike : BaseTutorial
 
     cmdBuffer.Blit(null, rendTex, highlightMat, 0);
 
-    cmdBuffer.SetRenderTarget(PersistentData.Instance.RenderTex);
-    cmdBuffer.ClearRenderTarget(false, false, Color.clear, 1f);
+    Util.ClearWebViewScreen(cmdBuffer);
 
     Graphics.ExecuteCommandBuffer(cmdBuffer);
   }

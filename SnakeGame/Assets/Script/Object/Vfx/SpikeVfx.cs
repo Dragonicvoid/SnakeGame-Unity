@@ -70,14 +70,17 @@ public class SpikeVfx : MonoBehaviour
     spikes = new List<ObstacleData>();
     cmdBuffer = new CommandBuffer();
 
-    quadTex = new RenderTexture(
-      (int)ARENA_DEFAULT_SIZE.WIDTH,
-      (int)ARENA_DEFAULT_SIZE.HEIGHT,
-      Util.GetGraphicFormat(),
-      Util.GetDepthFormat()
-    );
+    if (!quadTex)
+    {
+      quadTex = new RenderTexture(
+        (int)ARENA_DEFAULT_SIZE.WIDTH,
+        (int)ARENA_DEFAULT_SIZE.HEIGHT,
+        Util.GetGraphicFormat(),
+        Util.GetDepthFormat()
+        );
 
-    Util.ClearDepthRT(quadTex, cmdBuffer, true);
+      Util.ClearDepthRT(quadTex, cmdBuffer, true);
+    }
 
     setMaterial();
     setQuadMesh();
@@ -115,15 +118,26 @@ public class SpikeVfx : MonoBehaviour
       quadMat = new Material(shader);
     }
 
-    if (renderer.materials.Length > 0)
+    if (!Application.isEditor)
     {
-      renderer.materials[0] = quadMat;
+      if (renderer.materials.Length > 0)
+      {
+        renderer.materials[0] = quadMat;
+      }
+      else
+      {
+        renderer.materials.Append(quadMat);
+      }
+      renderer.material = quadMat;
     }
     else
     {
-      renderer.materials.Append(quadMat);
+      renderer.sharedMaterial = quadMat;
+      Material tempMaterial = new Material(renderer.sharedMaterial);
+      renderer.sharedMaterial = tempMaterial;
+      quadMat = tempMaterial;
     }
-    renderer.material = quadMat;
+
     quadMat.SetTexture("_MainTex", quadTex);
 
     if (!spikeMat)
@@ -174,11 +188,7 @@ public class SpikeVfx : MonoBehaviour
     quadMesh.SetIndexBufferData(new short[6] { 0, 2, 1, 1, 2, 3 }, 0, 0, indexCount);
 
     quadMesh.subMeshCount = 1;
-    quadMesh.bounds = new Bounds
-    {
-      center = transform.localPosition,
-      extents = new Vector3(currWidth, currHeight)
-    };
+    quadMesh.RecalculateBounds();
     quadMesh.SetSubMesh(0, new SubMeshDescriptor
     {
       indexStart = 0,
@@ -192,15 +202,12 @@ public class SpikeVfx : MonoBehaviour
       }
     });
 
-    if (Application.isPlaying)
+    MeshFilter filter = GetComponent<MeshFilter>();
+    if (!filter)
     {
-      MeshFilter filter = GetComponent<MeshFilter>();
-      if (!filter)
-      {
-        filter = gameObject.AddComponent<MeshFilter>();
-      }
-      filter.mesh = quadMesh;
+      filter = gameObject.AddComponent<MeshFilter>();
     }
+    filter.mesh = quadMesh;
   }
 
   void updateSpikeMesh()
@@ -430,9 +437,7 @@ public class SpikeVfx : MonoBehaviour
 
       cmdBuffer.ReleaseTemporaryRT(tempID);
 
-      // Hack resize Web-view
-      cmdBuffer.SetRenderTarget(PersistentData.Instance.RenderTex);
-      cmdBuffer.ClearRenderTarget(false, false, Color.clear, 1f);
+      Util.ClearWebViewScreen(cmdBuffer);
 
       Graphics.ExecuteCommandBuffer(cmdBuffer);
     }
@@ -447,9 +452,7 @@ public class SpikeVfx : MonoBehaviour
     cmdBuffer.SetRenderTarget(quadTex);
     cmdBuffer.ClearRenderTarget(true, true, Color.clear, 1f);
 
-    // Hack resize Web-view
-    cmdBuffer.SetRenderTarget(PersistentData.Instance.RenderTex);
-    cmdBuffer.ClearRenderTarget(false, false, Color.clear, 1f);
+    Util.ClearWebViewScreen(cmdBuffer);
 
     Graphics.ExecuteCommandBuffer(cmdBuffer);
   }
@@ -484,6 +487,17 @@ public class SpikeVfx : MonoBehaviour
 
   public RenderTexture GetTexture()
   {
+    if (!quadTex)
+    {
+      quadTex = new RenderTexture(
+        (int)ARENA_DEFAULT_SIZE.WIDTH,
+        (int)ARENA_DEFAULT_SIZE.HEIGHT,
+        Util.GetGraphicFormat(),
+        Util.GetDepthFormat()
+        );
+
+      Util.ClearDepthRT(quadTex, cmdBuffer ?? new CommandBuffer(), true);
+    }
     return quadTex;
   }
 

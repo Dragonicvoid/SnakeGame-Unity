@@ -3,11 +3,23 @@ using UnityEngine;
 
 public class TutorialEvent : MonoBehaviour
 {
-  public static TutorialEvent Instance;
+  public static TutorialEvent _instance;
+
+  public static TutorialEvent Instance
+  {
+    get
+    {
+      if (_instance == null)
+      {
+        _instance = new TutorialEvent();
+      }
+      return _instance;
+    }
+  }
 
   void Awake()
   {
-    Instance = this;
+    _instance = this;
   }
 
   public event Action? onNextTutorial;

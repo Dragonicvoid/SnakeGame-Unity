@@ -123,11 +123,7 @@ public class TutorialEatAnim : MonoBehaviour
     mesh.SetIndexBufferData(new short[6] { 0, 2, 1, 1, 2, 3 }, 0, 0, indexCount);
 
     mesh.subMeshCount = 1;
-    mesh.bounds = new Bounds
-    {
-      center = transform.localPosition,
-      extents = new Vector3(currWidth, currHeight)
-    };
+    mesh.RecalculateBounds();
     mesh.SetSubMesh(0, new SubMeshDescriptor
     {
       indexStart = 0,
@@ -155,9 +151,7 @@ public class TutorialEatAnim : MonoBehaviour
     cmdBuffer.ClearRenderTarget(true, true, Color.clear, 1f);
     cmdBuffer.DrawMesh(mesh, Matrix4x4.identity, mat, 0, 0);
 
-    // Hack resize Web-view
-    cmdBuffer.SetRenderTarget(PersistentData.Instance.RenderTex);
-    cmdBuffer.ClearRenderTarget(false, false, Color.clear, 1f);
+    Util.ClearWebViewScreen(cmdBuffer);
 
     Graphics.ExecuteCommandBuffer(cmdBuffer);
   }

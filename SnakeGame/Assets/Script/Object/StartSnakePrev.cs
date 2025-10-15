@@ -1,6 +1,6 @@
 
+using System;
 using System.Collections.Generic;
-using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.Rendering;
 using UnityEngine.UI;
@@ -10,12 +10,13 @@ public class StartSnakePrev : MonoBehaviour
 {
   class TweenData
   {
-    public int Mult;
     public SnakeBody Body;
 
-    public TweenData(int mult, SnakeBody body)
+    public float Offset;
+
+    public TweenData(float offset, SnakeBody body)
     {
-      Mult = mult;
+      Offset = offset;
       Body = body;
     }
   }
@@ -25,22 +26,24 @@ public class StartSnakePrev : MonoBehaviour
 
   [SerializeField]
   RenderTexture? renTex = null;
+  [SerializeField]
+  Image? headImage = null;
 
   float snakeSize = ARENA_DEFAULT_SIZE.SNAKE;
-
-  List<IEnumerator<float>> tween;
 
   float danceLength = ARENA_DEFAULT_SIZE.SNAKE * 0.1f;
 
   List<SnakeBody> snakeShape;
 
-  float duration = 0.5f;
+  float duration = 1.65f;
 
   public SkinDetail? SkinDataPrim = null;
 
   public SkinDetail? SkinDataSecond = null;
 
   public SNAKE_TYPE SnakeType = SNAKE_TYPE.NORMAL;
+
+  Vector2 front = Vector2.up;
 
   void Awake()
   {
@@ -74,7 +77,7 @@ public class StartSnakePrev : MonoBehaviour
 
   void OnEnable()
   {
-    StartCoroutine(startSnakeDance());
+    startSnakeDance();
     StartCoroutine(renderSnake());
   }
 
@@ -87,13 +90,18 @@ public class StartSnakePrev : MonoBehaviour
     }
   }
 
-  IEnumerator<object> startSnakeDance()
+  void startSnakeDance()
   {
     for (int i = 0; i < snakeShape.Count; i++)
     {
-      TweenData data = new TweenData((i % 2) == 0 ? 1 : -1, snakeShape[i]);
+      float offset = i * 0.25f;
+      float sinVal = Mathf.Sin(offset * Mathf.PI * 2f);
+      snakeShape[i].Position = new Vector2(
+        sinVal * danceLength,
+        snakeShape[i].Position.y
+      );
+      TweenData data = new TweenData(offset, snakeShape[i]);
       animDance(data);
-      yield return PersistentData.Instance.GetWaitSecond(0.25f);
     }
   }
 
@@ -104,7 +112,7 @@ public class StartSnakePrev : MonoBehaviour
     obj,
     (dist, data) =>
     {
-      float sinVal = (dist * 2 - 1) * data.Mult;
+      float sinVal = Mathf.Sin((data.Offset + dist) * Mathf.PI * 2);
 
       data.Body.Position = new Vector2(
               sinVal * danceLength,
@@ -113,16 +121,21 @@ public class StartSnakePrev : MonoBehaviour
     },
     (dist, data) =>
     {
-      float sinVal = (dist * 2 - 1) * data.Mult;
+      float sinVal = Mathf.Sin((data.Offset + dist) * Mathf.PI * 2);
+      Vector2 pos = new Vector2(
+        sinVal * danceLength,
+        data.Body.Position.y
+      );
 
-      data.Body.Position = new Vector2(
-              sinVal * danceLength,
-              data.Body.Position.y
-          );
+      if (data.Offset <= 0)
+      {
+        updateHeadStatus(snakeShape[1].Position - snakeShape[0].Position, pos);
+      }
+
+      data.Body.Position = pos;
     },
     (dist, data) =>
     {
-      data.Mult *= -1;
       animDance(obj);
     }
   );
@@ -143,5 +156,24 @@ public class StartSnakePrev : MonoBehaviour
     }
 
     snakeRender?.SetSnakeSkin(skin, isPrimary);
+  }
+
+  void updateHeadStatus(Vector2 dir, Vector2 pos)
+  {
+    updateAngle(dir);
+    updatePos(pos);
+  }
+
+  void updateAngle(Vector2 dir)
+  {
+    float angle = Mathf.Atan2(front.y, front.x) - Mathf.Atan2(dir.y, dir.x);
+    angle += Mathf.PI;
+
+    headImage.rectTransform.eulerAngles = new Vector3(0, 0, (Mathf.PI * 2 - angle) * Mathf.Rad2Deg);
+  }
+
+  void updatePos(Vector2 pos)
+  {
+    headImage.rectTransform.anchoredPosition = new Vector2(pos.x, pos.y);
   }
 }

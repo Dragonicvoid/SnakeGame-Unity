@@ -87,7 +87,7 @@ public class Vortex : MonoBehaviour
       mat = new Material(shader);
     }
 
-    if (Application.isPlaying)
+    if (!Application.isEditor)
     {
       if (meshRend.materials.Length > 0)
       {
@@ -98,6 +98,13 @@ public class Vortex : MonoBehaviour
         meshRend.materials.Append(mat);
       }
       meshRend.material = mat;
+    }
+    else
+    {
+      meshRend.sharedMaterial = mat;
+      Material tempMaterial = new Material(meshRend.sharedMaterial);
+      meshRend.sharedMaterial = tempMaterial;
+      mat = tempMaterial;
     }
 
     mat.SetInt("_VortexSize", vortexCount);
@@ -158,15 +165,12 @@ public class Vortex : MonoBehaviour
       }
     });
 
-    if (Application.isPlaying)
+    MeshFilter filter = GetComponent<MeshFilter>();
+    if (!filter)
     {
-      MeshFilter filter = GetComponent<MeshFilter>();
-      if (!filter)
-      {
-        filter = gameObject.AddComponent<MeshFilter>();
-      }
-      filter.mesh = mesh;
+      filter = gameObject.AddComponent<MeshFilter>();
     }
+    filter.mesh = mesh;
   }
 
   void playShowAnim()

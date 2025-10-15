@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using UnityEngine;
 
 public class ObstacleData
@@ -19,4 +20,10 @@ public class ObstacleData
       this.Obj = Obj;
     }
   }
+}
+
+public struct DodgeObstacleData
+{
+  public List<float> Angles { get; set; }
+  public float Nearest { get; set; }
 }

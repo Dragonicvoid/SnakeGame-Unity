@@ -12,6 +12,8 @@ public static class Util
 {
   public static T Pop<T>(this List<T> list)
   {
+    if (list.Count <= 0) return default;
+
     int index = list.Count - 1;
     T r = list[index];
     list.RemoveAt(index);
@@ -287,9 +289,7 @@ public static class Util
     cmdBuffer.SetRenderTarget(rt);
     cmdBuffer.ClearRenderTarget(true, true, Color.clear, 1f);
 
-    // Hack resize Web-view
-    cmdBuffer.SetRenderTarget(PersistentData.Instance.RenderTex);
-    cmdBuffer.ClearRenderTarget(false, false, Color.clear, 1f);
+    ClearWebViewScreen(cmdBuffer);
 
     if (run) Graphics.ExecuteCommandBuffer(cmdBuffer);
   }
@@ -316,5 +316,16 @@ public static class Util
     DateTime currentTime = DateTime.UtcNow;
     long unixTime = ((DateTimeOffset)currentTime).ToUnixTimeSeconds();
     return unixTime;
+  }
+
+  // Hack for web view since it uses last RT size
+  // but does not automatically returns it to original size
+  public static void ClearWebViewScreen(CommandBuffer cmdBuffer)
+  {
+    if (PersistentData.Instance)
+    {
+      cmdBuffer.SetRenderTarget(PersistentData.Instance.RenderTex);
+      cmdBuffer.ClearRenderTarget(false, false, Color.clear, 1f);
+    }
   }
 }

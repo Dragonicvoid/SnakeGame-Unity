@@ -1,9 +1,13 @@
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class Difficulty : MonoBehaviour
 {
   [SerializeField] List<RectTransform> diffObj = new List<RectTransform>();
+  [SerializeField] List<Image> diffLight = new List<Image>();
+  // 0 is default sprite, 1 is easy, 2 is medium, 3 is hard
+  [SerializeField] List<Sprite> lightSprite = new List<Sprite>();
   [SerializeField] RectTransform? content;
 
   DIFFICULTY _currDiff = DIFFICULTY.MEDIUM;
@@ -29,10 +33,12 @@ public class Difficulty : MonoBehaviour
     rect.anchoredPosition = new Vector2(0, 0);
     content.anchoredPosition = new Vector2(0, 0);
     rect.gameObject.SetActive(true);
+    updateLightSprite();
   }
 
   public void onNextClick()
   {
+    AudioManager.Instance.PlaySFX(ASSET_KEY.SFX_BUTTON_CLICK);
     int prevValue = (int)currDiff;
     int nextValue = (int)currDiff + 1;
     if (nextValue > 2) nextValue = (int)DIFFICULTY.EASY;
@@ -43,11 +49,13 @@ public class Difficulty : MonoBehaviour
     SaveManager.Instance.SaveData.LastDiffSelect = nextValue;
     SaveManager.Instance.Save();
 
+    updateLightSprite();
     playAnimTo(prevValue, nextValue, false);
   }
 
   public void onPrevClick()
   {
+    AudioManager.Instance.PlaySFX(ASSET_KEY.SFX_BUTTON_CLICK);
     int prevValue = (int)currDiff;
     int nextValue = (int)currDiff - 1;
     if (nextValue < 0) nextValue = (int)DIFFICULTY.HARD;
@@ -58,6 +66,7 @@ public class Difficulty : MonoBehaviour
     SaveManager.Instance.SaveData.LastDiffSelect = nextValue;
     SaveManager.Instance.Save();
 
+    updateLightSprite();
     playAnimTo(prevValue, nextValue, true);
   }
 
@@ -110,6 +119,32 @@ public class Difficulty : MonoBehaviour
     );
     IEnumerator<object> tween = Tween.Create(tweenData);
     animCour = StartCoroutine(tween);
+  }
+
+  void updateLightSprite()
+  {
+    if (lightSprite.Count <= 0) return;
+
+    int spriteIdx = (int)(currDiff + 1);
+    if (spriteIdx >= lightSprite.Count)
+    {
+      spriteIdx = lightSprite.Count - 1;
+    }
+
+    Sprite currSprite = lightSprite[spriteIdx];
+    Sprite emptySprite = lightSprite[0];
+
+    for (int i = 0; i < diffLight.Count; i++)
+    {
+      if (i <= (int)currDiff)
+      {
+        diffLight[i].sprite = currSprite;
+      }
+      else
+      {
+        diffLight[i].sprite = emptySprite;
+      }
+    }
   }
 
   void stopAnim()

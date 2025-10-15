@@ -26,22 +26,126 @@ public class AssetLoader : MonoBehaviour
 
   List<AssetConfig> getAssetsConf()
   {
+    // Texture 
     List<AssetConfig> assets = new List<AssetConfig>() {
-            new AssetConfig {
-                url = "https://res.cloudinary.com/dyfgknhce/image/upload/v1759574990/Snake/Skins/slime_normal_isqsoc.jpg",
-                key = "SKIN_WITHER_NORMAL",
-                type = ASSET_TYPE.IMAGE,
-                opts = new DownloadOpts(),
-            },
-            new AssetConfig {
-                url = "https://res.cloudinary.com/dyfgknhce/image/upload/v1759575035/Snake/Skins/bubble_kblnw4.png",
-                key = "SKIN_BUBBLE_MAIN",
-                type = ASSET_TYPE.IMAGE,
-                opts = new DownloadOpts {
-                  retries = 4,
-                },
-            },
-        };
+      new AssetConfig {
+          url = "https://res.cloudinary.com/dyfgknhce/image/upload/v1759574990/Snake/Skins/slime_normal_isqsoc.jpg",
+          key = ASSET_KEY.SKIN_WITHER_NORMAL,
+          type = ASSET_TYPE.IMAGE,
+          opts = new DownloadOpts(),
+      },
+      new AssetConfig {
+          url = "https://res.cloudinary.com/dyfgknhce/image/upload/v1759575035/Snake/Skins/bubble_kblnw4.png",
+          key = ASSET_KEY.SKIN_BUBBLE_MAIN,
+          type = ASSET_TYPE.IMAGE,
+          opts = new DownloadOpts {
+            retries = 4,
+          },
+      },
+
+      // Music 
+      new AssetConfig {
+          url = "https://res.cloudinary.com/dyfgknhce/video/upload/v1760447743/Snake/audio/happy_adventure_hor8hb.mp3",
+          key = ASSET_KEY.BGM_MAIN_MENU,
+          type = ASSET_TYPE.AUDIO,
+          opts = new DownloadOpts {
+            retries = 4,
+            audioType = AudioType.MPEG
+          },
+      },
+      new AssetConfig {
+          url = "https://res.cloudinary.com/dyfgknhce/video/upload/v1760447720/Snake/audio/8bit_title_screen_fdl6w3.mp3",
+          key = ASSET_KEY.BGM_GAMEPLAY,
+          type = ASSET_TYPE.AUDIO,
+          opts = new DownloadOpts {
+            retries = 4,
+            audioType = AudioType.MPEG
+          },
+      },
+
+      // SFX
+      new AssetConfig {
+          url = "https://res.cloudinary.com/dyfgknhce/video/upload/v1760448039/Snake/audio/eat_2_pu93uq.wav",
+          key = ASSET_KEY.SFX_EAT,
+          type = ASSET_TYPE.AUDIO,
+          opts = new DownloadOpts {
+            retries = 4,
+            audioType = AudioType.WAV
+          },
+      },
+      new AssetConfig {
+          url = "https://res.cloudinary.com/dyfgknhce/video/upload/v1760448347/Snake/audio/move_1_lzv84y.wav",
+          key = ASSET_KEY.SFX_START_PLAY,
+          type = ASSET_TYPE.AUDIO,
+          opts = new DownloadOpts {
+            retries = 4,
+            audioType = AudioType.WAV
+          },
+      },
+      new AssetConfig {
+          url = "https://res.cloudinary.com/dyfgknhce/video/upload/v1760448360/Snake/audio/move_2_dvcxc8.wav",
+          key = ASSET_KEY.SFX_BACK_TO_MENU,
+          type = ASSET_TYPE.AUDIO,
+          opts = new DownloadOpts {
+            retries = 4,
+            audioType = AudioType.WAV
+          },
+      },
+      new AssetConfig {
+          url = "https://res.cloudinary.com/dyfgknhce/video/upload/v1760449061/Snake/audio/button_click_5_esh6jq.wav",
+          key = ASSET_KEY.SFX_BUTTON_CLICK,
+          type = ASSET_TYPE.AUDIO,
+          opts = new DownloadOpts {
+            retries = 4,
+            audioType = AudioType.WAV
+          },
+      },
+      new AssetConfig {
+          url = "https://res.cloudinary.com/dyfgknhce/video/upload/v1760448285/Snake/audio/button_click_3_btuyka.wav",
+          key = ASSET_KEY.SFX_CLICK_SKIN,
+          type = ASSET_TYPE.AUDIO,
+          opts = new DownloadOpts {
+            retries = 4,
+            audioType = AudioType.WAV
+          },
+      },
+      new AssetConfig {
+          url = "https://res.cloudinary.com/dyfgknhce/video/upload/v1760448317/Snake/audio/button_click_4_w5avaa.wav",
+          key = ASSET_KEY.SFX_CLICK_TAB,
+          type = ASSET_TYPE.AUDIO,
+          opts = new DownloadOpts {
+            retries = 4,
+            audioType = AudioType.WAV
+          },
+      },
+      new AssetConfig {
+          url = "https://res.cloudinary.com/dyfgknhce/video/upload/v1760447871/Snake/audio/lose_4_w5atfe.wav",
+          key = ASSET_KEY.SFX_LOSE,
+          type = ASSET_TYPE.AUDIO,
+          opts = new DownloadOpts {
+            retries = 4,
+            audioType = AudioType.WAV
+          },
+      },
+      new AssetConfig {
+          url = "https://res.cloudinary.com/dyfgknhce/video/upload/v1760448023/Snake/audio/eat_3_fke7ui.wav",
+          key = ASSET_KEY.SFX_WIN,
+          type = ASSET_TYPE.AUDIO,
+          opts = new DownloadOpts {
+            retries = 4,
+            audioType = AudioType.WAV
+          },
+      },
+      new AssetConfig {
+          url = "https://res.cloudinary.com/dyfgknhce/video/upload/v1760448001/Snake/audio/fire_1_udfndd.wav",
+          key = ASSET_KEY.SFX_FIRE,
+          type = ASSET_TYPE.AUDIO,
+          opts = new DownloadOpts {
+            retries = 4,
+            audioType = AudioType.WAV
+          },
+      },
+    };
 
     totalAssets = (uint)assets.Count;
     return assets;
@@ -71,6 +175,9 @@ public class AssetLoader : MonoBehaviour
           break;
         case ASSET_TYPE.TEXT:
           StartCoroutine(downloadText(asset));
+          break;
+        case ASSET_TYPE.AUDIO:
+          StartCoroutine(downloadAudio(asset));
           break;
         default:
           break;
@@ -120,7 +227,7 @@ public class AssetLoader : MonoBehaviour
   {
     UnityWebRequest request = UnityWebRequestTexture.GetTexture(conf.url);
     yield return request.SendWebRequest();
-    if (request.isNetworkError || request.isHttpError)
+    if (request.result == UnityWebRequest.Result.ConnectionError || request.result == UnityWebRequest.Result.ProtocolError)
     {
       if (conf.opts.retries < tries)
       {
@@ -144,7 +251,7 @@ public class AssetLoader : MonoBehaviour
   {
     UnityWebRequest request = UnityWebRequestTexture.GetTexture(conf.url);
     yield return request.SendWebRequest();
-    if (request.isNetworkError || request.isHttpError)
+    if (request.result == UnityWebRequest.Result.ConnectionError || request.result == UnityWebRequest.Result.ProtocolError)
     {
       if (conf.opts.retries < tries)
       {
@@ -158,6 +265,29 @@ public class AssetLoader : MonoBehaviour
     else
     {
       AssetManager.Instance.AddTextAsset(conf.key, request.downloadHandler.text);
+      AssetLoadEvent.Instance.DownloadAssetSuccessEnter(conf);
+    }
+  }
+
+  IEnumerator<object> downloadAudio(AssetConfig conf, uint tries = 0)
+  {
+    UnityWebRequest request = UnityWebRequestMultimedia.GetAudioClip(conf.url, conf.opts.audioType ?? AudioType.UNKNOWN);
+    yield return request.SendWebRequest();
+    if (request.result == UnityWebRequest.Result.ConnectionError || request.result == UnityWebRequest.Result.ProtocolError)
+    {
+      if (conf.opts.retries < tries)
+      {
+        downloadText(conf, tries++);
+      }
+      else
+      {
+        AssetLoadEvent.Instance.DownloadAssetFailedEnter(conf);
+      }
+    }
+    else
+    {
+      AudioClip clip = DownloadHandlerAudioClip.GetContent(request);
+      AssetManager.Instance.AddAudio(conf.key, clip);
       AssetLoadEvent.Instance.DownloadAssetSuccessEnter(conf);
     }
   }

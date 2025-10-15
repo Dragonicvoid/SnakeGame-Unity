@@ -118,11 +118,7 @@ public class SnakeTexture : MonoBehaviour
     mesh.SetIndexBufferData(new short[6] { 0, 2, 1, 1, 2, 3 }, 0, 0, indexCount);
 
     mesh.subMeshCount = 1;
-    mesh.bounds = new Bounds
-    {
-      center = transform.localPosition,
-      extents = new Vector3(currWidth, currHeight)
-    };
+    mesh.RecalculateBounds();
     mesh.SetSubMesh(0, new SubMeshDescriptor
     {
       indexStart = 0,
@@ -232,9 +228,7 @@ public class SnakeTexture : MonoBehaviour
       cmdBuff.ClearRenderTarget(true, true, Color.clear, 1f);
       cmdBuff.DrawMesh(mesh, Matrix4x4.identity, mat, 0, isPrimary ? (int)SNAKE_RENDER_PASS.MAIN_BODY : (int)SNAKE_RENDER_PASS.SECOND_BODY);
 
-      // Hack resize Web-view
-      cmdBuff.SetRenderTarget(PersistentData.Instance.RenderTex);
-      cmdBuff.ClearRenderTarget(false, false, Color.clear, 1f);
+      Util.ClearWebViewScreen(cmdBuff);
 
       Graphics.ExecuteCommandBuffer(cmdBuff);
     }

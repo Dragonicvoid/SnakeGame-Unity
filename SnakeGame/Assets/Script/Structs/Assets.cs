@@ -1,7 +1,10 @@
+using UnityEngine;
+
 public enum ASSET_TYPE
 {
     IMAGE,
     TEXT,
+    AUDIO,
 }
 
 public struct AssetConfig
@@ -14,5 +17,6 @@ public struct AssetConfig
 
 public struct DownloadOpts
 {
-    public uint retries { get; set; }
+    public uint? retries { get; set; }
+    public AudioType? audioType { get; set; }
 }

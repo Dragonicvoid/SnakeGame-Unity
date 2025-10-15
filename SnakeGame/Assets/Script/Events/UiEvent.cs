@@ -3,11 +3,23 @@ using UnityEngine;
 
 public class UiEvent : MonoBehaviour
 {
-    public static UiEvent Instance;
+    public static UiEvent _instance;
+
+    public static UiEvent Instance
+    {
+        get
+        {
+            if (_instance == null)
+            {
+                _instance = new UiEvent();
+            }
+            return _instance;
+        }
+    }
 
     void Awake()
     {
-        Instance = this;
+        _instance = this;
     }
 
     public event Action<int, bool>? onSkinSelected;

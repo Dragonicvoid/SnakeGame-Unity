@@ -2,9 +2,11 @@ using System.Collections.Generic;
 using System.Linq;
 using Unity.Collections;
 using Unity.Mathematics;
+using UnityEditor;
 using UnityEngine;
 using UnityEngine.Rendering;
 
+[ExecuteInEditMode]
 public class FoodVfx : MonoBehaviour
 {
     [System.Runtime.InteropServices.StructLayout(System.Runtime.InteropServices.LayoutKind.Sequential)]
@@ -49,6 +51,7 @@ public class FoodVfx : MonoBehaviour
     void Awake()
     {
         setMaterial();
+        setMeshData();
     }
 
     IEnumerator<object> Render()
@@ -59,7 +62,6 @@ public class FoodVfx : MonoBehaviour
         {
             yield return null;
             updateRotPos();
-            rotate();
             setMeshData();
         }
     }
@@ -68,13 +70,6 @@ public class FoodVfx : MonoBehaviour
     {
         float delta = Time.deltaTime * 360f;
         rotationDeg.Set((rotationDeg.x - delta * 2) % 360f, (rotationDeg.y + delta) % 360f);
-    }
-
-    void rotate()
-    {
-        float delta = Time.deltaTime * 160f;
-        float eulerAngles = gameObject.transform.eulerAngles.z;
-        gameObject.transform.eulerAngles = new Vector3(0, 0, (eulerAngles + delta) % 360);
     }
 
     void setMaterial()
@@ -91,7 +86,7 @@ public class FoodVfx : MonoBehaviour
             mat = new Material(shader);
         }
 
-        if (Application.isPlaying)
+        if (!Application.isEditor)
         {
             if (meshRend.materials.Length > 0)
             {
@@ -102,6 +97,13 @@ public class FoodVfx : MonoBehaviour
                 meshRend.materials.Append(mat);
             }
             meshRend.material = mat;
+        }
+        else
+        {
+            meshRend.sharedMaterial = mat;
+            Material tempMaterial = new Material(meshRend.sharedMaterial);
+            meshRend.sharedMaterial = tempMaterial;
+            mat = tempMaterial;
         }
     }
 
@@ -135,19 +137,14 @@ public class FoodVfx : MonoBehaviour
         vertex[2] = new VertexType { pos = new Vector3(-currWidth, currHeight, 0), color = _color, uv = new half2(h0, h1), isMain = 1f };
         vertex[3] = new VertexType { pos = new Vector3(currWidth, currHeight, 0), color = _color, uv = new half2(h1, h1), isMain = 1f };
 
-        List<Vector3> neuronRot = getRotPos();
+        Vector3 neuronRot = getRotPos();
         currHeight = size.y / 6f;
         currWidth = size.x / 6f;
 
-        vertex[4] = new VertexType { pos = new Vector3(-currWidth + neuronRot[0].x, -currHeight + neuronRot[0].y, neuronRot[0].z), color = _color, uv = new half2(h0, h0), isMain = 0f };
-        vertex[5] = new VertexType { pos = new Vector3(currWidth + neuronRot[0].x, -currHeight + neuronRot[0].y, neuronRot[0].z), color = _color, uv = new half2(h1, h0), isMain = 0f };
-        vertex[6] = new VertexType { pos = new Vector3(-currWidth + neuronRot[0].x, currHeight + neuronRot[0].y, neuronRot[0].z), color = _color, uv = new half2(h0, h1), isMain = 0f };
-        vertex[7] = new VertexType { pos = new Vector3(currWidth + neuronRot[0].x, currHeight + neuronRot[0].y, neuronRot[0].z), color = _color, uv = new half2(h1, h1), isMain = 0f };
-
-        // vertex[8] = new VertexType { pos = new Vector3(-currWidth + neuronRot[1].x, -currHeight + neuronRot[1].y, neuronRot[1].z), color = _color, uv = new half2(h0, h0), isMain = 0f };
-        // vertex[9] = new VertexType { pos = new Vector3(currWidth + neuronRot[1].x, -currHeight + neuronRot[1].y, neuronRot[1].z), color = _color, uv = new half2(h1, h0), isMain = 0f };
-        // vertex[10] = new VertexType { pos = new Vector3(-currWidth + neuronRot[1].x, currHeight + neuronRot[1].y, neuronRot[1].z), color = _color, uv = new half2(h0, h1), isMain = 0f };
-        // vertex[11] = new VertexType { pos = new Vector3(currWidth + neuronRot[1].x, currHeight + neuronRot[1].y, neuronRot[1].z), color = _color, uv = new half2(h1, h1), isMain = 0f };
+        vertex[4] = new VertexType { pos = new Vector3(-currWidth + neuronRot.x, -currHeight + neuronRot.y, neuronRot.z), color = _color, uv = new half2(h0, h0), isMain = 0f };
+        vertex[5] = new VertexType { pos = new Vector3(currWidth + neuronRot.x, -currHeight + neuronRot.y, neuronRot.z), color = _color, uv = new half2(h1, h0), isMain = 0f };
+        vertex[6] = new VertexType { pos = new Vector3(-currWidth + neuronRot.x, currHeight + neuronRot.y, neuronRot.z), color = _color, uv = new half2(h0, h1), isMain = 0f };
+        vertex[7] = new VertexType { pos = new Vector3(currWidth + neuronRot.x, currHeight + neuronRot.y, neuronRot.z), color = _color, uv = new half2(h1, h1), isMain = 0f };
 
         mesh.SetVertexBufferData(vertex, 0, 0, 8);
         vertex.Dispose();
@@ -160,18 +157,11 @@ public class FoodVfx : MonoBehaviour
 
             4, 6, 5,
             5, 6, 7
-
-            // 8, 10, 9,
-            // 9, 10, 11
             },
         0, 0, indexCount);
 
         mesh.subMeshCount = 1;
-        mesh.bounds = new Bounds
-        {
-            center = transform.localPosition,
-            extents = new Vector3(currWidth, currHeight)
-        };
+        mesh.RecalculateBounds();
         mesh.SetSubMesh(0, new SubMeshDescriptor
         {
             indexStart = 0,
@@ -185,42 +175,25 @@ public class FoodVfx : MonoBehaviour
             }
         });
 
-        if (Application.isPlaying)
+        MeshFilter filter = GetComponent<MeshFilter>();
+        if (!filter)
         {
-            MeshFilter filter = GetComponent<MeshFilter>();
-            if (!filter)
-            {
-                filter = gameObject.AddComponent<MeshFilter>();
-            }
-            filter.mesh = mesh;
+            filter = gameObject.AddComponent<MeshFilter>();
         }
+        filter.mesh = mesh;
     }
 
-    private List<Vector3> getRotPos()
+    private Vector3 getRotPos()
     {
         List<Vector3> rotPos = new List<Vector3>();
 
         float currRot = rotationDeg.x * Mathf.Deg2Rad;
         Vector3 startRot = Vector3.right * size.x * 0.75f;
-        rotPos.Add(
-            new Vector3(
-                startRot.x * Mathf.Cos(currRot) + startRot.z * Mathf.Sin(currRot),
-                startRot.y,
-                Mathf.Clamp(startRot.x * -Mathf.Sin(currRot) + startRot.z * Mathf.Cos(currRot), -0.5f, 0.5f)
-            )
+        return new Vector3(
+            startRot.x * Mathf.Cos(currRot) + startRot.y * -Mathf.Sin(currRot),
+            startRot.x * Mathf.Sin(currRot) + startRot.y * Mathf.Cos(currRot),
+            startRot.z
         );
-
-        currRot = rotationDeg.y * Mathf.Deg2Rad;
-        startRot = Vector3.up * size.y * 0.5f;
-        rotPos.Add(
-            new Vector3(
-                startRot.x,
-                startRot.y * Mathf.Cos(currRot) + startRot.z * -Mathf.Sin(currRot),
-                Mathf.Clamp(startRot.y * Mathf.Sin(currRot) + startRot.z * Mathf.Cos(currRot), -0.5f, 0.5f)
-            )
-        );
-
-        return rotPos;
     }
 
     private void destroyMat()

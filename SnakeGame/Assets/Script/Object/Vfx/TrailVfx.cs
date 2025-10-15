@@ -103,8 +103,6 @@ public class TrailVfx : MonoBehaviour
       );
     }
     Util.ClearDepthRT(quadTex, new CommandBuffer(), true);
-
-    renderCoroutine = StartCoroutine(render());
   }
 
   void setMaterial()
@@ -134,7 +132,7 @@ public class TrailVfx : MonoBehaviour
       quadMat = new Material(shader);
     }
 
-    if (Application.isPlaying)
+    if (!Application.isEditor)
     {
       if (meshRend.materials.Length > 0)
       {
@@ -144,7 +142,15 @@ public class TrailVfx : MonoBehaviour
       {
         meshRend.materials.Append(quadMat);
       }
+
       meshRend.material = quadMat;
+    }
+    else
+    {
+      meshRend.sharedMaterial = quadMat;
+      Material tempMaterial = new Material(meshRend.sharedMaterial);
+      meshRend.sharedMaterial = tempMaterial;
+      quadMat = tempMaterial;
     }
 
     trailMat.SetTexture("_MainTex", rendTex);
@@ -190,11 +196,7 @@ public class TrailVfx : MonoBehaviour
     mesh.SetIndexBufferData(new short[6] { 0, 2, 1, 1, 2, 3 }, 0, 0, indexCount);
 
     mesh.subMeshCount = 1;
-    mesh.bounds = new Bounds
-    {
-      center = transform.localPosition,
-      extents = new Vector3(currWidth, currHeight)
-    };
+    mesh.RecalculateBounds();
     mesh.SetSubMesh(0, new SubMeshDescriptor
     {
       indexStart = 0,
@@ -208,15 +210,12 @@ public class TrailVfx : MonoBehaviour
       }
     });
 
-    if (Application.isPlaying)
+    MeshFilter filter = GetComponent<MeshFilter>();
+    if (!filter)
     {
-      MeshFilter filter = GetComponent<MeshFilter>();
-      if (!filter)
-      {
-        filter = gameObject.AddComponent<MeshFilter>();
-      }
-      filter.mesh = mesh;
+      filter = gameObject.AddComponent<MeshFilter>();
     }
+    filter.mesh = mesh;
   }
 
   IEnumerator<object> render()
@@ -282,9 +281,7 @@ public class TrailVfx : MonoBehaviour
         cmdBuffer.ReleaseTemporaryRT(temp1);
         cmdBuffer.ReleaseTemporaryRT(temp2);
 
-        // Hack resize Web-view
-        cmdBuffer.SetRenderTarget(PersistentData.Instance.RenderTex);
-        cmdBuffer.ClearRenderTarget(false, false, Color.clear, 1f);
+        Util.ClearWebViewScreen(cmdBuffer);
 
         Graphics.ExecuteCommandBuffer(cmdBuffer);
 
@@ -303,12 +300,9 @@ public class TrailVfx : MonoBehaviour
     cmdBuffer.SetRenderTarget(prevTex);
     cmdBuffer.ClearRenderTarget(true, true, Color.clear, 1f);
 
-    // Hack resize Web-view
-    cmdBuffer.SetRenderTarget(PersistentData.Instance.RenderTex);
-    cmdBuffer.ClearRenderTarget(false, false, Color.clear, 1f);
+    Util.ClearWebViewScreen(cmdBuffer);
     Graphics.ExecuteCommandBuffer(cmdBuffer);
   }
-
 
   public void SetRendTex(RenderTexture rendTex)
   {

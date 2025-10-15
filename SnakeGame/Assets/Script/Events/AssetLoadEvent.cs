@@ -3,28 +3,40 @@ using UnityEngine;
 
 public class AssetLoadEvent : MonoBehaviour
 {
-    public static AssetLoadEvent Instance;
+    public static AssetLoadEvent _instance;
 
-    private void Awake()
+    public static AssetLoadEvent Instance
     {
-        Instance = this;
+        get
+        {
+            if (_instance == null)
+            {
+                _instance = new AssetLoadEvent();
+            }
+            return _instance;
+        }
     }
 
-    public event Action<AssetConfig> onDownloadAssetSuccess;
+    void Awake()
+    {
+        _instance = this;
+    }
+
+    public event Action<AssetConfig>? onDownloadAssetSuccess;
     public void DownloadAssetSuccessEnter(AssetConfig conf)
     {
         if (onDownloadAssetSuccess != null)
             onDownloadAssetSuccess(conf);
     }
 
-    public event Action<AssetConfig> onDownloadAssetFailed;
+    public event Action<AssetConfig>? onDownloadAssetFailed;
     public void DownloadAssetFailedEnter(AssetConfig conf)
     {
         if (onDownloadAssetFailed != null)
             onDownloadAssetFailed(conf);
     }
 
-    public event Action onDownloadAssetCompleted;
+    public event Action? onDownloadAssetCompleted;
     public void DownloadAssetCompletedEnter()
     {
         if (onDownloadAssetCompleted != null)

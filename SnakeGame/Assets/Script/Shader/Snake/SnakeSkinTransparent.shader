@@ -111,7 +111,7 @@ Shader "Snake/TransparentWavy"
                 float offset = rand(uvI.y) * 0.5;
                 float dist = f.x - 0.25;
 
-                float4 bgCol = float4(0.9686, 0.8549, 0.6235, 0.95);
+                float4 bgCol = float4(0.9686, 0.8549, 0.6235, 1.);
                 float4 waveCol = float4(1., 1., 1., 1.);
 
                 float waveY = (sin((0.5 - dist) / 0.5 * -PI) * 0.2 + 1.0);

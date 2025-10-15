@@ -2,16 +2,28 @@ using UnityEngine;
 
 public class SaveManager : MonoBehaviour
 {
-    public static SaveManager Instance;
-
     public SaveState SaveData;
 
     public bool shouldDoTutorial = true;
 
+    public static SaveManager _instance;
+
+    public static SaveManager Instance
+    {
+        get
+        {
+            if (_instance == null)
+            {
+                _instance = new SaveManager();
+            }
+            return _instance;
+        }
+    }
+
     void Awake()
     {
         DontDestroyOnLoad(gameObject);
-        Instance = this;
+        _instance = this;
 
         LoadSave();
         setTutorialState();

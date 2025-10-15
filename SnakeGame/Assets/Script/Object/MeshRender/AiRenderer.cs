@@ -77,7 +77,18 @@ public class AiRenderer : MonoBehaviour
     {
       renderer = gameObject.AddComponent<MeshRenderer>();
       Shader shader = Shader.Find("Debug/AiRenderer");
-      renderer.material = new Material(shader);
+      Material mat = new Material(shader);
+
+      if (!Application.isEditor)
+      {
+        renderer.material = mat;
+      }
+      else
+      {
+        renderer.sharedMaterial = mat;
+        Material tempMaterial = new Material(renderer.sharedMaterial);
+        renderer.sharedMaterial = tempMaterial;
+      }
     }
 
     if (!mesh)

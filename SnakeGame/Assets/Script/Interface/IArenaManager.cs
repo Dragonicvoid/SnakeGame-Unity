@@ -9,7 +9,7 @@ public interface IArenaManager
   public Vector2 CenterPos { get; set; }
   public void InitializedMap();
   public void UpdateTileType(Coordinate coord, ARENA_OBJECT_TYPE type);
-  public List<float> FindObsAnglesFromSnake(SnakeConfig player, float radius);
+  public DodgeObstacleData FindObsAnglesFromSnake(SnakeConfig player, float radius);
   public FoodConfig GetNearestDetectedFood(
     SnakeConfig player,
     float radius

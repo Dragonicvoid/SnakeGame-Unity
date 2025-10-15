@@ -10,6 +10,7 @@ public class NormalAction : BaseAction
 
         List<float> detectedObs = new List<float>(data.DetectedWall);
         detectedObs.AddRange(data.DetectedPlayer);
+        detectedObs.AddRange(data.DetectedFire);
         Vector2? dodgeAngle = ProcessBotMovementByFatalObs(player, detectedObs);
 
         IPlayerManager playerManager = CurrData.Manager.PlayerManager;
@@ -29,6 +30,11 @@ public class NormalAction : BaseAction
         }
 
         if (factor.DetectedPlayer.Count > 0)
+        {
+            Score += ACTION_SCORE.OBSTACLE_DETECTED;
+        }
+
+        if (factor.DetectedFire.Count > 0)
         {
             Score += ACTION_SCORE.OBSTACLE_DETECTED;
         }

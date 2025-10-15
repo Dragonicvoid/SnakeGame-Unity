@@ -22,6 +22,11 @@ public class GameManager : MonoBehaviour
 
   Coroutine? enemySpawnCoroutine = null;
 
+  void Awake()
+  {
+    AudioManager.Instance.PlayBGM(ASSET_KEY.BGM_MAIN_MENU, 1f, true);
+  }
+
   void FixedUpdate()
   {
     if (PersistentData.Instance.isPaused) return;
@@ -31,6 +36,10 @@ public class GameManager : MonoBehaviour
 
   public void StartGame()
   {
+    if (PersistentData.Instance.IsButtonLock) return;
+    PersistentData.Instance.LockButton();
+
+    AudioManager.Instance.PlaySFX(ASSET_KEY.SFX_START_PLAY);
     setStartAnimEvent();
     UiManager?.StartGame();
   }
@@ -100,12 +109,18 @@ public class GameManager : MonoBehaviour
 
   public void GoToMainMenu()
   {
+    if (PersistentData.Instance.IsButtonLock) return;
+    PersistentData.Instance.LockButton();
+
     UiManager?.EndGame();
     FoodManager?.I.RemoveAllFood();
     PlayerManager?.I.RemoveAllPlayers();
     FoodManager?.I.RemoveAllFood();
     ArenaManager?.I.ClearSpikeRender();
     UiManager?.ShowEndUI(null, false);
+
+    AudioManager.Instance.PlaySFX(ASSET_KEY.SFX_BACK_TO_MENU);
+    AudioManager.Instance.PlayBGM(ASSET_KEY.BGM_MAIN_MENU, 1f, true);
   }
 
   void setStartAnimEvent()
@@ -253,9 +268,14 @@ public class GameManager : MonoBehaviour
 
     if (data.IsWon)
     {
+      AudioManager.Instance.PlaySFX(ASSET_KEY.SFX_WIN);
       SaveState save = SaveManager.Instance.SaveData;
       save.WonStat[(int)PersistentData.Instance.Difficulty]++;
       SaveManager.Instance.Save();
+    }
+    else
+    {
+      AudioManager.Instance.PlaySFX(ASSET_KEY.SFX_LOSE);
     }
   }
 
@@ -292,12 +312,35 @@ public class GameManager : MonoBehaviour
 
   void onEnemyVortexSpawn()
   {
+    AudioManager.Instance.PlayBGM(ASSET_KEY.BGM_GAMEPLAY, 1f, true);
     UiEvent.Instance.onEnemyVortexSpawn -= onEnemyVortexSpawn;
     enemySpawnCoroutine = StartCoroutine(SpawnEnemy());
   }
 
   void handleBotLogic(SnakeConfig snake)
   {
+    DodgeObstacleData detectedPlayer;
+    DodgeObstacleData detectedWall;
+    DodgeObstacleData detectedFire;
+
+    detectedPlayer = PlayerManager.I.FindNearestPlayerTowardPoint(
+      snake,
+      BOT_CONFIG.GetConfig().TRIGGER_AREA_DST
+    );
+
+    detectedWall =
+      ArenaManager.I.FindObsAnglesFromSnake(
+        snake,
+        BOT_CONFIG.GetConfig().TRIGGER_AREA_DST
+      );
+
+    detectedFire = PlayerManager.I.FindNearestProjNearPlayer(
+      snake,
+      BOT_CONFIG.GetConfig().TRIGGER_AREA_DST
+    );
+
+    PlayerManager.I.UpdateSnakeHeadSprite(snake, Mathf.Min(new float[] { detectedPlayer.Nearest, detectedWall.Nearest, detectedFire.Nearest }));
+
     if (!snake.IsBot) return;
 
     float deltaTime = Time.time - snake.LastReactTime;
@@ -311,26 +354,13 @@ public class GameManager : MonoBehaviour
     )
       return;
 
-    List<float> detectedPlayer = new List<float>();
-    List<float> detectedWall = new List<float>();
     FoodConfig? detectedFood = null;
 
     if (snake.State.InDirectionChange) return;
 
-    detectedPlayer = PlayerManager.I.FindNearestPlayerTowardPoint(
-      snake,
-      BOT_CONFIG.GetConfig().TRIGGER_AREA_DST
-    );
-
-    detectedWall =
-      ArenaManager.I.FindObsAnglesFromSnake(
-        snake,
-        BOT_CONFIG.GetConfig().TRIGGER_AREA_DST
-      ) ?? new List<float>();
-
     // need to updated to adjust botData
     FoodTargetData? targetFood = snake.State.TargetFood;
-    if (detectedPlayer.Count < 1 && targetFood == null)
+    if (detectedPlayer.Angles.Count < 1 && targetFood == null)
     {
       detectedFood =
         ArenaManager.I.GetNearestDetectedFood(
@@ -369,8 +399,9 @@ public class GameManager : MonoBehaviour
     PlannerFactor factor = new PlannerFactor(
       snake,
       PlayerManager.I.PlayerList,
-    detectedPlayer,
-      detectedWall,
+      detectedPlayer.Angles,
+      detectedWall.Angles,
+      detectedFire.Angles,
       currState.Position,
       detectedFood
     // gridWithMostFood: gridWithMostFood,
@@ -410,8 +441,9 @@ public class GameManager : MonoBehaviour
       ArenaManager?.I,
         FoodManager.I
       ),
-      detectedPlayer,
-      detectedWall,
+      detectedPlayer.Angles,
+      detectedWall.Angles,
+      detectedFire.Angles,
       detectedFood
     ));
 

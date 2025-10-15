@@ -36,6 +36,8 @@ public class SkinSelectItem : MonoBehaviour
 
   CommandBuffer? cmdBuffer = null;
 
+  bool hasLoaded = false;
+
   void Awake()
   {
     cmdBuffer = new CommandBuffer();
@@ -60,6 +62,12 @@ public class SkinSelectItem : MonoBehaviour
 
   public void SetSkinData(SkinDetail data)
   {
+    if (data.id == SkinData?.id)
+    {
+      return;
+    }
+
+    hasLoaded = false;
     SkinData = data;
     setName();
     getImage();
@@ -74,7 +82,7 @@ public class SkinSelectItem : MonoBehaviour
 
   void getImage()
   {
-    if (!preview || SkinData == null) return;
+    if (!preview || SkinData == null || hasLoaded) return;
 
     StartCoroutine(getTextureAndLoadImage());
   }
@@ -85,6 +93,7 @@ public class SkinSelectItem : MonoBehaviour
         && (SkinData?.normal_tex_name == null || SkinData?.normal_tex_name == ""))
     {
       setTexture(null, null);
+      hasLoaded = true;
       yield return null;
       yield break;
     }
@@ -111,6 +120,7 @@ public class SkinSelectItem : MonoBehaviour
     }
 
     setTexture(loadedTexture, loadedNormalMap);
+    hasLoaded = true;
   }
 
   void setTexture(Texture2D? tex, Texture2D? normalMap)
@@ -205,6 +215,7 @@ public class SkinSelectItem : MonoBehaviour
     mesh.SetIndexBufferData(new short[6] { 0, 2, 1, 1, 2, 3 }, 0, 0, indexCount);
 
     mesh.subMeshCount = 1;
+    mesh.RecalculateBounds();
     mesh.SetSubMesh(0, new SubMeshDescriptor
     {
       indexStart = 0,
@@ -238,16 +249,17 @@ public class SkinSelectItem : MonoBehaviour
 
     cmdBuffer.ReleaseTemporaryRT(temp1);
 
-    // Hack resize Web-view
-    cmdBuffer.SetRenderTarget(PersistentData.Instance.RenderTex);
-    cmdBuffer.ClearRenderTarget(false, false, Color.clear, 1f);
+    Util.ClearWebViewScreen(cmdBuffer);
 
     Graphics.ExecuteCommandBuffer(cmdBuffer);
   }
 
   public void Select()
   {
-    StartCoroutine(getTextureAndLoadImage());
+    if (PersistentData.Instance.IsButtonLock) return;
+    PersistentData.Instance.LockButton();
+
+    AudioManager.Instance.PlaySFX(ASSET_KEY.SFX_CLICK_SKIN);
     UiEvent.Instance.SkinSelected(
       SkinData?.id ?? 0,
       true

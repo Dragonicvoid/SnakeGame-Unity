@@ -1,4 +1,4 @@
-
+#nullable enable
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -65,9 +65,10 @@ public class Background : MonoBehaviour
 
   void Awake()
   {
-    cmdBuffer = new CommandBuffer();
-    posBound.Set(-(QuadWidth / 2f) - (LengthBound.y / 2f), (QuadWidth / 2f) + (LengthBound.y / 2f));
     blocks = new List<BlockData>();
+    cmdBuffer = new CommandBuffer();
+
+    posBound.Set(-(QuadWidth / 2f) - (LengthBound.y / 2f), (QuadWidth / 2f) + (LengthBound.y / 2f));
     generateRandomBlock();
     setQuadMeshData();
 
@@ -137,7 +138,8 @@ public class Background : MonoBehaviour
       blockMat = new Material(shader);
     }
 
-    if (Application.isPlaying)
+
+    if (!Application.isEditor)
     {
       if (meshRender.materials.Length > 0)
       {
@@ -148,6 +150,13 @@ public class Background : MonoBehaviour
         meshRender.materials.Append(quadMat);
       }
       meshRender.material = quadMat;
+    }
+    else
+    {
+      meshRender.sharedMaterial = quadMat;
+      Material tempMaterial = new Material(meshRender.sharedMaterial);
+      meshRender.sharedMaterial = tempMaterial;
+      quadMat = tempMaterial;
     }
 
     blockMat.SetColor("_Color", blockColor);
@@ -201,11 +210,7 @@ public class Background : MonoBehaviour
     quadMeshes.SetIndexBufferData(new short[6] { 0, 2, 1, 1, 2, 3 }, 0, 0, indexCount);
 
     quadMeshes.subMeshCount = 1;
-    quadMeshes.bounds = new Bounds
-    {
-      center = transform.localPosition,
-      extents = new Vector3(currWidth, currHeight)
-    };
+    quadMeshes.RecalculateBounds();
     quadMeshes.SetSubMesh(0, new SubMeshDescriptor
     {
       indexStart = 0,
@@ -219,15 +224,12 @@ public class Background : MonoBehaviour
       }
     });
 
-    if (Application.isPlaying)
+    MeshFilter filter = GetComponent<MeshFilter>();
+    if (!filter)
     {
-      MeshFilter filter = GetComponent<MeshFilter>();
-      if (!filter)
-      {
-        filter = gameObject.AddComponent<MeshFilter>();
-      }
-      filter.mesh = quadMeshes;
+      filter = gameObject.AddComponent<MeshFilter>();
     }
+    filter.mesh = quadMeshes;
   }
 
   private void setBlockMesh()
@@ -390,7 +392,7 @@ public class Background : MonoBehaviour
 
       blockMat?.SetVector("_CameraPos", new Vector4(camPos.x, camPos.y, camPos.z, camForMatrix.farClipPlane));
       cmdBuffer.Clear();
-      Matrix4x4 lookMatrix = Util.CreateViewMatrix(camPos, camForMatrix.transform.rotation, camForMatrix.transform.localScale);
+      Matrix4x4 lookMatrix = camForMatrix.worldToCameraMatrix;
       Matrix4x4 orthoMatrix = Matrix4x4.Perspective(60f, QuadWidth / QuadHeight, 0.03f, 700f);
       cmdBuffer.SetViewProjectionMatrices(lookMatrix, orthoMatrix);
 
@@ -417,9 +419,7 @@ public class Background : MonoBehaviour
       cmdBuffer.ReleaseTemporaryRT(blur1);
       cmdBuffer.ReleaseTemporaryRT(blur2);
 
-      // Hack resize Web-view
-      cmdBuffer.SetRenderTarget(PersistentData.Instance.RenderTex);
-      cmdBuffer.ClearRenderTarget(false, false, Color.clear, 1f);
+      Util.ClearWebViewScreen(cmdBuffer);
 
       Graphics.ExecuteCommandBuffer(cmdBuffer);
     }
@@ -432,9 +432,7 @@ public class Background : MonoBehaviour
     cmdBuffer.SetRenderTarget(blockRendTex);
     cmdBuffer.ClearRenderTarget(true, true, color, 1f);
 
-    // Hack resize Web-view
-    cmdBuffer.SetRenderTarget(PersistentData.Instance.RenderTex);
-    cmdBuffer.ClearRenderTarget(false, false, Color.clear, 1f);
+    Util.ClearWebViewScreen(cmdBuffer);
 
     Graphics.ExecuteCommandBuffer(cmdBuffer);
   }

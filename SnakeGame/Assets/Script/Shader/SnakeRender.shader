@@ -25,6 +25,8 @@ Shader "Transparent/SnakeRender"
 
             #include "UnityCG.cginc"
 
+            #define PI 3.14159265359
+
             struct appdata
             {
                 float4 vertex : POSITION;
@@ -57,7 +59,25 @@ Shader "Transparent/SnakeRender"
                 float dClamp;
                 float2 proj;
                 float2 projClamp;
+                float2 projDelta;
+                float2 projClampDelta;
             };
+
+            struct polarData
+            {
+                float alpha;
+                float distance;
+            };
+
+            // Must use -N to N uv coord
+            polarData getPolarData(float2 uv) {
+                polarData res;
+                
+                res.alpha = (atan2(uv.y, uv.x) + 2.0 * PI) % (2.0 * PI);
+                res.distance = distance(float2(0, 0), uv);
+
+                return res;
+            }
 
             struct texdata
             {
@@ -161,6 +181,8 @@ Shader "Transparent/SnakeRender"
                 float hClamp = min(1. , max(0., h));
                 float2 proj = v * h;
                 float2 projClamp = v * hClamp;
+                float2 projDelta = u - proj;
+                float2 projClampDelta = u - projClamp;
                 float d = distance(u, proj);
                 float dClamp = distance(u, projClamp);
 
@@ -171,12 +193,16 @@ Shader "Transparent/SnakeRender"
                 res.dClamp = dClamp;
                 res.proj = proj;
                 res.projClamp = projClamp;
+                res.projDelta = projDelta;
+                res.projClampDelta = projClampDelta;
 
                 return res;
             }
 
             float4 frag (v2f i) : SV_Target
             {
+                float segment = 10.;
+                float3 lightDir = float3(-1, -0.75, 0);
                 float2 uv0 = (i.uv * 2.) - 1.;
                 float4 o = float4(1., 1., 1., 1.);
 
@@ -233,8 +259,22 @@ Shader "Transparent/SnakeRender"
 
                 o *= snake_body(tex);
 
-                float4 col = o;
-                return col;
+                float2 delta = when_ge(prevData.h, nextData.h) * prevData.projClampDelta 
+                    + when_lt(prevData.h, nextData.h) * nextData.projClampDelta;
+
+                float3 normal = float3(delta.xy, -(1.0 - step(0.1, min(prevData.dClamp, nextData.dClamp))));
+
+                float3 inverseLight = lightDir * -1;
+                float dist = sqrt(normal.x * normal.x + normal.y * normal.y + normal.z * normal.z) * sqrt(inverseLight.x * inverseLight.x + inverseLight.y * inverseLight.y + inverseLight.z * inverseLight.z);
+                float dot = (normal.x * inverseLight.x + normal.y * inverseLight.y + normal.z * inverseLight.z);
+                float reflectAngle = acos(dot / dist);
+                reflectAngle = PI - reflectAngle;
+                reflectAngle /= PI;
+                reflectAngle = max(reflectAngle, 0.35);
+
+                o.rgb *= float3(reflectAngle,reflectAngle,reflectAngle);
+
+                return o;
             }
             ENDCG
         }

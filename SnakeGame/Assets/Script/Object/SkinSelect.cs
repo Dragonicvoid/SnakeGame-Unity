@@ -338,11 +338,19 @@ public class SkinSelect : MonoBehaviour
 
   public void SelectTabPrimary()
   {
+    if (PersistentData.Instance.IsButtonLock) return;
+    PersistentData.Instance.LockButton();
+
+    AudioManager.Instance.PlaySFX(ASSET_KEY.SFX_CLICK_TAB);
     UiEvent.Instance.TabSkinSelect(0);
   }
 
   public void SelectTabSecond()
   {
+    if (PersistentData.Instance.IsButtonLock) return;
+    PersistentData.Instance.LockButton();
+
+    AudioManager.Instance.PlaySFX(ASSET_KEY.SFX_CLICK_TAB);
     UiEvent.Instance.TabSkinSelect(1);
   }
 
