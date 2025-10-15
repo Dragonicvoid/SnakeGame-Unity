@@ -1,4 +1,4 @@
-
+#nullable enable
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -392,7 +392,7 @@ public class Background : MonoBehaviour
 
       blockMat?.SetVector("_CameraPos", new Vector4(camPos.x, camPos.y, camPos.z, camForMatrix.farClipPlane));
       cmdBuffer.Clear();
-      Matrix4x4 lookMatrix = Util.CreateViewMatrix(camPos, camForMatrix.transform.rotation, camForMatrix.transform.localScale);
+      Matrix4x4 lookMatrix = camForMatrix.worldToCameraMatrix;
       Matrix4x4 orthoMatrix = Matrix4x4.Perspective(60f, QuadWidth / QuadHeight, 0.03f, 700f);
       cmdBuffer.SetViewProjectionMatrices(lookMatrix, orthoMatrix);
 
