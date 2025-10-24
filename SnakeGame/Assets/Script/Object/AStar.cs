@@ -22,7 +22,7 @@ public class AStar
     AStarSearchData prevData,
     string id,
     List<Vector2>? predefinedPath = null,
-    int maxDepth = 1
+    int maxDepth = 3
   )
   {
     float TILE = ARENA_DEFAULT_SIZE.TILE;

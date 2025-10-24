@@ -61,36 +61,36 @@ public static class BOT_CONFIG
           AGGRRESIVE_TIME = 0f,
           AGGRESSIVE_CONE_RAD = 0f,
           AGGRESSIVE_CONE_DIST = 0f,
-          AGGRESSIVE_COOLDOWN = 0f,
+          AGGRESSIVE_COOLDOWN = 10f,
           TRIGGER_AREA_DST = 180f,
           TURN_RADIUS = 0f,
-          REACTION_TIME = 0.5f,
+          REACTION_TIME = 0.3f,
         }
       },
       {
       DIFFICULTY.MEDIUM,
       new BotConfigData
         {
-          AGGRRESIVE_TIME = 5f,
+          AGGRRESIVE_TIME = 10f,
           AGGRESSIVE_CONE_RAD = 360f,
           AGGRESSIVE_CONE_DIST = 700f,
-          AGGRESSIVE_COOLDOWN = 0f,
+          AGGRESSIVE_COOLDOWN = 3f,
           TRIGGER_AREA_DST = 100f,
-          TURN_RADIUS = 0.5f,
-          REACTION_TIME = 0.4f,
+          TURN_RADIUS = 0f,
+          REACTION_TIME = 0.15f,
         }
       },
       {
       DIFFICULTY.HARD,
       new BotConfigData
         {
-          AGGRRESIVE_TIME = 10f,
+          AGGRRESIVE_TIME = 20f,
           AGGRESSIVE_CONE_RAD = 360f,
           AGGRESSIVE_CONE_DIST = 850f,
-          AGGRESSIVE_COOLDOWN = 3f,
+          AGGRESSIVE_COOLDOWN = 0f,
           TRIGGER_AREA_DST = 90f,
-          TURN_RADIUS = 1f,
-          REACTION_TIME = 0.15f,
+          TURN_RADIUS = 0f,
+          REACTION_TIME = 0.05f,
         }
       }
     };
