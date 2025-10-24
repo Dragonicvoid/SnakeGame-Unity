@@ -11,8 +11,7 @@ public interface IArenaManager
   public void UpdateTileType(Coordinate coord, ARENA_OBJECT_TYPE type);
   public DodgeObstacleData FindObsAnglesFromSnake(SnakeConfig player, float radius);
   public FoodConfig GetNearestDetectedFood(
-    SnakeConfig player,
-    float radius
+    SnakeConfig player
   );
   public GridConfig GetGridWithMostFood();
   public void SetMapBody(Vector2 pos, string playerId);

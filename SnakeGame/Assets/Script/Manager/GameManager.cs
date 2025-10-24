@@ -360,12 +360,11 @@ public class GameManager : MonoBehaviour
 
     // need to updated to adjust botData
     FoodTargetData? targetFood = snake.State.TargetFood;
-    if (detectedPlayer.Angles.Count < 1 && targetFood == null)
+    if (detectedPlayer.Angles.Count < 1)
     {
       detectedFood =
         ArenaManager.I.GetNearestDetectedFood(
-          snake,
-          BOT_CONFIG.GetConfig().TRIGGER_AREA_DST
+          snake
         ) ?? null;
     }
 
@@ -383,9 +382,8 @@ public class GameManager : MonoBehaviour
         (item) => item.Id == targetFood.Food.Id
       );
       bool isEaten = targetFood.Food.State.Eaten;
-      bool isExpired = Time.time - targetFood.TimeTargeted > TIME_CONFIG.FOOD_EXPIRED;
       snake.State.TargetFood = targetFood;
-      if (targetExist == null || isEaten || isExpired)
+      if (targetExist == null || isEaten)
       {
         snake.State.TargetFood = null;
       }

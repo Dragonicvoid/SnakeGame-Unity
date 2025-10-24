@@ -322,8 +322,7 @@ public class ArenaManager : MonoBehaviour, IArenaManager
   }
 
   public FoodConfig? GetNearestDetectedFood(
-    SnakeConfig player,
-    float radius
+    SnakeConfig player
   )
   {
     FoodConfig? result = null;
